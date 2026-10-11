@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Stats · Instagram in numbers</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/masa-neu/tokens.css">
+<link rel="stylesheet" href="ds/masa-neu/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Nunito:wght@400;600;700;800&amp;family=Instrument+Serif&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="mn-root" data-theme="{{theme}}" data-type="{{typeSet}}" style="min-height: 3000px;">
+<div class="mn-page">
+  <nav class="mn-nav mn-nav--dock" aria-label="Main">
+    <a class="mn-nav__brand" href="HomeA.dc.html" style="padding-right: 4px;" aria-label="Masa Chien, home"><span class="mn-nav__mark" aria-hidden="true">MC</span></a>
+    <div class="mn-nav__links"><a href="Stats.dc.html" aria-current="page">Stats</a><a href="Projects.dc.html">Projects</a><a href="Resume.dc.html">Resume</a></div>
+    <a class="mn-nav__stat" href="Stats.dc.html" aria-label="10,214 followers, live">10.2K</a>
+  </nav>
+
+  <header class="mn-section__head" style="align-items: flex-end;">
+    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 680px;">
+      <span class="mn-label">@masamcodes</span>
+      <h1 class="mn-display-lg">Instagram, in numbers</h1>
+      <p class="mn-body-lg">Pulled straight from the Instagram API. Not rounded up, not cherry-picked.</p>
+      <div class="mn-row">
+        <sc-if value="{{isLive}}" hint-placeholder-val="{{true}}"><span class="mn-pill mn-pill--live">Live</span><span class="mn-mono">updated 4 min ago · Oct 11, 2:14 PM</span></sc-if>
+        <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}"><span class="mn-msg"><span class="mn-spinner"></span>Pulling from Instagram…</span></sc-if>
+        <sc-if value="{{isError}}" hint-placeholder-val="{{false}}"><span class="mn-pill">Stale</span><span class="mn-mono">last good pull · Oct 10, 9:02 PM</span></sc-if>
+        <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}"><span class="mn-pill">New</span><span class="mn-mono">first pull · Oct 11, 2:14 PM</span></sc-if>
+      </div>
+    </div>
+    <a class="mn-btn mn-btn--primary" href="https://instagram.com/masamcodes">Follow @masamcodes</a>
+  </header>
+
+  <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+    <div class="mn-card mn-card--inset" role="alert" style="flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 20px 24px;">
+      <div class="mn-msg mn-msg--error"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg><div>Couldn't reach Instagram. <span>The numbers below are from the last good pull, Oct 10 at 9:02 PM.</span></div></div>
+      <button class="mn-btn mn-btn--sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/></svg>Try again</button>
+    </div>
+  </sc-if>
+
+  <section class="mn-section" aria-label="Headline numbers">
+    <div class="mn-grid" style="grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));">
+      <sc-for list="{{tiles}}" as="t" hint-placeholder-count="4">
+        <div class="mn-stat {{t.cls}}" aria-busy="{{t.busy}}">
+          <span class="mn-label">{{t.label}}</span>
+          <sc-if value="{{t.loading}}" hint-placeholder-val="{{false}}"><span class="mn-skel" style="height: 52px; width: 75%;"></span><span class="mn-skel" style="height: 14px; width: 50%;"></span><span class="mn-skel" style="height: 30px;"></span></sc-if>
+          <sc-if value="{{t.ready}}" hint-placeholder-val="{{true}}"><span class="mn-stat__value" title="{{t.exact}}">{{t.value}}</span><span class="{{t.metaCls}}">{{t.meta}}</span></sc-if>
+          <sc-if value="{{t.hasSpark}}" hint-placeholder-val="{{true}}">
+            <svg class="mn-spark" viewBox="0 0 120 36" role="img" aria-label="{{t.sparkLabel}}"><line class="base" x1="0" x2="120" y1="35" y2="35"/><path class="line" d="{{t.spark}}"/><circle class="pt" cx="118" cy="3" r="3.5"/></svg>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section class="mn-section">
+    <div class="mn-section__head">
+      <div style="display: flex; flex-direction: column; gap: 8px;"><h2 class="mn-heading-md">Follower growth</h2><span class="mn-mono">{{chart.summary}}</span></div>
+      <div class="mn-tabs" role="tablist" aria-label="Range">
+        <sc-for list="{{ranges}}" as="r" hint-placeholder-count="3"><button class="mn-tab" role="tab" aria-selected="{{r.selected}}" onClick="{{r.pick}}">{{r.label}}</button></sc-for>
+      </div>
+    </div>
+    <sc-if value="{{showChart}}" hint-placeholder-val="{{true}}">
+      <figure class="mn-chart mn-focusable" tabindex="0" style="margin: 0;" aria-label="Follower growth chart. Use left and right arrow keys to move between days." onKeyDown="{{onChartKey}}">
+        <svg viewBox="0 0 600 214" role="img" aria-label="{{chart.aria}}">
+          <line class="grid" x1="40" x2="590" y1="190" y2="190"/><line class="grid" x1="40" x2="590" y1="115" y2="115"/><line class="grid" x1="40" x2="590" y1="41" y2="41"/>
+          <text class="axis" x="0" y="194">0</text><text class="axis" x="0" y="119">5K</text><text class="axis" x="0" y="45">10K</text>
+          <text class="axis" x="40" y="212">{{chart.l0}}</text><text class="axis" x="310" y="212" text-anchor="middle">{{chart.l1}}</text><text class="axis" x="580" y="212" text-anchor="end">{{chart.l2}}</text>
+          <path class="area" d="{{chart.area}}"/>
+          <path class="line" d="{{chart.line}}"/>
+          <g opacity="{{chart.noteOp}}"><line class="guide" x1="{{chart.noteX}}" x2="{{chart.noteX}}" y1="60" y2="190" style="opacity: .5;"/><text class="axis" x="{{chart.noteTx}}" y="54" text-anchor="end">reel #1 posted</text></g>
+          <line class="guide" x1="{{hov.x}}" x2="{{hov.x}}" y1="30" y2="190"/>
+          <circle class="pt" cx="{{hov.x}}" cy="{{hov.y}}" r="6"/>
+          <rect x="40" y="20" width="550" height="175" fill="transparent" onMouseMove="{{onMove}}" onMouseLeave="{{onLeave}}"/>
+        </svg>
+        <div class="mn-chart__tip" style="left: {{hov.left}}; top: {{hov.top}}; transform: translate(-50%, -110%); pointer-events: none;">{{hov.date}}<b>{{hov.value}}</b>followers</div>
+      </figure>
+    </sc-if>
+    <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+      <figure class="mn-chart" style="margin: 0;" aria-busy="true"><div class="mn-chart__center"><span class="mn-skel" style="height: 10px; width: 70%;"></span><span class="mn-skel" style="height: 10px; width: 50%;"></span><div class="mn-msg"><span class="mn-spinner"></span>Pulling follower history…</div></div></figure>
+    </sc-if>
+    <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+      <figure class="mn-chart" style="margin: 0;"><div class="mn-chart__center"><div class="mn-msg mn-msg--error" role="alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg><div>Couldn't load follower history. <span>Daily snapshots resume on the next pull.</span></div></div><button class="mn-btn mn-btn--sm">Try again</button></div></figure>
+    </sc-if>
+    <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}">
+      <figure class="mn-chart" style="margin: 0;"><div class="mn-chart__center"><div class="mn-msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16M6 15l4-4 3 3 5-6"/></svg>Not enough history yet. Growth shows after 2 days of snapshots.</div></div></figure>
+    </sc-if>
+  </section>
+
+  <sc-if value="{{hasData}}" hint-placeholder-val="{{true}}">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 24px;">
+      <section class="mn-card" style="gap: 20px;" aria-label="Where the views come from">
+        <div class="mn-card__row"><h2 class="mn-heading-sm">Where the views come from</h2><span class="mn-mono">of 6.0M total</span></div>
+        <div class="mn-meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="68" aria-label="Top reel's share of all views">
+          <div class="mn-meter__head"><span class="mn-label">Top reel's share</span><span class="mn-meter__value">68%</span></div>
+          <div class="mn-meter__track"><span class="mn-meter__fill" style="width: calc((100% - 8px) * 0.68);"></span></div>
+        </div>
+        <ol class="mn-bars" aria-label="Views by reel">
+          <li class="mn-bar is-top" title="Reel 1 · 4,100,000 views"><span class="mn-bar__label">Reel 1</span><span class="mn-bar__track"><span class="mn-bar__fill" style="width: calc((100% - 8px) * 1);"></span></span><span class="mn-bar__value">4.1M</span></li>
+          <li class="mn-bar" title="Reel 2 · 1,100,000 views"><span class="mn-bar__label">Reel 2</span><span class="mn-bar__track"><span class="mn-bar__fill" style="width: calc((100% - 8px) * 0.268);"></span></span><span class="mn-bar__value">1.1M</span></li>
+          <li class="mn-bar" title="Reel 3 · 380,000 views"><span class="mn-bar__label">Reel 3</span><span class="mn-bar__track"><span class="mn-bar__fill" style="width: calc((100% - 8px) * 0.093);"></span></span><span class="mn-bar__value">380K</span></li>
+          <li class="mn-bar" title="Every other reel combined · 444,000 views"><span class="mn-bar__label">All others</span><span class="mn-bar__track"><span class="mn-bar__fill" style="width: calc((100% - 8px) * 0.108);"></span></span><span class="mn-bar__value">444K</span></li>
+        </ol>
+      </section>
+      <section class="mn-card" style="gap: 20px;" aria-label="How people engage">
+        <div class="mn-card__row"><h2 class="mn-heading-sm">How people engage</h2><span class="mn-mono">all reels</span></div>
+        <div class="mn-meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="8.7" aria-label="Engagement rate: likes, shares and saves per view">
+          <div class="mn-meter__head"><span class="mn-label">Engagement per view</span><span class="mn-meter__value">8.7%</span></div>
+          <div class="mn-meter__track"><span class="mn-meter__fill" style="width: calc((100% - 8px) * 0.087);"></span></div>
+        </div>
+        <ol class="mn-bars" aria-label="Likes, shares and saves">
+          <li class="mn-bar is-top" title="412,300 likes"><span class="mn-bar__label">Likes</span><span class="mn-bar__track"><span class="mn-bar__fill" style="width: calc((100% - 8px) * 1);"></span></span><span class="mn-bar__value">412K</span></li>
+          <li class="mn-bar" title="73,500 shares"><span class="mn-bar__label">Shares</span><span class="mn-bar__track"><span class="mn-bar__fill" style="width: calc((100% - 8px) * 0.178);"></span></span><span class="mn-bar__value">73.5K</span></li>
+          <li class="mn-bar" title="41,300 saves"><span class="mn-bar__label">Saves</span><span class="mn-bar__track"><span class="mn-bar__fill" style="width: calc((100% - 8px) * 0.100);"></span></span><span class="mn-bar__value">41.3K</span></li>
+        </ol>
+      </section>
+    </div>
+  </sc-if>
+
+  <section class="mn-section">
+    <div class="mn-section__head"><h2 class="mn-heading-md">Top 3 reels</h2><span class="mn-mono">ranked by views</span></div>
+    <div class="mn-grid" style="grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));">
+      <sc-for list="{{reels}}" as="r" hint-placeholder-count="3">
+        <sc-if value="{{r.ready}}" hint-placeholder-val="{{true}}">
+          <a class="mn-reel mn-card--link" href="https://instagram.com/masamcodes">
+            <div class="mn-reel__thumb"><span class="mn-reel__rank">{{r.rank}}</span><span class="mn-placeholder">[REEL {{r.rank}} THUMBNAIL]</span><div class="mn-reel__views"><span class="mn-label">Views</span><b>{{r.views}}</b></div></div>
+            <ol class="mn-bars" aria-label="Reel {{r.rank}} engagement" style="gap: 8px;">
+              <li class="mn-bar" title="{{r.likes}} likes" style="grid-template-columns: 4rem minmax(0,1fr) 3.75rem; gap: 10px;"><span class="mn-bar__label">Likes</span><span class="mn-bar__track"><span class="mn-bar__fill" style="width: {{r.likesW}};"></span></span><span class="mn-bar__value">{{r.likes}}</span></li>
+              <li class="mn-bar" title="{{r.shares}} shares" style="grid-template-columns: 4rem minmax(0,1fr) 3.75rem; gap: 10px;"><span class="mn-bar__label">Shares</span><span class="mn-bar__track"><span class="mn-bar__fill" style="width: {{r.sharesW}};"></span></span><span class="mn-bar__value">{{r.shares}}</span></li>
+              <li class="mn-bar" title="{{r.saves}} saves" style="grid-template-columns: 4rem minmax(0,1fr) 3.75rem; gap: 10px;"><span class="mn-bar__label">Saves</span><span class="mn-bar__track"><span class="mn-bar__fill" style="width: {{r.savesW}};"></span></span><span class="mn-bar__value">{{r.saves}}</span></li>
+            </ol>
+            <p class="mn-reel__cap">[REEL {{r.rank}} CAPTION]</p>
+          </a>
+        </sc-if>
+        <sc-if value="{{r.loading}}" hint-placeholder-val="{{false}}">
+          <div class="mn-reel" aria-busy="true"><div class="mn-reel__thumb"></div><span class="mn-skel" style="height: 16px;"></span><span class="mn-skel" style="height: 16px;"></span><span class="mn-skel" style="height: 16px;"></span></div>
+        </sc-if>
+        <sc-if value="{{r.empty}}" hint-placeholder-val="{{false}}">
+          <div class="mn-card mn-card--inset" style="min-height: 200px; justify-content: center;"><span class="mn-msg">Post more reels to fill this slot.</span></div>
+        </sc-if>
+      </sc-for>
+    </div>
+    <p class="mn-mono" style="margin: 0;">Engagement bars inside each reel share one scale (Reel 1's likes = full bar), so reels can be compared.</p>
+  </section>
+
+  <p class="mn-mono" style="margin: 0;">Source: Instagram Graph API (creator account). Views = reel plays. Followers are snapshotted daily for the growth chart.</p>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"typeSet":{"editor":"enum","options":["a","b","c"],"default":"a"},"status":{"editor":"enum","options":["live","loading","error","empty"],"default":"live"},"$preview":{"width":1440,"height":3000}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { range: '90D', hover: null }; }
+  renderVals() {
+    const status = this.props.status ?? 'live';
+    const isLive = status === 'live', isLoading = status === 'loading', isError = status === 'error', isEmpty = status === 'empty';
+    const C = {
+      '30D': { days: 30, step: 3, line: 'M40 84 L94 78 L148 73 L202 67 L256 62 L310 58 L364 54 L418 50 L472 46 L526 42 L580 38', l0: 'Sep 11', l1: 'Sep 26', l2: 'Oct 11', summary: '10.2K today · +3,114 in 30 days', aria: 'Followers grew from 7.1K on Sep 11 to 10.2K on Oct 11.', hasNote: false, noteX: 0 },
+      '90D': { days: 90, step: 6, line: 'M40 174 L76 172 L112 170 L148 168 L184 166 L220 163 L256 159 L292 118 L328 102 L364 93 L400 84 L436 73 L472 62 L508 54 L544 46 L580 38', l0: 'Jul 13', l1: 'Aug 27', l2: 'Oct 11', summary: '10.2K today · +9,114 in 90 days', aria: 'Followers grew from 1.1K on Jul 13 to 10.2K on Oct 11, with the biggest jump in late August after reel #1.', hasNote: true, noteX: 270 },
+      'All': { days: 240, step: 12, line: 'M40 190 L67 189 L94 188 L121 188 L148 187 L175 185 L202 184 L229 183 L256 181 L283 180 L310 178 L337 176 L364 174 L391 172 L418 168 L445 163 L472 118 L499 93 L526 73 L553 54 L580 38', l0: '[START]', l1: '', l2: 'Oct 11', summary: '10.2K today · since [START DATE]', aria: 'Followers grew from 0 to 10.2K since the account started, mostly after reel #1 in late August.', hasNote: true, noteX: 462 }
+    };
+    const c = C[this.state.range];
+    const end = new Date(2026, 9, 11);
+    const fmt = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const pts = c.line.replace(/[ML]/g, ' ').trim().split(/\s+/).reduce((a, n, i, arr) => { if (i % 2 === 0) a.push({ x: +n, y: +arr[i + 1] }); return a; }, []);
+    const n = pts.length;
+    pts.forEach((p, i) => {
+      const daysBack = Math.round(c.days * (1 - i / (n - 1)));
+      const d = new Date(end); d.setDate(d.getDate() - daysBack);
+      p.date = fmt(d);
+      p.v = i === n - 1 ? 10214 : Math.max(0, Math.round((190 - p.y) / 164 * 11000 / 10) * 10);
+    });
+    const hi = this.state.hover == null ? n - 1 : Math.min(this.state.hover, n - 1);
+    const hp = pts[hi];
+    const leftPct = Math.min(88, Math.max(12, hp.x / 600 * 100));
+    const hov = { x: hp.x, y: hp.y, left: leftPct + '%', top: (hp.y / 214 * 100) + '%', date: hp.date, value: hp.v.toLocaleString('en-US') };
+    const chart = Object.assign({}, c, { area: c.line + ' L580 190 L40 190 Z', noteTx: c.noteX - 6, noteOp: c.hasNote ? 1 : 0 });
+    const ranges = ['30D', '90D', 'All'].map((r) => ({ label: r, selected: this.state.range === r ? 'true' : 'false', pick: () => this.setState({ range: r, hover: null }) }));
+    const onMove = (e) => {
+      const r = e.currentTarget.ownerSVGElement.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width * 600;
+      let best = 0; pts.forEach((p, i) => { if (Math.abs(p.x - x) < Math.abs(pts[best].x - x)) best = i; });
+      if (best !== this.state.hover) this.setState({ hover: best });
+    };
+    const onLeave = () => this.setState({ hover: null });
+    const onChartKey = (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault();
+      const cur = this.state.hover == null ? n - 1 : this.state.hover;
+      this.setState({ hover: Math.max(0, Math.min(n - 1, cur + (e.key === 'ArrowLeft' ? -1 : 1))) });
+    };
+    const base = [
+      { label: 'Followers', value: '10.2K', exact: '10,214 followers', meta: '+3,114 · last 30 days', metaCls: 'mn-stat__delta', spark: 'M2 33.0 L12 32.3 L21 31.7 L31 30.7 L41 29.7 L50 21.5 L60 18.2 L70 15.9 L79 13.3 L89 9.0 L99 6.0 L108 4.4 L118 3.0', sparkLabel: 'Followers, last 90 days: 1.1K to 10.2K' },
+      { label: 'Total views', value: '6.0M', exact: '6,024,310 views', meta: 'across all reels', metaCls: 'mn-stat__meta', spark: 'M2 33.0 L12 32.5 L21 31.9 L31 31.1 L41 30.3 L50 18.1 L60 10.6 L70 8.4 L79 6.8 L89 5.5 L99 4.4 L108 3.6 L118 3.0', sparkLabel: 'Total views, last 90 days: 0.4M to 6.0M' },
+      { label: 'Total likes', value: '412K', exact: '412,300 likes', meta: 'across all reels', metaCls: 'mn-stat__meta', spark: 'M2 33.0 L12 32.4 L21 31.7 L31 30.9 L41 30.2 L50 15.7 L60 9.4 L70 7.5 L79 6.1 L89 5.0 L99 4.2 L108 3.5 L118 3.0', sparkLabel: 'Likes, last 90 days: 30K to 412K' },
+      { label: 'Total shares', value: '73.5K', exact: '73,500 shares', meta: 'across all reels', metaCls: 'mn-stat__meta', spark: 'M2 33.0 L12 32.6 L21 32.1 L31 31.2 L41 30.8 L50 17.7 L60 11.1 L70 8.9 L79 7.2 L89 5.8 L99 4.5 L108 3.7 L118 3.0', sparkLabel: 'Shares, last 90 days: 5K to 73.5K' }
+    ];
+    const tiles = base.map((t) => {
+      if (isLoading) return Object.assign({}, t, { cls: '', busy: 'true', loading: true, ready: false, hasSpark: false });
+      if (isEmpty) return Object.assign({}, t, { cls: 'is-empty', busy: 'false', loading: false, ready: true, hasSpark: false, value: t.label === 'Followers' ? '214' : '—', meta: t.label === 'Followers' ? 'first snapshot' : 'no reels yet', metaCls: 'mn-stat__meta' });
+      if (isError) return Object.assign({}, t, { cls: '', busy: 'false', loading: false, ready: true, hasSpark: true, meta: 'as of Oct 10, 9:02 PM', metaCls: 'mn-stat__meta' });
+      return Object.assign({}, t, { cls: '', busy: 'false', loading: false, ready: true, hasSpark: true });
+    });
+    const w = (v) => 'calc((100% - 8px) * ' + (v / 312).toFixed(3) + ')';
+    const R = [
+      { rank: 1, views: '4.1M', likes: '312K', shares: '48.2K', saves: '27.9K', l: 312, s: 48.2, v: 27.9 },
+      { rank: 2, views: '1.1M', likes: '64.0K', shares: '12.9K', saves: '7.4K', l: 64, s: 12.9, v: 7.4 },
+      { rank: 3, views: '380K', likes: '21.5K', shares: '5.2K', saves: '3.9K', l: 21.5, s: 5.2, v: 3.9 }
+    ];
+    const reels = R.map((r) => Object.assign({}, r, { likesW: w(r.l), sharesW: w(r.s), savesW: w(r.v), ready: isLive || isError, loading: isLoading, empty: isEmpty }));
+    return { theme: this.props.theme ?? 'light', typeSet: this.props.typeSet ?? 'a', isLive, isLoading, isError, isEmpty, showChart: isLive, hasData: isLive || isError, chart, hov, onMove, onLeave, onChartKey, ranges, tiles, reels };
+  }
+}
+</script>
+</body>
+</html>

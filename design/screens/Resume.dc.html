@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Resume · timeline + terminal</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/masa-neu/tokens.css">
+<link rel="stylesheet" href="ds/masa-neu/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="mn-root" data-theme="{{theme}}" data-type="a" style="min-height: 2800px;">
+<div class="mn-page" style="gap: 40px;">
+  <nav class="mn-nav mn-nav--dock" aria-label="Main">
+    <a class="mn-nav__brand" href="HomeA.dc.html" style="padding-right: 4px;" aria-label="Masa Chien, home"><span class="mn-nav__mark" aria-hidden="true">MC</span></a>
+    <div class="mn-nav__links"><a href="Stats.dc.html">Stats</a><a href="Projects.dc.html">Projects</a><a href="Resume.dc.html" aria-current="page">Resume</a></div>
+    <a class="mn-nav__stat" href="Stats.dc.html" aria-label="10,214 followers, live. Open stats">10.2K</a>
+  </nav>
+
+  <header style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="mn-section__head">
+      <div style="display: flex; flex-direction: column; gap: 10px; max-width: 680px;">
+        <span class="mn-label">Masaki "Masa" Chien · CS at UC Irvine · graduating Mar 2028</span>
+        <h1 class="mn-display-lg">Resume</h1>
+      </div>
+      <div class="mn-row" style="gap: 16px;">
+        <a class="mn-btn mn-btn--primary" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Download PDF</a>
+        <a class="mn-btn" href="mailto:masakic@uci.edu">Email me</a>
+      </div>
+    </div>
+    <div class="mn-tabs" role="tablist" aria-label="Resume view" style="align-self: flex-start;">
+      <button class="mn-tab" role="tab" aria-selected="{{tlSel}}" onClick="{{pickTl}}">Timeline</button>
+      <button class="mn-tab" role="tab" aria-selected="{{termSel}}" onClick="{{pickTerm}}" style="font-family: var(--font-mono);">$ terminal</button>
+    </div>
+  </header>
+
+  <sc-if value="{{isTl}}" hint-placeholder-val="{{true}}">
+    <div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start;">
+      <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 36px;">
+        <section class="mn-card" style="gap: 16px;" aria-label="At a glance">
+          <div class="mn-card__row"><h2 class="mn-heading-sm">At a glance</h2><span class="mn-mono">blue = ongoing · line = today</span></div>
+          <div class="mn-lanes" role="img" aria-label="Timeline: hockey coaching Aug 2020 to Jun 2024; KAV Helmets Oct to Dec 2023; UC Irvine Sep 2025 to Mar 2028; Dungeon Dilemma Jan to Mar 2026; Lavner Jun to Aug 2026; RetroLink, One Basket and Cofura ongoing since Jul, Aug and Sep 2026.">
+            <div class="mn-lanes__axis"><span></span><div class="mn-lanes__ticks"><span style="left: 0%">2020</span><span style="left: 24.5%">2022</span><span style="left: 49%">2024</span><span style="left: 73.5%">2026</span><span style="left: 98%">2028</span><span class="mn-lanes__now" style="left: 83.7%"></span></div></div>
+            <sc-for list="{{lanes}}" as="ln" hint-placeholder-count="8">
+              <div class="mn-lane {{ln.cls}}" title="{{ln.when}}"><span class="mn-lane__label">{{ln.short}}</span><span class="mn-lane__track"><span class="mn-lane__bar {{ln.barCls}}" style="left: {{ln.left}}; width: {{ln.width}};"></span></span></div>
+            </sc-for>
+          </div>
+        </section>
+
+        <sc-if value="{{hasFilter}}" hint-placeholder-val="{{false}}">
+          <div class="mn-card mn-card--inset" style="flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 14px 20px;">
+            <span class="mn-msg">{{filterMsg}}</span>
+            <button class="mn-btn mn-btn--ghost mn-btn--sm" onClick="{{clearFilter}}">Show everything</button>
+          </div>
+        </sc-if>
+
+        <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+          <section style="display: flex; flex-direction: column; gap: 16px;" aria-label="{{g.title}}">
+            <div class="mn-card__row"><h2 class="mn-heading-md" style="font-size: 22px; line-height: 28px;">{{g.title}}</h2><span class="mn-mono">{{g.count}}</span></div>
+            <ol class="mn-timeline">
+              <sc-for list="{{g.entries}}" as="e" hint-placeholder-count="4">
+                <li class="mn-tl {{e.cls}}">
+                  <span class="mn-tl__node"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/></svg></span>
+                  <button class="mn-tl-head" aria-expanded="{{e.expanded}}" aria-controls="{{e.bodyId}}" onClick="{{e.toggle}}">
+                    <span class="mn-tl__title">{{e.title}}</span>
+                    <span class="mn-tl__sub">{{e.sub}}</span>
+                    <span class="mn-tl__when">{{e.when}}</span>
+                    <svg class="mn-tl__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                  </button>
+                  <sc-if value="{{e.open}}" hint-placeholder-val="{{false}}">
+                    <div class="mn-tl__body" id="{{e.bodyId}}">
+                      <ul><sc-for list="{{e.bullets}}" as="b" hint-placeholder-count="3"><li>{{b}}</li></sc-for></ul>
+                      <span class="mn-mono">{{e.stack}}</span>
+                    </div>
+                  </sc-if>
+                </li>
+              </sc-for>
+            </ol>
+          </section>
+        </sc-for>
+      </div>
+
+      <aside style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 28px; position: sticky; top: 104px;">
+        <section class="mn-card" aria-label="Education">
+          <span class="mn-label">Education</span>
+          <div class="mn-card__row"><h2 class="mn-heading-sm">UC Irvine</h2><span class="mn-mono">Sep 2025 – Mar 2028</span></div>
+          <p style="margin: 0;">B.S. Computer Science · graduating early</p>
+          <div class="mn-meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="43" aria-label="Degree progress">
+            <div class="mn-meter__head"><span class="mn-label">Degree progress</span><span class="mn-meter__value">43%</span></div>
+            <div class="mn-meter__track"><span class="mn-meter__fill" style="width: calc((100% - 8px) * 0.43);"></span></div>
+          </div>
+        </section>
+        <section class="mn-card" aria-label="Skills" style="gap: 18px;">
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span class="mn-label">Skills</span><span class="mn-body-sm">Tap one to see where I used it.</span></div>
+          <sc-for list="{{skillGroups}}" as="sg" hint-placeholder-count="5">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <span class="mn-label" style="font-size: 11px;">{{sg.label}}</span>
+              <div class="mn-tags" role="group" aria-label="{{sg.label}}" style="gap: 8px;">
+                <sc-for list="{{sg.tags}}" as="t" hint-placeholder-count="2"><button class="mn-tag" aria-pressed="{{t.pressed}}" onClick="{{t.pick}}" style="min-height: 40px; padding: 0 14px;">{{t.label}}</button></sc-for>
+              </div>
+              <sc-if value="{{sg.hasMore}}" hint-placeholder-val="{{false}}"><span class="mn-body-sm">{{sg.more}}</span></sc-if>
+            </div>
+          </sc-for>
+        </section>
+      </aside>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isTerm}}" hint-placeholder-val="{{false}}">
+    <section class="mn-term" aria-label="Resume terminal" style="min-height: 560px;">
+      <div class="mn-term__out" role="log" aria-live="polite" style="flex: 1;">
+        <sc-for list="{{log}}" as="l" hint-placeholder-count="6"><span class="{{l.cls}}">{{l.text}}</span></sc-for>
+      </div>
+      <label class="mn-term__line"><span class="mn-term__prompt">$</span><input aria-label="Command" placeholder="type a command, or tap one below" value="{{input}}" onChange="{{onInput}}" onKeyDown="{{onKey}}"></label>
+      <div class="mn-term__chips" role="group" aria-label="Commands">
+        <sc-for list="{{chips}}" as="c" hint-placeholder-count="9"><button class="mn-tag" aria-pressed="false" onClick="{{c.run}}">{{c.label}}</button></sc-for>
+      </div>
+    </section>
+    <p class="mn-body-sm" style="margin: 0;">Same resume, as commands. <button class="mn-link" style="background: none; border: 0; padding: 0; font: inherit; font-weight: 600;" onClick="{{pickTl}}">Back to the timeline</button></p>
+  </sc-if>
+
+  <footer class="mn-row" style="justify-content: space-between; border-top: 1px solid var(--line); padding-top: 24px;">
+    <span class="mn-mono">© 2026 Masa Chien · Next.js on Vercel</span>
+    <div class="mn-row" style="gap: 20px;"><a class="mn-link" href="mailto:masakic@uci.edu">Email</a><a class="mn-link" href="https://github.com/MasaCTC">GitHub</a><a class="mn-link" href="https://linkedin.com/in/masakichien">LinkedIn</a><a class="mn-link" href="https://instagram.com/masamcodes">Instagram</a></div>
+  </footer>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"startView":{"editor":"enum","options":["timeline","terminal"],"default":"timeline"},"$preview":{"width":1440,"height":2800}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { view: null, open: { cofura: true }, filter: 'All', input: '', log: [
+      { cls: 'mn-term__muted', text: 'masa chien · resume · type help, or tap a command' },
+      { cls: '', text: '$ whoami' },
+      { cls: '', text: 'masaki "masa" chien · cs @ uc irvine · graduating mar 2028 (early)' },
+      { cls: 'mn-term__muted', text: 'builds apps in public as @masamcodes' }
+    ] };
+  }
+  out(cmd) {
+    const c = cmd.trim().toLowerCase();
+    const L = (text, cls) => ({ text, cls: cls || '' });
+    const M = (t) => L(t, 'mn-term__muted');
+    switch (c) {
+      case 'help': return [M('commands:'), L('  whoami       who I am'), L('  projects     what I’m building'), L('  experience   jobs'), L('  skills       languages, tools, hardware'), L('  education    school + coursework'), L('  contact      email, github, linkedin'), L('  resume.pdf   download the pdf'), L('  clear        clear the screen')];
+      case 'whoami': return [L('masaki "masa" chien · cs @ uc irvine · graduating mar 2028 (early)'), M('builds apps in public as @masamcodes')];
+      case 'projects': return [L('cofura           sep 2026–now   cofounder · messaging + safety slice · supabase, ci'), L('one basket       aug 2026–now   recipes → buyable grocery quantities · claude code'), L('retrolink        jul 2026–now   stm32 sensor node · can bus @ 500 kbps · ltspice'), L('dungeon dilemma  jan–mar 2026   unity multiplayer · 15+ person team · c#'), L('pullpilot        dead           no design planned → every screen differed → rewrite', 'mn-term__muted')];
+      case 'experience': return [L('stem instructor intern         lavner education      jun–aug 2026'), L('3d printing production intern  kav helmets           oct–dec 2023'), L('youth hockey assistant coach   ice center cupertino  aug 2020–jun 2024')];
+      case 'skills': return [L('proficient   python, c++'), L('working      c, c#, java'), L('tools        git, github, supabase, linear, unity, vs code, cursor'), L('ai           claude code, claude cowork, claude design, gemini api'), L('hardware     ltspice, fusion 360, 3d printing, automotive diagnostics')];
+      case 'education': return [L('uc irvine · b.s. computer science · sep 2025 – mar 2028 (expected)'), M('python · c/c++ · data structures & algorithms (in progress) · intro to software engineering · computer organization · probability & statistics')];
+      case 'contact': return [L('email     masakic@uci.edu'), L('github    github.com/MasaCTC'), L('linkedin  linkedin.com/in/masakichien'), L('instagram @masamcodes')];
+      case 'resume.pdf': return [M('preparing pdf…'), L('✓ downloaded masaki_chien_resume.pdf', 'mn-term__ok')];
+      case '': return [];
+      default: return [L('command not found: ' + c + '. try help', 'mn-term__err')];
+    }
+  }
+  run(cmd) {
+    if (cmd.trim().toLowerCase() === 'clear') { this.setState({ input: '', log: [{ cls: 'mn-term__muted', text: 'type help, or tap a command' }] }); return; }
+    this.setState({ input: '', log: this.state.log.concat([{ cls: '', text: '$ ' + cmd }]).concat(this.out(cmd)) });
+  }
+  renderVals() {
+    const view = this.state.view || this.props.startView || 'timeline';
+    const isTl = view === 'timeline';
+    const E = [
+      { id: 'cofura', now: true, title: 'Cofura · Cofounder', sub: 'Cofounder-matching mobile app for UCI students', when: 'Sep 2026 – now', stack: 'Supabase · GitHub Actions · Claude Code', tags: ['Supabase', 'Claude Code'],
+        bullets: ['Lead a three-person student team; wrote the product spec and roadmap, and split the build into three owned slices so we build in parallel.', 'Own the conversation and safety slice: messaging with rate limits and content moderation, plus unmatch, block and report flows enforced at the database level.', 'Set up CI that runs the full database and server-function test suite on every pull request; cross-team decisions go in a numbered rulings log.'] },
+      { id: 'onebasket', now: true, title: 'One Basket', sub: 'Recipe-to-grocery-list app, built end to end', when: 'Aug 2026 – now', stack: 'Claude Code · Claude Design · Gemini API', tags: ['Claude Code'],
+        bullets: ['Building with Claude Code as the implementer: scoping each task, constraining it with written system invariants, and verifying changes before they land.', 'Run AI work in parallel on isolated branches with declared file ownership, so concurrent changes can’t collide.', 'Settle visual direction in Claude Design before production art is drawn.'] },
+      { id: 'retrolink', now: true, title: 'RetroLink', sub: 'Automotive embedded sensor node', when: 'Jul 2026 – now', stack: 'C · STM32 · CAN bus · LTspice', tags: ['C', 'Hardware', 'Claude Code'],
+        bullets: ['Designed an analog front end in LTspice scaling 0–5 V automotive sensor signals into the STM32F446RE’s 3.3 V ADC range; bench-tested with potentiometers.', 'Streamed ADC readings as CAN frames at 500 kbps through a TJA1050 transceiver, with live readout on an I2C OLED.', 'Root-caused a CAN init timeout to a floating RX pin reading dominant; fixed with an internal pull-up.'] },
+      { id: 'ig', now: true, title: '@masamcodes', sub: 'Building apps in public on Instagram', when: '[START] – now', stack: '10.2K followers · 6.0M views', tags: [],
+        bullets: ['Posting what I build, numbers included. Live stats on the Stats page.'] },
+      { id: 'lavner', now: false, title: 'Lavner Education · STEM Instructor Intern', sub: 'Camp Tech Revolution · Foster City, CA', when: 'Jun – Aug 2026', stack: 'Teaching', tags: [],
+        bullets: ['Taught hands-on AI, coding, robotics, game design and 3D modeling to elementary and middle school classes, adapting explanations in real time across skill levels.'] },
+      { id: 'dungeon', now: false, title: 'Dungeon Dilemma', sub: 'Networked multiplayer Unity game · 15+ person team', when: 'Jan – Mar 2026', stack: 'C# · Unity · Git · Linear', tags: ['C#', 'Unity'],
+        bullets: ['Shipped the SpikeTrap and HauntedArmor hazards by extending the shared abstract Trap class, with coroutine-timed activation wired into networked combat.', 'Fixed a bug where trigger collisions applied damage every physics frame, using a HashSet of players already hit per cycle.', 'Refactored the shared AttackModule, merging duplicated damage paths behind overloaded CalculateAttackDamage signatures.'] },
+      { id: 'kav', now: false, title: 'KAV Helmets · 3D Printing Production Intern', sub: 'Redwood City, CA', when: 'Oct – Dec 2023', stack: '3D printing', tags: ['Hardware'],
+        bullets: ['Ran and calibrated 100+ 3D printers in high-volume production; diagnosed stepper, thermal-runaway and adhesion failures, and standardized an adhesion fix fleet-wide.'] },
+      { id: 'hockey', now: false, title: 'Ice Center Cupertino · Youth Hockey Assistant Coach', sub: 'Cupertino, CA', when: 'Aug 2020 – Jun 2024', stack: 'Coaching', tags: [],
+        bullets: ['Ran practices for groups of 30+ players ages 6–14 and served as interim head coach, coordinating players, parents and staff.'] }
+    ];
+    const f = this.state.filter;
+    const mk = (e) => {
+      const open = !!this.state.open[e.id];
+      const dim = f !== 'All' && e.tags.indexOf(f) < 0;
+      return Object.assign({}, e, { open, expanded: open ? 'true' : 'false', bodyId: 'tl-' + e.id, cls: dim ? 'is-dim' : '',
+        toggle: () => this.setState({ open: Object.assign({}, this.state.open, { [e.id]: !open }) }) });
+    };
+    const nowE = E.filter((e) => e.now).map(mk), pastE = E.filter((e) => !e.now).map(mk);
+    const groups = [
+      { title: 'Right now', count: nowE.length + ' ongoing', entries: nowE },
+      { title: 'Before', count: '2020 – 2026', entries: pastE }
+    ];
+    const matches = f === 'All' ? 0 : E.filter((e) => e.tags.indexOf(f) >= 0).length;
+    const hasFilter = f !== 'All';
+    const label = (k) => (k === 'Hardware' ? 'hardware' : k);
+    const filterMsg = !hasFilter ? '' : (matches ? 'Showing where I used ' + label(f) + ' (' + matches + (matches === 1 ? ' entry).' : ' entries).') : 'Nothing on here uses ' + label(f) + ' yet.');
+    const tag = (lbl, key) => ({ label: lbl, pressed: f === key ? 'true' : 'false', pick: () => this.setState({ filter: f === key ? 'All' : key }) });
+    const skillGroups = [
+      { label: 'Proficient', tags: [tag('Python', 'Python'), tag('C++', 'C++')], hasMore: false, more: '' },
+      { label: 'Working knowledge', tags: [tag('C', 'C'), tag('C#', 'C#'), tag('Java', 'Java')], hasMore: false, more: '' },
+      { label: 'Tools', tags: [tag('Supabase', 'Supabase'), tag('Unity', 'Unity')], hasMore: true, more: 'Also: Git, GitHub, Linear, VS Code, Cursor' },
+      { label: 'AI tools', tags: [tag('Claude Code', 'Claude Code')], hasMore: true, more: 'Also: Claude Cowork, Claude Design, Gemini API' },
+      { label: 'Hardware', tags: [tag('LTspice · 3D printing', 'Hardware')], hasMore: true, more: 'Also: Fusion 360, automotive diagnostics' }
+    ];
+    const span = { cofura: ['Cofura', [2026, 9], null], onebasket: ['One Basket', [2026, 8], null], retrolink: ['RetroLink', [2026, 7], null], lavner: ['Lavner Education', [2026, 6], [2026, 8]], dungeon: ['Dungeon Dilemma', [2026, 1], [2026, 3]], kav: ['KAV Helmets', [2023, 10], [2023, 12]], hockey: ['Hockey coach', [2020, 8], [2024, 6]] };
+    const pos = (ym) => ((ym[0] - 2020) * 12 + (ym[1] - 1)) / 98 * 100;
+    const NOW = pos([2026, 11]);
+    const laneE = E.filter((e) => span[e.id]).concat([{ id: 'uci', when: 'Sep 2025 – Mar 2028', tags: ['Python', 'C++', 'C'] }]);
+    span.uci = ['UC Irvine', [2025, 9], [2028, 3]];
+    const lanes = laneE.map((e) => {
+      const s = span[e.id];
+      const a = pos(s[1]); const b = s[2] ? pos([s[2][0], s[2][1] + 1]) : NOW;
+      const dim = f !== 'All' && e.tags.indexOf(f) < 0;
+      return { short: s[0], when: e.when, left: a.toFixed(1) + '%', width: Math.max(1.2, Math.min(100, b) - a).toFixed(1) + '%', barCls: s[2] && e.id !== 'uci' ? '' : 'is-current', cls: dim ? 'is-dim' : '' };
+    });
+    const chips = ['help', 'whoami', 'projects', 'experience', 'skills', 'education', 'contact', 'resume.pdf', 'clear'].map((x) => ({ label: x, run: () => this.run(x) }));
+    return {
+      theme: this.props.theme ?? 'light',
+      isTl, isTerm: !isTl, tlSel: isTl ? 'true' : 'false', termSel: isTl ? 'false' : 'true',
+      pickTl: () => this.setState({ view: 'timeline' }), pickTerm: () => this.setState({ view: 'terminal' }),
+      groups, skillGroups, lanes, hasFilter, filterMsg, clearFilter: () => this.setState({ filter: 'All' }),
+      log: this.state.log.map((l) => ({ text: l.text, cls: l.cls || '' })), input: this.state.input, chips,
+      onInput: (e) => this.setState({ input: e.target.value }),
+      onKey: (e) => { if (e.key === 'Enter') this.run(this.state.input); }
+    };
+  }
+}
+</script>
+</body>
+</html>

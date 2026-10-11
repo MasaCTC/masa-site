@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Components × states · Masa Neu</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/masa-neu/tokens.css">
+<link rel="stylesheet" href="ds/masa-neu/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Nunito:wght@400;600;700;800&amp;family=Instrument+Serif&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="mn-root" data-theme="{{theme}}" data-type="{{typeSet}}" style="width: 1680px; min-height: 2700px; box-sizing: border-box; padding: 64px 56px; display: flex; flex-direction: column; gap: 36px;">
+  <header style="display: flex; flex-direction: column; gap: 12px; max-width: 980px;">
+    <span class="mn-label">Every component · every state · flip the Theme tweak for dark</span>
+    <h1 class="mn-display-lg">Components × states</h1>
+    <p class="mn-body-lg">"n/a" cells are deliberate: the reason is written in the cell and in the component's guidelines.</p>
+  </header>
+
+  <div style="display: grid; grid-template-columns: 150px repeat(8, minmax(0, 1fr)); gap: 30px 22px; align-items: center;">
+    <span></span><span class="mn-label">Default</span><span class="mn-label">Hover</span><span class="mn-label">Pressed</span><span class="mn-label">Focus</span><span class="mn-label">Disabled</span><span class="mn-label">Loading</span><span class="mn-label">Empty</span><span class="mn-label">Error</span>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Button · primary</span>
+    <button class="mn-btn mn-btn--primary mn-btn--sm">Follow</button>
+    <button class="mn-btn mn-btn--primary mn-btn--sm is-hover">Follow</button>
+    <button class="mn-btn mn-btn--primary mn-btn--sm is-pressed">Follow</button>
+    <button class="mn-btn mn-btn--primary mn-btn--sm is-focus">Follow</button>
+    <button class="mn-btn mn-btn--primary mn-btn--sm" disabled>Follow</button>
+    <button class="mn-btn mn-btn--primary mn-btn--sm is-loading" aria-busy="true"><span class="mn-spinner"></span>Opening</button>
+    <span class="mn-mono" style="font-size: 11px;">n/a · always labeled</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · error shows beside it</span>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Button · secondary</span>
+    <button class="mn-btn mn-btn--sm">GitHub</button>
+    <button class="mn-btn mn-btn--sm is-hover">GitHub</button>
+    <button class="mn-btn mn-btn--sm is-pressed">GitHub</button>
+    <button class="mn-btn mn-btn--sm is-focus">GitHub</button>
+    <button class="mn-btn mn-btn--sm" disabled>GitHub</button>
+    <button class="mn-btn mn-btn--sm is-loading" aria-busy="true"><span class="mn-spinner"></span>Loading</button>
+    <span class="mn-mono" style="font-size: 11px;">n/a · always labeled</span>
+    <button class="mn-btn mn-btn--sm">Try again</button>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Link</span>
+    <a class="mn-link" href="#">Resume</a>
+    <a class="mn-link is-hover" href="#">Resume</a>
+    <a class="mn-link is-pressed" href="#">Resume</a>
+    <a class="mn-link is-focus" href="#">Resume</a>
+    <a class="mn-link is-disabled" aria-disabled="true">Live demo</a>
+    <span class="mn-mono" style="font-size: 11px;">n/a · navigates</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · no url = not shown</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Tag (filter)</span>
+    <button class="mn-tag" aria-pressed="false">Python</button>
+    <button class="mn-tag is-hover" aria-pressed="false">Python</button>
+    <button class="mn-tag" aria-pressed="true">Python</button>
+    <button class="mn-tag is-focus" aria-pressed="false">Python</button>
+    <button class="mn-tag" disabled aria-pressed="false">Java</button>
+    <span class="mn-mono" style="font-size: 11px;">n/a · instant, local</span>
+    <span class="mn-msg" style="font-size: 12px;">Nothing tagged Java yet.</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · local</span>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Tabs</span>
+    <div class="mn-tabs"><button class="mn-tab" aria-selected="true">30D</button><button class="mn-tab" aria-selected="false">All</button></div>
+    <div class="mn-tabs"><button class="mn-tab" aria-selected="true">30D</button><button class="mn-tab is-hover" aria-selected="false">All</button></div>
+    <div class="mn-tabs"><button class="mn-tab" aria-selected="true">30D</button><button class="mn-tab is-pressed" aria-selected="false">All</button></div>
+    <div class="mn-tabs"><button class="mn-tab is-focus" aria-selected="true">30D</button><button class="mn-tab" aria-selected="false">All</button></div>
+    <div class="mn-tabs"><button class="mn-tab" aria-selected="true">30D</button><button class="mn-tab" aria-selected="false" disabled>All</button></div>
+    <div class="mn-tabs is-loading"><button class="mn-tab" aria-selected="false">30D</button><button class="mn-tab" aria-selected="true">All</button></div>
+    <span class="mn-mono" style="font-size: 11px;">n/a · never empty</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · panel shows it</span>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Card · link</span>
+    <a class="mn-card mn-card--link" href="#" style="padding: 16px; gap: 6px;"><span class="mn-heading-sm" style="font-size: 16px;">Stats</span><span class="mn-body-sm">10.2K followers</span></a>
+    <a class="mn-card mn-card--link is-hover" href="#" style="padding: 16px; gap: 6px;"><span class="mn-heading-sm" style="font-size: 16px;">Stats</span><span class="mn-body-sm">10.2K followers</span></a>
+    <a class="mn-card mn-card--link is-pressed" href="#" style="padding: 16px; gap: 6px;"><span class="mn-heading-sm" style="font-size: 16px;">Stats</span><span class="mn-body-sm">10.2K followers</span></a>
+    <a class="mn-card mn-card--link is-focus" href="#" style="padding: 16px; gap: 6px;"><span class="mn-heading-sm" style="font-size: 16px;">Stats</span><span class="mn-body-sm">10.2K followers</span></a>
+    <div class="mn-card is-disabled" style="padding: 16px; gap: 6px;"><span class="mn-heading-sm" style="font-size: 16px;">Soon</span><span class="mn-body-sm" style="color: var(--ink-disabled);">Slot reserved</span></div>
+    <div class="mn-card" style="padding: 16px; gap: 8px;" aria-busy="true"><span class="mn-skel" style="height: 18px; width: 60%;"></span><span class="mn-skel" style="height: 12px;"></span></div>
+    <div class="mn-card" style="padding: 16px;"><span class="mn-msg" style="font-size: 13px;">No projects yet.</span></div>
+    <div class="mn-card" style="padding: 16px;"><span class="mn-msg mn-msg--error" style="font-size: 13px;">Couldn't load.</span></div>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Stat tile</span>
+    <div class="mn-stat mn-stat--md"><span class="mn-label">Followers</span><span class="mn-stat__value">10.2K</span></div>
+    <span class="mn-mono" style="font-size: 11px;">n/a · read-only</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · read-only</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · not focusable</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · data is live, loading, empty or error</span>
+    <div class="mn-stat mn-stat--md" aria-busy="true"><span class="mn-label">Followers</span><span class="mn-skel" style="height: 30px; width: 80%;"></span></div>
+    <div class="mn-stat mn-stat--md is-empty"><span class="mn-label">Shares</span><span class="mn-stat__value">—</span></div>
+    <div class="mn-stat mn-stat--md is-error"><span class="mn-label">Followers</span><span class="mn-stat__value">—</span><span class="mn-msg mn-msg--error" style="font-size: 12px;">Couldn't reach IG</span></div>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Chart</span>
+    <figure class="mn-chart" style="margin: 0; padding: 10px;"><svg viewBox="0 0 200 80" role="img" aria-label="Followers rising"><line class="grid" x1="0" x2="200" y1="70" y2="70"/><path class="line" d="M4 66 L60 60 L90 36 L140 24 L196 10"/></svg></figure>
+    <figure class="mn-chart" style="margin: 0; padding: 10px;"><svg viewBox="0 0 200 80" role="img" aria-label="Followers rising, hovered"><line class="grid" x1="0" x2="200" y1="70" y2="70"/><path class="line" d="M4 66 L60 60 L90 36 L140 24 L196 10"/><line class="guide" x1="90" x2="90" y1="6" y2="70"/><circle class="pt" cx="90" cy="36" r="5"/></svg></figure>
+    <span class="mn-mono" style="font-size: 11px;">n/a · tap = hover</span>
+    <figure class="mn-chart" style="margin: 0; padding: 10px; outline: 3px solid var(--focus-ring); outline-offset: 4px;"><svg viewBox="0 0 200 80" role="img" aria-label="Followers rising, focused"><line class="grid" x1="0" x2="200" y1="70" y2="70"/><path class="line" d="M4 66 L60 60 L90 36 L140 24 L196 10"/><circle class="pt" cx="196" cy="10" r="5"/></svg></figure>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+    <figure class="mn-chart" style="margin: 0; padding: 14px;" aria-busy="true"><span class="mn-msg" style="font-size: 12px;"><span class="mn-spinner"></span>Pulling…</span></figure>
+    <figure class="mn-chart" style="margin: 0; padding: 14px;"><span class="mn-msg" style="font-size: 12px;">Needs 2 days of data.</span></figure>
+    <figure class="mn-chart" style="margin: 0; padding: 14px;"><span class="mn-msg mn-msg--error" style="font-size: 12px;">Couldn't load.</span></figure>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Progress track</span>
+    <ol class="mn-track" aria-label="Build map"><li class="mn-phase is-done"><span class="mn-phase__dot"></span></li><li class="mn-phase is-current"><span class="mn-phase__dot"></span></li><li class="mn-phase"><span class="mn-phase__dot"></span></li></ol>
+    <span class="mn-mono" style="font-size: 11px;">n/a · read-only map</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · dead card keeps map</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · static</span>
+    <ol class="mn-track is-empty" aria-label="Build map" style="grid-template-columns: repeat(2, minmax(0,1fr)); grid-auto-flow: row;"><li class="mn-phase is-current"><span class="mn-phase__dot"></span></li><li class="mn-phase"><span class="mn-phase__dot"></span></li></ol>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Pill</span>
+    <span class="mn-pill mn-pill--building">Building</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · not interactive</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+    <span class="mn-pill mn-pill--dead">Dead</span>
+    <span class="mn-pill mn-pill--live">Live</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · no status, no pill</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · use Feedback</span>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Demo area</span>
+    <div class="mn-demo" style="padding: 8px;"><div class="mn-demo__media"><span class="mn-placeholder">[SCREEN]</span></div></div>
+    <div class="mn-demo" style="padding: 8px;"><div class="mn-demo__media"><span class="mn-btn mn-btn--icon is-hover" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span></div></div>
+    <div class="mn-demo" style="padding: 8px;"><div class="mn-demo__media"><span class="mn-btn mn-btn--icon is-pressed" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span></div></div>
+    <div class="mn-demo" style="padding: 8px;"><div class="mn-demo__media"><span class="mn-btn mn-btn--icon is-focus" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span></div></div>
+    <span class="mn-mono" style="font-size: 11px;">n/a · demo down = error</span>
+    <div class="mn-demo" style="padding: 8px;" aria-busy="true"><span class="mn-skel" style="aspect-ratio: 16/10;"></span></div>
+    <div class="mn-demo" style="padding: 8px;"><div class="mn-demo__shots"><div class="mn-demo__shot"></div><div class="mn-demo__shot"></div><div class="mn-demo__shot"></div></div><span class="mn-body-sm" style="font-size: 12px;">No demo yet.</span></div>
+    <div class="mn-demo" style="padding: 8px;"><div class="mn-demo__media"><span class="mn-msg mn-msg--error" style="font-size: 12px; padding: 8px;">Clip didn't load.</span></div></div>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Reel card</span>
+    <a class="mn-reel" href="#" style="padding: 10px; gap: 8px;"><div class="mn-reel__thumb" style="aspect-ratio: 1;"><span class="mn-reel__rank">1</span></div><span class="mn-stat__meta">4.1M views</span></a>
+    <a class="mn-reel mn-card--link is-hover" href="#" style="padding: 10px; gap: 8px;"><div class="mn-reel__thumb" style="aspect-ratio: 1;"><span class="mn-reel__rank">1</span></div><span class="mn-stat__meta">4.1M views</span></a>
+    <a class="mn-reel mn-card--link is-pressed" href="#" style="padding: 10px; gap: 8px;"><div class="mn-reel__thumb" style="aspect-ratio: 1;"><span class="mn-reel__rank">1</span></div><span class="mn-stat__meta">4.1M views</span></a>
+    <a class="mn-reel mn-card--link is-focus" href="#" style="padding: 10px; gap: 8px;"><div class="mn-reel__thumb" style="aspect-ratio: 1;"><span class="mn-reel__rank">1</span></div><span class="mn-stat__meta">4.1M views</span></a>
+    <span class="mn-mono" style="font-size: 11px;">n/a · unlinked reel just isn't wrapped</span>
+    <div class="mn-reel" style="padding: 10px; gap: 8px;" aria-busy="true"><div class="mn-reel__thumb" style="aspect-ratio: 1;"></div><span class="mn-skel" style="height: 12px;"></span></div>
+    <div class="mn-card mn-card--inset" style="padding: 12px;"><span class="mn-msg" style="font-size: 12px;">Post more reels to fill this.</span></div>
+    <div class="mn-reel" style="padding: 10px; gap: 8px;"><div class="mn-reel__thumb" style="aspect-ratio: 1;"><span class="mn-placeholder" style="font-size: 10px;">Preview unavailable</span></div><span class="mn-stat__meta">4.1M views</span></div>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Timeline item</span>
+    <button class="mn-tl-head" aria-expanded="false" style="padding: 10px 12px; grid-template-columns: minmax(0,1fr);"><span class="mn-tl__title" style="font-size: 14px;">Cofura</span></button>
+    <button class="mn-tl-head is-hover" aria-expanded="false" style="padding: 10px 12px; grid-template-columns: minmax(0,1fr);"><span class="mn-tl__title" style="font-size: 14px;">Cofura</span></button>
+    <button class="mn-tl-head" aria-expanded="true" style="padding: 10px 12px; grid-template-columns: minmax(0,1fr);"><span class="mn-tl__title" style="font-size: 14px;">Cofura · open</span></button>
+    <button class="mn-tl-head is-focus" aria-expanded="false" style="padding: 10px 12px; grid-template-columns: minmax(0,1fr);"><span class="mn-tl__title" style="font-size: 14px;">Cofura</span></button>
+    <div class="mn-tl is-dim" style="padding: 0;"><button class="mn-tl-head" aria-expanded="false" style="padding: 10px 12px; grid-template-columns: minmax(0,1fr);"><span class="mn-tl__title" style="font-size: 14px;">KAV · filtered</span></button></div>
+    <span class="mn-mono" style="font-size: 11px;">n/a · static content</span>
+    <span class="mn-msg" style="font-size: 12px;">Nothing tagged Java yet.</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · static</span>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Terminal</span>
+    <div class="mn-term" style="padding: 10px; font-size: 12px;"><span>$ whoami</span></div>
+    <div class="mn-term" style="padding: 10px;"><button class="mn-tag is-hover" style="min-height: 36px;">skills</button></div>
+    <div class="mn-term" style="padding: 10px;"><button class="mn-tag is-pressed" style="min-height: 36px;">skills</button></div>
+    <div class="mn-term" style="padding: 10px; font-size: 12px;"><span class="mn-term__line" style="min-height: 36px; outline: 3px solid var(--focus-ring); outline-offset: 4px;">$<span class="mn-caret"></span></span></div>
+    <span class="mn-mono" style="font-size: 11px;">n/a · falls back to Recruiter view</span>
+    <div class="mn-term" style="padding: 10px; font-size: 12px;"><span class="mn-term__muted">preparing pdf…</span></div>
+    <div class="mn-term" style="padding: 10px; font-size: 12px;"><span class="mn-term__muted">type help</span></div>
+    <div class="mn-term" style="padding: 10px; font-size: 12px;"><span class="mn-term__err">command not found</span></div>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Sparkline (in tile)</span>
+    <svg class="mn-spark" viewBox="0 0 120 36" role="img" aria-label="Followers rising"><line class="base" x1="0" x2="120" y1="35" y2="35"/><path class="line" d="M2 33.0 L12 32.3 L21 31.7 L31 30.7 L41 29.7 L50 21.5 L60 18.2 L70 15.9 L79 13.3 L89 9.0 L99 6.0 L108 4.4 L118 3.0"/><circle class="pt" cx="118" cy="3" r="3.5"/></svg>
+    <span class="mn-mono" style="font-size: 11px;">n/a · shape only; tile has the number</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+    <span class="mn-skel" style="height: 30px;"></span>
+    <span class="mn-mono" style="font-size: 11px;">hidden · &lt; 2 days data</span>
+    <span class="mn-mono" style="font-size: 11px;">hidden · tile shows error</span>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Bar list</span>
+    <div class="mn-bar is-top" style="grid-template-columns: minmax(0,1fr) 3rem; gap: 8px;"><span class="mn-bar__track"><span class="mn-bar__fill" style="width: calc((100% - 8px) * 0.7);"></span></span><span class="mn-bar__value">4.1M</span></div>
+    <div class="mn-bar is-hover" style="grid-template-columns: minmax(0,1fr) 3rem; gap: 8px;"><span class="mn-bar__track"><span class="mn-bar__fill" style="width: calc((100% - 8px) * 0.7);"></span></span><span class="mn-bar__value">4.1M</span></div>
+    <span class="mn-mono" style="font-size: 11px;">n/a · read-only</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · values printed</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+    <div class="mn-bar" style="grid-template-columns: minmax(0,1fr) 3rem; gap: 8px;" aria-busy="true"><span class="mn-skel" style="height: 16px;"></span><span class="mn-bar__value">—</span></div>
+    <span class="mn-msg" style="font-size: 12px;">No reels yet.</span>
+    <span class="mn-msg mn-msg--error" style="font-size: 12px;">Couldn't load.</span>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Meter</span>
+    <div class="mn-meter"><div class="mn-meter__head"><span class="mn-label" style="font-size: 11px;">Degree</span><span class="mn-meter__value">43%</span></div><div class="mn-meter__track"><span class="mn-meter__fill" style="width: calc((100% - 8px) * 0.43);"></span></div></div>
+    <span class="mn-mono" style="font-size: 11px;">n/a · read-only</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · value printed</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+    <div class="mn-meter" aria-busy="true"><div class="mn-meter__head"><span class="mn-label" style="font-size: 11px;">Share</span><span class="mn-meter__value">—</span></div><span class="mn-skel" style="height: 16px;"></span></div>
+    <div class="mn-meter"><div class="mn-meter__head"><span class="mn-label" style="font-size: 11px;">Share</span><span class="mn-meter__value">—</span></div><div class="mn-meter__track"></div></div>
+    <span class="mn-msg mn-msg--error" style="font-size: 12px;">Couldn't load.</span>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Time lanes</span>
+    <div class="mn-lane" style="grid-template-columns: minmax(0,1fr); gap: 4px;"><span class="mn-lane__track"><span class="mn-lane__bar" style="left: 10%; width: 50%;"></span></span></div>
+    <div class="mn-lane is-hover" style="grid-template-columns: minmax(0,1fr); gap: 4px;"><span class="mn-lane__track"><span class="mn-lane__bar" style="left: 10%; width: 50%;"></span></span></div>
+    <span class="mn-mono" style="font-size: 11px;">n/a · summary only</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+    <div class="mn-lane is-dim" style="grid-template-columns: minmax(0,1fr); gap: 4px;"><span class="mn-lane__track"><span class="mn-lane__bar" style="left: 10%; width: 50%;"></span></span></div>
+    <span class="mn-mono" style="font-size: 11px;">n/a · static</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+
+    <span class="mn-heading-sm" style="font-size: 16px;">Nav link</span>
+    <nav class="mn-nav" style="padding: 6px;"><div class="mn-nav__links"><a href="#">Stats</a></div></nav>
+    <nav class="mn-nav" style="padding: 6px;"><div class="mn-nav__links"><a href="#" class="is-hover">Stats</a></div></nav>
+    <nav class="mn-nav" style="padding: 6px;"><div class="mn-nav__links"><a href="#" aria-current="page">Stats</a></div></nav>
+    <nav class="mn-nav" style="padding: 6px;"><div class="mn-nav__links"><a href="#" class="is-focus">Stats</a></div></nav>
+    <span class="mn-mono" style="font-size: 11px;">n/a · no links to missing pages</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a · static</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+    <span class="mn-mono" style="font-size: 11px;">n/a</span>
+  </div>
+
+  <section class="mn-section" style="gap: 18px;">
+    <h2 class="mn-heading-md">Dead project card</h2>
+    <article class="mn-card mn-card--dead" style="max-width: 560px;">
+      <div class="mn-card__row"><h3 class="mn-heading-sm">PullPilot</h3><span class="mn-pill mn-pill--dead">Dead</span></div>
+      <p class="mn-body-sm">A crowdsourced auto-parts platform. My earlier app.</p>
+      <div class="mn-epitaph"><span class="mn-label">Why it died</span><p>I built features with no design planned, so every screen looked different, and fixing it meant a rewrite.</p></div>
+    </article>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"typeSet":{"editor":"enum","options":["a","b","c"],"default":"a"},"$preview":{"width":1680,"height":3200}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.theme ?? 'light', typeSet: this.props.typeSet ?? 'a' };
+  }
+}
+</script>
+</body>
+</html>

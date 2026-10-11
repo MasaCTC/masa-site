@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home A · Hero + teasers</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/masa-neu/tokens.css">
+<link rel="stylesheet" href="ds/masa-neu/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Nunito:wght@400;600;700;800&amp;family=Instrument+Serif&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="mn-root" data-theme="{{theme}}" data-type="{{typeSet}}" style="min-height: 2300px;">
+<div class="mn-page">
+  <sc-if value="{{navFloat}}" hint-placeholder-val="{{true}}">
+    <nav class="mn-nav" aria-label="Main">
+      <a class="mn-nav__brand" href="HomeA.dc.html"><span class="mn-nav__mark" aria-hidden="true">MC</span>Masa Chien</a>
+      <div class="mn-nav__right">
+        <a class="mn-nav__stat" href="Stats.dc.html" aria-label="10,214 followers, live. Open stats">10.2K <span>followers</span></a>
+        <div class="mn-nav__links"><a href="Stats.dc.html">Stats</a><a href="Projects.dc.html">Projects</a><a href="Resume.dc.html">Resume</a></div>
+      </div>
+    </nav>
+  </sc-if>
+  <sc-if value="{{navDock}}" hint-placeholder-val="{{false}}">
+    <nav class="mn-nav mn-nav--dock" aria-label="Main">
+      <a class="mn-nav__brand" href="HomeA.dc.html" style="padding-right: 4px;" aria-label="Masa Chien, home"><span class="mn-nav__mark" aria-hidden="true">MC</span></a>
+      <div class="mn-nav__links"><a href="Stats.dc.html">Stats</a><a href="Projects.dc.html">Projects</a><a href="Resume.dc.html">Resume</a></div>
+      <a class="mn-nav__stat" href="Stats.dc.html" aria-label="10,214 followers, live. Open stats">10.2K</a>
+    </nav>
+  </sc-if>
+  <sc-if value="{{navSplit}}" hint-placeholder-val="{{false}}">
+    <div class="mn-navsplit">
+      <a class="mn-nav__brand mn-nav__brand--capsule" href="HomeA.dc.html"><span class="mn-nav__mark" aria-hidden="true">MC</span>Masa Chien</a>
+      <nav class="mn-nav" aria-label="Main">
+        <a class="mn-nav__stat" href="Stats.dc.html" aria-label="10,214 followers, live. Open stats">10.2K</a>
+        <div class="mn-nav__links"><a href="Stats.dc.html">Stats</a><a href="Projects.dc.html">Projects</a><a href="Resume.dc.html">Resume</a></div>
+      </nav>
+    </div>
+  </sc-if>
+
+  <section class="mn-card mn-card--lg" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr)); gap: 40px; align-items: center; padding: 48px;">
+    <div style="display: flex; flex-direction: column; gap: 20px; min-width: 0;">
+      <span class="mn-label">@masamcodes · UC Irvine CS</span>
+      <h1 class="mn-display-xl">Masa Chien</h1>
+      <p class="mn-body-lg" style="max-width: 520px;">{{taglineText}}</p>
+      <div class="mn-row" style="gap: 16px;">
+        <a class="mn-btn mn-btn--primary" href="https://instagram.com/masamcodes">Follow @masamcodes</a>
+        <a class="mn-btn" href="https://github.com/MasaCTC">GitHub<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+      </div>
+    </div>
+    <div class="mn-card mn-card--inset" style="gap: 14px;">
+      <span class="mn-label">Right now</span>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="mn-card__row"><span>Building One Basket</span><span class="mn-pill mn-pill--building">Building</span></div>
+        <div class="mn-card__row"><span>Scoping a sector scanner</span><span class="mn-pill mn-pill--scoping">Scoping</span></div>
+        <div class="mn-card__row"><span>CS at UCI, graduating early</span><span class="mn-mono">Mar 2028</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mn-section">
+    <div class="mn-section__head">
+      <div style="display: flex; flex-direction: column; gap: 8px;"><h2 class="mn-heading-md">Instagram, in numbers</h2><span class="mn-mono">updated 4 min ago · Oct 11, 2:14 PM</span></div>
+      <a class="mn-link" href="Stats.dc.html">See all stats<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+    <div class="mn-grid">
+      <div class="mn-stat"><span class="mn-label">Followers</span><span class="mn-stat__value" title="10,214 followers">10.2K</span><span class="mn-stat__delta">+3,114 · last 30 days</span>
+        <svg class="mn-spark" viewBox="0 0 120 36" role="img" aria-label="Followers, last 90 days: 1.1K to 10.2K"><line class="base" x1="0" x2="120" y1="35" y2="35"/><path class="line" d="M2 33.0 L12 32.3 L21 31.7 L31 30.7 L41 29.7 L50 21.5 L60 18.2 L70 15.9 L79 13.3 L89 9.0 L99 6.0 L108 4.4 L118 3.0"/><circle class="pt" cx="118" cy="3" r="3.5"/></svg></div>
+      <div class="mn-stat"><span class="mn-label">Total views</span><span class="mn-stat__value" title="6,024,310 views">6.0M</span><span class="mn-stat__meta">across all reels · last 90 days shown</span>
+        <svg class="mn-spark" viewBox="0 0 120 36" role="img" aria-label="Total views, last 90 days: 0.4M to 6.0M"><line class="base" x1="0" x2="120" y1="35" y2="35"/><path class="line" d="M2 33.0 L12 32.5 L21 31.9 L31 31.1 L41 30.3 L50 18.1 L60 10.6 L70 8.4 L79 6.8 L89 5.5 L99 4.4 L108 3.6 L118 3.0"/><circle class="pt" cx="118" cy="3" r="3.5"/></svg></div>
+      <div class="mn-stat"><span class="mn-label">Likes · shares</span><span class="mn-stat__value" title="412,300 likes">412K</span><span class="mn-stat__meta">73.5K shares</span>
+        <svg class="mn-spark" viewBox="0 0 120 36" role="img" aria-label="Likes, last 90 days: 30K to 412K"><line class="base" x1="0" x2="120" y1="35" y2="35"/><path class="line" d="M2 33.0 L12 32.4 L21 31.7 L31 30.9 L41 30.2 L50 15.7 L60 9.4 L70 7.5 L79 6.1 L89 5.0 L99 4.2 L108 3.5 L118 3.0"/><circle class="pt" cx="118" cy="3" r="3.5"/></svg></div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 24px;">
+      <figure class="mn-chart" style="margin: 0; display: flex; flex-direction: column; gap: 10px;">
+        <figcaption class="mn-card__row"><span class="mn-label">Follower growth · 90 days</span><span class="mn-mono">+9,114</span></figcaption>
+        <svg viewBox="0 0 600 214" role="img" aria-label="Followers grew from 1.1K on Jul 13 to 10.2K on Oct 11, with the biggest jump after reel #1 in late August.">
+          <line class="grid" x1="40" x2="590" y1="190" y2="190"/><line class="grid" x1="40" x2="590" y1="115" y2="115"/><line class="grid" x1="40" x2="590" y1="41" y2="41"/>
+          <text class="axis" x="0" y="194">0</text><text class="axis" x="0" y="119">5K</text><text class="axis" x="0" y="45">10K</text>
+          <text class="axis" x="40" y="212">Jul 13</text><text class="axis" x="580" y="212" text-anchor="end">Oct 11</text>
+          <path class="area" d="M40 174 L76 172 L112 170 L148 168 L184 166 L220 163 L256 159 L292 118 L328 102 L364 93 L400 84 L436 73 L472 62 L508 54 L544 46 L580 38 L580 190 L40 190 Z"/>
+          <path class="line" d="M40 174 L76 172 L112 170 L148 168 L184 166 L220 163 L256 159 L292 118 L328 102 L364 93 L400 84 L436 73 L472 62 L508 54 L544 46 L580 38"/>
+          <line class="guide" x1="270" x2="270" y1="60" y2="190"/><text class="axis" x="264" y="54" text-anchor="end">reel #1</text>
+          <circle class="pt" cx="580" cy="38" r="6"/>
+        </svg>
+      </figure>
+      <div class="mn-card" style="gap: 20px;">
+        <div class="mn-card__row"><span class="mn-label">Top reels by views</span><span class="mn-mono">top reel = 68% of all views</span></div>
+        <ol class="mn-bars" aria-label="Top reels by views">
+          <li class="mn-bar is-top" title="Reel 1 · 4,100,000 views"><span class="mn-bar__label">Reel 1</span><span class="mn-bar__track"><span class="mn-bar__fill" style="width: calc((100% - 8px) * 1);"></span></span><span class="mn-bar__value">4.1M</span></li>
+          <li class="mn-bar" title="Reel 2 · 1,100,000 views"><span class="mn-bar__label">Reel 2</span><span class="mn-bar__track"><span class="mn-bar__fill" style="width: calc((100% - 8px) * 0.268);"></span></span><span class="mn-bar__value">1.1M</span></li>
+          <li class="mn-bar" title="Reel 3 · 380,000 views"><span class="mn-bar__label">Reel 3</span><span class="mn-bar__track"><span class="mn-bar__fill" style="width: calc((100% - 8px) * 0.093);"></span></span><span class="mn-bar__value">380K</span></li>
+          <li class="mn-bar" title="Every other reel combined · 444,000 views"><span class="mn-bar__label">All others</span><span class="mn-bar__track"><span class="mn-bar__fill" style="width: calc((100% - 8px) * 0.108);"></span></span><span class="mn-bar__value">444K</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="mn-section">
+    <div class="mn-section__head">
+      <h2 class="mn-heading-md">What I'm building</h2>
+      <a class="mn-link" href="Projects.dc.html">All projects<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+    <div class="mn-grid">
+      <a class="mn-card mn-card--link" href="Projects.dc.html">
+        <div class="mn-card__row"><h3 class="mn-heading-sm">One Basket</h3><span class="mn-pill mn-pill--building">Building</span></div>
+        <p class="mn-body-sm">Recipes in, buyable grocery quantities out.</p>
+        <ol class="mn-track" aria-label="Build map: phase 2 of 6">
+          <li class="mn-track__fill" aria-hidden="true" style="width: calc(100% / 6);"></li>
+          <li class="mn-phase is-done"><span class="mn-phase__dot"></span></li><li class="mn-phase is-current" aria-current="step"><span class="mn-phase__dot"></span></li><li class="mn-phase"><span class="mn-phase__dot"></span></li><li class="mn-phase"><span class="mn-phase__dot"></span></li><li class="mn-phase"><span class="mn-phase__dot"></span></li><li class="mn-phase"><span class="mn-phase__dot"></span></li>
+        </ol>
+        <span class="mn-mono">phase 2 of 6 · Vertical slice</span>
+      </a>
+      <a class="mn-card mn-card--link" href="Projects.dc.html">
+        <div class="mn-card__row"><h3 class="mn-heading-sm">Stock analysis tool</h3><span class="mn-pill mn-pill--scoping">Scoping</span></div>
+        <p class="mn-body-sm">A sector trend scanner using technical analysis.</p>
+        <ol class="mn-track is-empty" aria-label="Build map: scoping" style="grid-template-columns: repeat(2, minmax(0,1fr)); grid-auto-flow: row;">
+          <li class="mn-phase is-current" aria-current="step"><span class="mn-phase__dot"></span></li><li class="mn-phase"><span class="mn-phase__dot"></span></li>
+        </ol>
+        <span class="mn-mono">first build · the sector scanner</span>
+      </a>
+      <article class="mn-card mn-card--dead">
+        <div class="mn-card__row"><h3 class="mn-heading-sm">PullPilot</h3><span class="mn-pill mn-pill--dead">Dead</span></div>
+        <p class="mn-body-sm">A crowdsourced auto-parts platform. My earlier app.</p>
+        <p style="margin: 0; font-size: 14px; line-height: 20px;">No design planned, so every screen looked different. Fixing it meant a rewrite.</p>
+        <a class="mn-link" href="Projects.dc.html">What I learned</a>
+      </article>
+    </div>
+  </section>
+
+  <section class="mn-card mn-card--lg" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); gap: 28px; align-items: center;">
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <span class="mn-label">Resume</span>
+      <h2 class="mn-heading-md">B.S. Computer Science, UC Irvine</h2>
+      <p class="mn-body-sm">Expected March 2028. Cofura, One Basket, RetroLink, Dungeon Dilemma, and three jobs before that.</p>
+      <div class="mn-meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="43" aria-label="Degree progress" style="max-width: 420px; margin-top: 6px;">
+        <div class="mn-meter__head"><span class="mn-label">Degree progress</span><span class="mn-meter__value">43%</span></div>
+        <div class="mn-meter__track"><span class="mn-meter__fill" style="width: calc((100% - 8px) * 0.43);"></span></div>
+        <span class="mn-mono">13 of 30 months · done Mar 2028</span>
+      </div>
+    </div>
+    <div class="mn-row" style="justify-content: flex-end; gap: 16px;">
+      <a class="mn-btn" href="Resume.dc.html">Open resume</a>
+      <a class="mn-btn mn-btn--ghost" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Download PDF</a>
+    </div>
+  </section>
+
+  <footer class="mn-row" style="justify-content: space-between; border-top: 1px solid var(--line); padding-top: 24px;">
+    <span class="mn-mono">© 2026 Masa Chien · Next.js on Vercel</span>
+    <div class="mn-row" style="gap: 20px;"><a class="mn-link" href="https://instagram.com/masamcodes">Instagram</a><a class="mn-link" href="https://github.com/MasaCTC">GitHub</a><a class="mn-link" href="mailto:masakic@uci.edu">Email</a></div>
+  </footer>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"typeSet":{"editor":"enum","options":["a","b","c"],"default":"a"},"tagline":{"editor":"enum","options":["1 · real numbers","2 · graduating early","3 · what works"],"default":"1 · real numbers"},"header":{"editor":"enum","options":["dock","float","split"],"default":"dock"},"$preview":{"width":1440,"height":2900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const lines = {
+      '1': 'CS at UC Irvine. I build apps in public and post the real numbers.',
+      '2': 'Second-year CS at UCI, graduating early. I build apps on Instagram, misses included.',
+      '3': 'I build apps in public as @masamcodes. What works, what doesn’t, and the numbers.'
+    };
+    const t = String(this.props.tagline ?? '1').charAt(0);
+    const h = this.props.header ?? 'dock';
+    return { theme: this.props.theme ?? 'light', typeSet: this.props.typeSet ?? 'a', taglineText: lines[t] || lines['1'], navFloat: h === 'float', navDock: h === 'dock', navSplit: h === 'split' };
+  }
+}
+</script>
+</body>
+</html>

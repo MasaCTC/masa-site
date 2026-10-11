@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Foundations · Masa Neu</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/masa-neu/tokens.css">
+<link rel="stylesheet" href="ds/masa-neu/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Nunito:wght@400;600;700;800&amp;family=Instrument+Serif&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="mn-root" data-theme="light" data-type="a" style="width: 1440px; min-height: 1900px; box-sizing: border-box; padding: 64px 72px; display: flex; flex-direction: column; gap: 56px;">
+  <header style="display: flex; flex-direction: column; gap: 12px; max-width: 820px;">
+    <span class="mn-label">Masa Neu · design system</span>
+    <h1 class="mn-display-lg">Foundations</h1>
+    <p class="mn-body-lg">One base color carved into raised and inset surfaces. Depth only comes from shadow tokens. Red only fills the primary button. Every text color passes 4.5:1 in both themes, and focus is a thick ink ring.</p>
+  </header>
+
+  <section class="mn-section">
+    <h2 class="mn-heading-md">Color · light and dark</h2>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px;">
+      <sc-for list="{{themes}}" as="th" hint-placeholder-count="2">
+        <div class="mn-root mn-card mn-card--lg" data-theme="{{th.id}}" style="gap: 20px;">
+          <div class="mn-card__row"><h3 class="mn-heading-sm">{{th.name}}</h3><span class="mn-mono">contrast vs surface</span></div>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 16px;">
+            <sc-for list="{{th.swatches}}" as="s" hint-placeholder-count="17">
+              <div style="display: flex; gap: 12px; align-items: center; min-width: 0;">
+                <span style="width: 44px; height: 44px; flex: none; border-radius: 14px; box-shadow: var(--neu-raised-sm); background: {{s.css}};"></span>
+                <span style="display: flex; flex-direction: column; min-width: 0;">
+                  <span style="font-size: 14px; line-height: 18px; font-weight: 600;">{{s.name}}</span>
+                  <span class="mn-mono">{{s.hex}} · {{s.ratio}}</span>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <p class="mn-body-sm" style="max-width: 900px;">Red is reserved: primary-button fill only. Errors use burnt amber (danger), the current build phase uses blue (status-scoping), growth deltas use green. Status colors also differ in lightness, and every pill carries a word, so color is never the only signal.</p>
+  </section>
+
+  <section class="mn-section">
+    <h2 class="mn-heading-md">Depth · shadow tokens</h2>
+    <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 28px;">
+      <sc-for list="{{shadows}}" as="sh" hint-placeholder-count="8">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="height: 110px; border-radius: var(--radius-md); background: {{sh.bg}}; box-shadow: var(--{{sh.name}});"></div>
+          <span style="font-size: 13px; font-weight: 600;">{{sh.name}}</span>
+          <span class="mn-mono" style="font-size: 12px;">{{sh.use}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px;">
+    <section class="mn-section">
+      <h2 class="mn-heading-md">Radius</h2>
+      <div style="display: flex; gap: 24px; align-items: flex-end;">
+        <sc-for list="{{radii}}" as="r" hint-placeholder-count="5">
+          <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+            <div style="width: 84px; height: 84px; background: var(--surface); box-shadow: var(--neu-raised-sm); border-radius: var(--{{r.name}});"></div>
+            <span class="mn-mono">{{r.name}} · {{r.v}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+    <section class="mn-section">
+      <h2 class="mn-heading-md">Spacing</h2>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <sc-for list="{{spaces}}" as="sp" hint-placeholder-count="9">
+          <div style="display: flex; gap: 16px; align-items: center;">
+            <span class="mn-mono" style="width: 110px;">{{sp.name}} · {{sp.v}}</span>
+            <span style="height: 12px; border-radius: 6px; background: var(--surface-sunken); box-shadow: var(--neu-inset-sm); width: var(--{{sp.name}});"></span>
+            <span class="mn-mono" style="font-size: 12px;">{{sp.use}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+
+  <section class="mn-section">
+    <h2 class="mn-heading-md">Type scale · Option A (default)</h2>
+    <div class="mn-card" style="gap: 18px;">
+      <div style="display: flex; gap: 24px; align-items: baseline;"><span class="mn-mono" style="width: 170px; flex: none;">display-xl 64/64</span><span class="mn-display-xl">Masa Chien</span></div>
+      <div style="display: flex; gap: 24px; align-items: baseline;"><span class="mn-mono" style="width: 170px; flex: none;">display-lg 44/48</span><span class="mn-display-lg">Instagram stats</span></div>
+      <div style="display: flex; gap: 24px; align-items: baseline;"><span class="mn-mono" style="width: 170px; flex: none;">heading-md 28/34</span><span class="mn-heading-md">Top reels</span></div>
+      <div style="display: flex; gap: 24px; align-items: baseline;"><span class="mn-mono" style="width: 170px; flex: none;">heading-sm 20/26</span><span class="mn-heading-sm">One Basket</span></div>
+      <div style="display: flex; gap: 24px; align-items: baseline;"><span class="mn-mono" style="width: 170px; flex: none;">body-lg 18/28</span><span class="mn-body-lg">CS at UC Irvine. I build apps in public and post the real numbers.</span></div>
+      <div style="display: flex; gap: 24px; align-items: baseline;"><span class="mn-mono" style="width: 170px; flex: none;">body 16/24</span><span>Recipes in, buyable grocery quantities out.</span></div>
+      <div style="display: flex; gap: 24px; align-items: baseline;"><span class="mn-mono" style="width: 170px; flex: none;">label 13/16</span><span class="mn-label">Total views</span></div>
+      <div style="display: flex; gap: 24px; align-items: baseline;"><span class="mn-mono" style="width: 170px; flex: none;">stat-xl 56/56 mono</span><span class="mn-stat__value">6.0M</span></div>
+      <div style="display: flex; gap: 24px; align-items: baseline;"><span class="mn-mono" style="width: 170px; flex: none;">mono-sm 13/18</span><span class="mn-mono">updated 4 min ago · Oct 11, 2:14 PM</span></div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const rows = [
+      ['surface', '#ece6dd', '#2b2722', 'base', 'base'],
+      ['surface-sunken', '#e4ddd2', '#24211d', 'wells', 'wells'],
+      ['shadow-dark', '#c9bfb0', '#1a1714', 'shadow', 'shadow'],
+      ['shadow-light', '#ffffff', '#3a352f', 'shadow', 'shadow'],
+      ['line', '#d6cdbf', '#3d3832', 'decor', 'decor'],
+      ['ink', '#2a241e', '#f2ebe1', '12.4:1', '12.5:1'],
+      ['ink-muted', '#5a5147', '#c4baad', '6.3:1', '7.8:1'],
+      ['ink-subtle', '#6a6055', '#a99f92', '5.0:1', '5.7:1'],
+      ['ink-disabled', '#857a6d', '#7d7468', 'exempt', 'exempt'],
+      ['red', '#b42a1a', '#c8362a', 'white 6.4:1', 'white 5.2:1'],
+      ['red-hover', '#c2321f', '#d1402f', 'white 5.6:1', 'white 4.7:1'],
+      ['red-pressed', '#962216', '#a82b20', 'white 8.3:1', 'white 6.9:1'],
+      ['focus-ring', '#2a241e', '#f2ebe1', '12.4:1', '12.5:1'],
+      ['status-building', '#3e6a35', '#93c285', '5.1:1', '7.3:1'],
+      ['status-scoping', '#2f5d86', '#7fb0dd', '5.6:1', '6.5:1'],
+      ['status-dead', '#6b6259', '#a69c90', '4.8:1', '5.5:1'],
+      ['danger', '#9a4a12', '#e59a5c', '5.0:1', '6.4:1']
+    ];
+    const mk = (i) => rows.map((r) => ({ name: r[0], hex: r[1 + i], ratio: r[3 + i], css: 'var(--' + r[0] + ')' }));
+    return {
+      themes: [
+        { id: 'light', name: 'Light · bone', swatches: mk(0) },
+        { id: 'dark', name: 'Dark · graphite', swatches: mk(1) }
+      ],
+      shadows: [
+        { name: 'neu-raised-sm', use: 'pills, tags, tab', bg: 'var(--surface)' },
+        { name: 'neu-raised-md', use: 'buttons, tiles, cards', bg: 'var(--surface)' },
+        { name: 'neu-raised-lg', use: 'hover lift, hero', bg: 'var(--surface)' },
+        { name: 'neu-inset-sm', use: 'pressed, rails', bg: 'var(--surface)' },
+        { name: 'neu-inset-md', use: 'wells', bg: 'var(--surface-sunken)' },
+        { name: 'neu-flat', use: 'disabled, dead', bg: 'var(--surface)' },
+        { name: 'neu-red-raised', use: 'primary rest', bg: 'var(--red)' },
+        { name: 'neu-red-pressed', use: 'primary pressed', bg: 'var(--red-pressed)' }
+      ],
+      radii: [
+        { name: 'radius-sm', v: '10' }, { name: 'radius-md', v: '16' }, { name: 'radius-lg', v: '24' }, { name: 'radius-xl', v: '32' }, { name: 'radius-pill', v: '999' }
+      ],
+      spaces: [
+        { name: 'space-1', v: '4', use: 'icon gap' }, { name: 'space-2', v: '8', use: 'pill padding' }, { name: 'space-3', v: '12', use: 'list gaps' },
+        { name: 'space-4', v: '16', use: 'phone gutter' }, { name: 'space-5', v: '24', use: 'card padding' }, { name: 'space-6', v: '32', use: 'desktop gutter' },
+        { name: 'space-7', v: '48', use: 'between sections' }, { name: 'space-8', v: '64', use: 'above titles' }, { name: 'space-9', v: '96', use: 'hero air' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

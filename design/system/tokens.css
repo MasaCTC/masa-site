@@ -1,0 +1,38 @@
+/* Masa Neu Design System — generated from tokens.json */
+:root, [data-theme="light"] {
+  --surface: #ece6dd; --surface-sunken: #e4ddd2; --shadow-dark: #c9bfb0; --shadow-light: #ffffff; --line: #d6cdbf;
+  --ink: #2a241e; --ink-muted: #5a5147; --ink-subtle: #6a6055; --ink-disabled: #857a6d;
+  --red: #b42a1a; --red-hover: #c2321f; --red-pressed: #962216; --on-red: #ffffff; --focus-ring: #2a241e;
+  --status-building: #3e6a35; --status-scoping: #2f5d86; --status-dead: #6b6259; --danger: #9a4a12;
+  --chart-line: var(--ink); --chart-point: var(--status-scoping);
+  --neu-raised-sm: 4px 4px 8px #c9bfb0, -4px -4px 8px #ffffff;
+  --neu-raised-md: 8px 8px 16px #c9bfb0, -8px -8px 16px #ffffff;
+  --neu-raised-lg: 14px 14px 28px #c9bfb0, -14px -14px 28px #ffffff;
+  --neu-inset-sm: inset 3px 3px 6px #c9bfb0, inset -3px -3px 6px #ffffff;
+  --neu-inset-md: inset 6px 6px 12px #c9bfb0, inset -6px -6px 12px #ffffff;
+  --neu-red-raised: 6px 6px 14px #c9bfb0, -6px -6px 14px #ffffff;
+  --neu-red-pressed: inset 3px 3px 7px #7a1a10, inset -3px -3px 7px #cf4430;
+  --neu-flat: none;
+}
+[data-theme="dark"] {
+  --surface: #2b2722; --surface-sunken: #24211d; --shadow-dark: #1a1714; --shadow-light: #3a352f; --line: #3d3832;
+  --ink: #f2ebe1; --ink-muted: #c4baad; --ink-subtle: #a99f92; --ink-disabled: #7d7468;
+  --red: #c8362a; --red-hover: #d1402f; --red-pressed: #a82b20; --on-red: #ffffff; --focus-ring: #f2ebe1;
+  --status-building: #93c285; --status-scoping: #7fb0dd; --status-dead: #a69c90; --danger: #e59a5c;
+  --chart-line: var(--ink); --chart-point: var(--status-scoping);
+  --neu-raised-sm: 4px 4px 8px #1a1714, -4px -4px 8px #3a352f;
+  --neu-raised-md: 8px 8px 16px #1a1714, -8px -8px 16px #3a352f;
+  --neu-raised-lg: 14px 14px 28px #1a1714, -14px -14px 28px #3a352f;
+  --neu-inset-sm: inset 3px 3px 6px #1a1714, inset -3px -3px 6px #3a352f;
+  --neu-inset-md: inset 6px 6px 12px #1a1714, inset -6px -6px 12px #3a352f;
+  --neu-red-raised: 6px 6px 14px #1a1714, -6px -6px 14px #3a352f;
+  --neu-red-pressed: inset 3px 3px 7px #7a1f17, inset -3px -3px 7px #de5545;
+  --neu-flat: none;
+}
+:root {
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px;
+  --radius-sm: 10px; --radius-md: 16px; --radius-lg: 24px; --radius-xl: 32px; --radius-pill: 999px;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}

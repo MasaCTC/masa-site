@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Projects</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/masa-neu/tokens.css">
+<link rel="stylesheet" href="ds/masa-neu/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Nunito:wght@400;600;700;800&amp;family=Instrument+Serif&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="mn-root" data-theme="{{theme}}" data-type="{{typeSet}}" style="min-height: 2300px;">
+<div class="mn-page">
+  <nav class="mn-nav mn-nav--dock" aria-label="Main">
+    <a class="mn-nav__brand" href="HomeA.dc.html" style="padding-right: 4px;" aria-label="Masa Chien, home"><span class="mn-nav__mark" aria-hidden="true">MC</span></a>
+    <div class="mn-nav__links"><a href="Stats.dc.html">Stats</a><a href="Projects.dc.html" aria-current="page">Projects</a><a href="Resume.dc.html">Resume</a></div>
+    <a class="mn-nav__stat" href="Stats.dc.html" aria-label="10,214 followers, live. Open stats">10.2K</a>
+  </nav>
+
+  <header class="mn-section__head">
+    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 680px;">
+      <span class="mn-label">1 building · 1 scoping · 1 dead</span>
+      <h1 class="mn-display-lg">Projects</h1>
+      <p class="mn-body-lg">What I'm building, where each one actually is, and one that didn't make it.</p>
+    </div>
+    <a class="mn-btn mn-btn--primary" href="https://instagram.com/masamcodes">Follow the build</a>
+  </header>
+
+  <article class="mn-card mn-card--lg" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr)); gap: 40px; align-items: start;">
+    <div style="display: flex; flex-direction: column; gap: 22px; min-width: 0;">
+      <div class="mn-card__row"><h2 class="mn-heading-md">One Basket</h2><span class="mn-pill mn-pill--building">Building</span></div>
+      <p class="mn-body-lg">Recipes in, buyable grocery quantities out.</p>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <span class="mn-label">Build map</span>
+        <ol class="mn-track mn-track--stack-sm" aria-label="Build map: phase 2 of 6, Vertical slice">
+          <li class="mn-track__fill" aria-hidden="true" style="width: calc(100% / 6);"></li>
+          <li class="mn-phase is-done"><span class="mn-phase__dot"></span><span class="mn-phase__name">Skeleton</span></li>
+          <li class="mn-phase is-current" aria-current="step"><span class="mn-phase__dot"></span><span class="mn-phase__name">Vertical slice</span></li>
+          <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Input paths</span></li>
+          <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Multiplayer</span></li>
+          <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Money</span></li>
+          <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Premium</span></li>
+        </ol>
+      </div>
+    </div>
+    <div class="mn-demo">
+      <sc-if value="{{demoLive}}" hint-placeholder-val="{{false}}">
+        <div class="mn-demo__media"><span class="mn-placeholder">[ONE BASKET SCREENSHOT]</span></div>
+        <div class="mn-demo__bar"><a class="mn-link" href="#">Try the live demo<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a><span class="mn-pill mn-pill--live">Live</span></div>
+      </sc-if>
+      <sc-if value="{{demoClip}}" hint-placeholder-val="{{true}}">
+        <div class="mn-demo__media"><span class="mn-placeholder" style="position: absolute; top: 10px; left: 10px;">[CLIP POSTER]</span><button class="mn-btn mn-btn--icon" style="width: 64px; min-height: 64px;" aria-label="Play 0:24 clip: a recipe becomes a basket"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button></div>
+        <div class="mn-demo__bar"><span class="mn-body-sm">Vertical slice: paste a recipe, get a basket</span><span class="mn-mono">0:24</span></div>
+      </sc-if>
+      <sc-if value="{{demoNone}}" hint-placeholder-val="{{false}}">
+        <div class="mn-demo__shots"><div class="mn-demo__shot">[SCREEN 1]</div><div class="mn-demo__shot">[SCREEN 2]</div><div class="mn-demo__shot">[SCREEN 3]</div></div>
+        <p class="mn-body-sm">No demo yet. Screenshots from the current build.</p>
+      </sc-if>
+    </div>
+  </article>
+
+  <article class="mn-card mn-card--lg" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr)); gap: 40px; align-items: start;">
+    <div style="display: flex; flex-direction: column; gap: 22px; min-width: 0;">
+      <div class="mn-card__row"><h2 class="mn-heading-md">Stock analysis tool</h2><span class="mn-pill mn-pill--scoping">Scoping</span></div>
+      <p class="mn-body-lg">A sector trend scanner using technical analysis.</p>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <span class="mn-label">Build map</span>
+        <ol class="mn-track is-empty" aria-label="Build map: scoping" style="grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: row;">
+          <li class="mn-phase is-current" aria-current="step"><span class="mn-phase__dot"></span><span class="mn-phase__name">Scoping</span></li>
+          <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">First build: sector scanner</span></li>
+        </ol>
+        <span class="mn-mono">phases get mapped once scoping is done</span>
+      </div>
+    </div>
+    <div class="mn-demo" style="min-height: 220px; justify-content: center;">
+      <div class="mn-msg" style="padding: 12px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12h6"/></svg>Nothing to show yet. Still deciding what the scanner measures. Screenshots land here once the first build runs.</div>
+    </div>
+  </article>
+
+  <article class="mn-card mn-card--lg mn-card--dead" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr)); gap: 40px; align-items: start;">
+    <div style="display: flex; flex-direction: column; gap: 22px; min-width: 0;">
+      <div class="mn-card__row"><h2 class="mn-heading-sm" style="font-size: 28px; line-height: 34px;">PullPilot</h2><span class="mn-pill mn-pill--dead">Dead</span></div>
+      <p class="mn-body-lg">A crowdsourced auto-parts platform. My earlier app.</p>
+      <ol class="mn-track" aria-label="Build map: stopped after features">
+        <li class="mn-track__fill" aria-hidden="true" style="width: calc(100% / 3 * 2);"></li>
+        <li class="mn-phase is-done"><span class="mn-phase__dot"></span><span class="mn-phase__name">Idea</span></li>
+        <li class="mn-phase is-done"><span class="mn-phase__dot"></span><span class="mn-phase__name">Features</span></li>
+        <li class="mn-phase is-done"><span class="mn-phase__dot"></span><span class="mn-phase__name">Stopped: needed a rewrite</span></li>
+      </ol>
+      <div class="mn-epitaph">
+        <span class="mn-label">Why it died</span>
+        <p>I built features with no design planned, so every screen looked different, and fixing it meant a rewrite.</p>
+        <p class="mn-body-sm">That's why this site started with a design system.</p>
+      </div>
+    </div>
+    <div class="mn-demo">
+      <div class="mn-demo__shots"><div class="mn-demo__shot">[OLD SCREEN 1]</div><div class="mn-demo__shot">[OLD SCREEN 2]</div><div class="mn-demo__shot">[OLD SCREEN 3]</div></div>
+      <p class="mn-body-sm">Never shipped a demo. Three screens from the last build, side by side: you can see the problem.</p>
+    </div>
+  </article>
+
+  <footer class="mn-row" style="justify-content: space-between; border-top: 1px solid var(--line); padding-top: 24px;">
+    <span class="mn-mono">© 2026 Masa Chien · Next.js on Vercel</span>
+    <div class="mn-row" style="gap: 20px;"><a class="mn-link" href="https://instagram.com/masamcodes">Instagram</a><a class="mn-link" href="https://github.com/MasaCTC">GitHub</a><a class="mn-link" href="mailto:masakic@uci.edu">Email</a></div>
+  </footer>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"typeSet":{"editor":"enum","options":["a","b","c"],"default":"a"},"oneBasketDemo":{"editor":"enum","options":["clip","live","none"],"default":"clip"},"$preview":{"width":1440,"height":2300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const d = this.props.oneBasketDemo ?? 'clip';
+    return { theme: this.props.theme ?? 'light', typeSet: this.props.typeSet ?? 'a', demoLive: d === 'live', demoClip: d === 'clip', demoNone: d === 'none' };
+  }
+}
+</script>
+</body>
+</html>

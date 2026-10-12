@@ -6,7 +6,7 @@ import { createContext, useContext, type CSSProperties } from "react";
 import type { Class, Task } from "@/db/schema";
 import type { Result } from "@/lib/planner/types";
 import type { StatusView } from "@/lib/planner/queries";
-import type { ActionFail } from "../_lib/errors";
+import type { ActionFail, ErrorCopy } from "../_lib/errors";
 import type { ClassAction, TaskAction } from "../_lib/tasks";
 
 export type RunOptions<T extends object> = {
@@ -31,6 +31,8 @@ export type PlannerCtx = {
   run: <T extends object>(opts: RunOptions<T>) => void;
   announce: (message: string) => void;
   openTask: (id: string) => void;
+  /** The current action error (also shown inside the task modal). */
+  error: ErrorCopy | null;
 };
 
 export const PlannerContext = createContext<PlannerCtx | null>(null);

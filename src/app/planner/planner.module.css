@@ -303,3 +303,8 @@
   flex-direction: column;
   gap: 12px;
 }
+
+/* Wrapper that only exists to find a <Button> for focus return. */
+.contents {
+  display: contents;
+}

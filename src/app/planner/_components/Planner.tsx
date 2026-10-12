@@ -102,6 +102,7 @@ export function Planner(props: PlannerProps) {
     run,
     announce,
     openTask: setOpenTaskId,
+    error,
   };
 
   const openTask = openTaskId ? tasks.find((t) => t.id === openTaskId) : undefined;

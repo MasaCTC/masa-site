@@ -308,3 +308,12 @@
 .contents {
   display: contents;
 }
+
+/* Headings that receive focus programmatically (after leaving a sub-view). */
+.headFocus:focus {
+  outline: none;
+}
+
+:global(.mn-body-sm).muted {
+  color: var(--ink-muted);
+}

@@ -64,6 +64,26 @@ export function chunk<T>(xs: readonly T[], size: number): T[][] {
   return out;
 }
 
+/**
+ * Pairs each assignment (in import order) with a rank. Only uids not already
+ * in the database consume a fresh bottom rank, so syncing a long feed does
+ * not push the bottom rank further each time. Rows that already exist carry
+ * the spare last rank as a placeholder: ON CONFLICT never writes it (and if
+ * the row vanished meanwhile, it is inserted at the bottom).
+ * `ranks` = bottomRanks(newCount + 1).
+ */
+export function importRows(
+  ordered: readonly CanvasAssignment[],
+  existingUids: ReadonlySet<string>,
+  ranks: readonly string[],
+): { a: CanvasAssignment; rank: string }[] {
+  const fresh = ordered.filter((x) => !existingUids.has(x.uid)).length;
+  if (ranks.length !== fresh + 1) throw new Error("need one rank per new row plus a spare");
+  const spare = ranks[fresh];
+  let i = 0;
+  return ordered.map((a) => ({ a, rank: existingUids.has(a.uid) ? spare : ranks[i++] }));
+}
+
 export function insertClassesSql(rows: readonly NewCanvasClass[]): SQL {
   const values = sql.join(
     rows.map((c) => sql`(${c.name}, 'class', ${c.color}::class_color, ${c.code})`),

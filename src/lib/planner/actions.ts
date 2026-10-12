@@ -333,10 +333,12 @@ export async function saveCanvasFeed(input: CanvasFeedInput): Promise<FeedResult
       return { ok: false, error: "unavailable" };
     }
   }
+  // A new (or no) link has never been synced: clearing last_synced_at also
+  // lets the sync that follows a save through the claim right away.
   await getDb()
     .insert(settings)
-    .values({ id: 1, canvasFeedEnc: enc })
-    .onConflictDoUpdate({ target: settings.id, set: { canvasFeedEnc: enc } });
+    .values({ id: 1, canvasFeedEnc: enc, lastSyncedAt: null })
+    .onConflictDoUpdate({ target: settings.id, set: { canvasFeedEnc: enc, lastSyncedAt: null } });
   invalidateFromAction({ now: false });
   return { ok: true, masked: url ? maskFeedUrl(url) : null };
 }

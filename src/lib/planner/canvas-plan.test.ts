@@ -4,6 +4,7 @@ import { PgDialect } from "drizzle-orm/pg-core";
 import type { SQL } from "drizzle-orm";
 import {
   chunk,
+  importRows,
   claimSql,
   insertClassesSql,
   orderForImport,
@@ -128,4 +129,13 @@ test("release: restores the previous value only if nobody re-claimed since (text
     "UPDATE settings SET last_synced_at = $1::timestamptz WHERE id = 1 AND last_synced_at = $2::timestamptz",
   );
   assert.deepEqual(params, [null, "2026-10-12 17:00:00.123456+00"]);
+});
+
+test("importRows: fresh bottom ranks only for new uids, in order; existing rows carry the spare rank", () => {
+  const rows = importRows([a("n1"), a("old"), a("n2")], new Set(["old"]), ["V", "W", "X"]);
+  assert.deepEqual(
+    rows.map((r) => [r.a.uid, r.rank]),
+    [["n1", "V"], ["old", "X"], ["n2", "W"]],
+  );
+  assert.throws(() => importRows([a("n1")], new Set(), ["V"]), /one rank per new row/);
 });

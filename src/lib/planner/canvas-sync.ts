@@ -1,11 +1,12 @@
 import "server-only";
-import { eq, sql } from "drizzle-orm";
-import { classes, getDb, settings } from "@/db";
+import { eq, inArray, sql } from "drizzle-orm";
+import { classes, getDb, settings, tasks } from "@/db";
 import { CanvasFeedError, parseCanvasFeed } from "./canvas-parse";
 import { FeedFetchError, fetchFeedText } from "./canvas-fetch";
 import {
   chunk,
   claimSql,
+  importRows,
   insertClassesSql,
   orderForImport,
   planNewClasses,
@@ -78,10 +79,15 @@ export async function runCanvasSync({ manual }: { manual: boolean }): Promise<Sy
   try {
     const existing = await db.select({ canvasCode: classes.canvasCode, color: classes.color }).from(classes);
     const newClasses = planNewClasses(assignments, existing);
-    // Every row gets a bottom rank in import order; only rows that are
-    // actually inserted keep theirs (ON CONFLICT never sets rank).
-    const ranks = await bottomRanks(assignments.length, db);
-    const rows = assignments.map((a, i) => ({ a, rank: ranks[i] }));
+    // New rows get fresh bottom ranks in import order (ON CONFLICT never
+    // sets rank, so existing rows keep theirs).
+    const uids = assignments.map((a) => a.uid);
+    const known = uids.length
+      ? await db.select({ uid: tasks.canvasUid }).from(tasks).where(inArray(tasks.canvasUid, uids))
+      : [];
+    const existingUids = new Set(known.map((r) => r.uid).filter((u): u is string => u !== null));
+    const newCount = uids.filter((u) => !existingUids.has(u)).length;
+    const rows = importRows(assignments, existingUids, await bottomRanks(newCount + 1, db));
     const stamp = db.execute(sql`UPDATE settings SET last_synced_at = now() WHERE id = 1`);
     const writes = [
       ...(newClasses.length ? [db.execute(insertClassesSql(newClasses))] : []),

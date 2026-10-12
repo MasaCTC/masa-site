@@ -128,9 +128,16 @@ export async function editTask(input: EditTaskInput): Promise<TaskResult> {
     return invalid("That class no longer exists", "classId");
   }
 
+  // Hand-edited means title/rank/done changed: only a title that differs from
+  // the stored one counts. Class/due/estimate edits leave the flag alone.
+  const handEdited =
+    fields.title !== undefined
+      ? sql<boolean>`${tasks.handEdited} OR (${tasks.source} = 'canvas' AND ${tasks.title} IS DISTINCT FROM ${fields.title})`
+      : undefined;
+
   const [task] = await getDb()
     .update(tasks)
-    .set({ ...fields, handEdited: markHandEdited })
+    .set({ ...fields, ...(handEdited ? { handEdited } : {}) })
     .where(eq(tasks.id, id))
     .returning();
   if (!task) return { ok: false, error: "not_found" };

@@ -9,9 +9,12 @@ import { Planner } from "./_components/Planner";
 import { parseView } from "./_lib/views";
 import styles from "./planner.module.css";
 
-// The session is read at request time; no Suspense so notFound() happens
-// before any bytes stream and the response is a real 404. The planner data
-// is owner-only and uncached, so it is read here too, after the gate.
+// The real 404 for signed-out visitors comes from src/proxy.ts, which runs
+// before this page renders; do not remove it. requireOwner() below is only
+// defence in depth (it calls notFound() if the proxy were ever bypassed). The
+// session is read at request time and the planner data is owner-only and
+// uncached, so it is read here too, after the gate. `instant = false` is not
+// what produces the 404.
 export const instant = false;
 
 async function signOutAction() {

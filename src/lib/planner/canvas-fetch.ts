@@ -61,11 +61,13 @@ function getOnce(url: URL, signal: AbortSignal): Promise<Hop> {
       (res) => {
         const status = res.statusCode ?? 0;
         if (status >= 300 && status < 400) {
-          res.resume();
+          // destroy, not resume: nothing is read past the headers, so a hostile
+          // server cannot keep streaming a body after the deadline timer is cleared.
+          res.destroy();
           return resolve({ status, location: res.headers.location });
         }
         if (status < 200 || status >= 300) {
-          res.resume();
+          res.destroy();
           return resolve({ status });
         }
         const declared = Number(res.headers["content-length"]);

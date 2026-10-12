@@ -91,15 +91,15 @@ export const canvasFeedSchema = z.object({
   ),
 });
 
-/** Scheme + host and the last 4 characters only, e.g. https://canvas.x.edu/••••••••.ics */
+/** Scheme + host and a fixed mask only, e.g. https://canvas.x.edu/•••• (never any of the path/token). */
 export function maskFeedUrl(url: string): string {
   let origin = "";
   try {
     origin = new URL(url).origin;
   } catch {
-    // Not a URL: show only the tail.
+    // Not a URL: show the mask alone.
   }
-  return `${origin}/••••••••${url.slice(-4)}`;
+  return `${origin}/••••`;
 }
 
 // Inputs accept form-ish values: "" means null, estMinutes may be a string.

@@ -78,9 +78,11 @@ test("canvas feed: https only, empty clears", () => {
   assert.equal(canvasFeedSchema.safeParse({ url: "https://a.b/" + "x".repeat(2100) }).success, false);
 });
 
-test("maskFeedUrl shows scheme+host and last 4 chars only", () => {
+test("maskFeedUrl shows scheme+host and a fixed mask only", () => {
   const m = maskFeedUrl("https://canvas.eee.uci.edu/feeds/calendars/user_SECRETTOKEN123.ics");
-  assert.equal(m, "https://canvas.eee.uci.edu/••••••••.ics");
+  assert.equal(m, "https://canvas.eee.uci.edu/••••");
+  assert.equal(maskFeedUrl("https://canvas.x/feeds/abc?token=SECRET9876"), "https://canvas.x/••••");
+  assert.equal(maskFeedUrl("not a url SECRET"), "/••••");
   assert.ok(!m.includes("SECRET"));
   assert.ok(!maskFeedUrl("https://canvas.x/feeds/abcdefgh?token=SECRET9876").includes("SECRET"));
 });

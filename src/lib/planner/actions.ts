@@ -186,6 +186,7 @@ export async function reorderTask(input: ReorderTaskInput): Promise<ReorderResul
     await db.update(tasks).set({ rank, handEdited: markHandEdited }).where(eq(tasks.id, id));
   } else {
     const ranks = await rebalance(db, { id, beforeId, afterId });
+    if (!ranks) return { ok: false, error: "stale" };
     const [row] = await db.select({ rank: tasks.rank }).from(tasks).where(eq(tasks.id, id));
     rank = row?.rank ?? ranks[0];
     rebalanced = true;

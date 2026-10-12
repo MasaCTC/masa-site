@@ -1,8 +1,8 @@
 "use client";
 // Settings (prototype "settings" panel): the Canvas calendar feed. The saved
 // link is only ever shown masked (getSettingsMasked / saveCanvasFeed return
-// scheme + host + ••••). Save replaces it, Remove clears it. Syncing itself
-// is Task 5.
+// scheme + host + ••••). Save replaces it (and syncs it right away), Remove
+// clears it. "Sync now" runs a manual Canvas sync (CanvasSyncLine).
 import { useId, useRef, useState } from "react";
 import { Button } from "@/components/Button";
 import { Message } from "@/components/Feedback";
@@ -12,6 +12,7 @@ import type { SettingsView as Settings } from "@/lib/planner/queries";
 import { PLANNER_TZ } from "@/lib/planner/time";
 import { fieldError } from "../_lib/errors";
 import styles from "../planner.module.css";
+import { useCanvasSync } from "./CanvasSyncLine";
 import { usePlanner } from "./context";
 
 type Props = { panelId: string; tabId: string; settings: Settings };
@@ -25,6 +26,7 @@ function syncedText(at: Date | null): string {
 
 export function SettingsView({ panelId, tabId, settings }: Props) {
   const { run } = usePlanner();
+  const sync = useCanvasSync();
   const uid = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   // What is saved, as far as this page knows (updated from saveCanvasFeed).
@@ -50,6 +52,7 @@ export function SettingsView({ panelId, tabId, settings }: Props) {
         setSaved({ has: r.masked !== null, masked: r.masked, readable: true });
         setUrl("");
         setEditing(r.masked === null);
+        if (r.masked !== null) sync.syncNow();
       },
       onFail: (r) => {
         setBusy(null);
@@ -168,7 +171,21 @@ export function SettingsView({ panelId, tabId, settings }: Props) {
           </>
         )}
 
-        <span className="mn-mono">{saved.has ? `synced on open · ${syncedText(settings.lastSyncedAt)}` : "No feed connected."}</span>
+        {saved.has ? (
+          <div className="mn-row">
+            <Button onClick={sync.syncNow} loading={sync.pending} disabled={sync.pending || busy !== null}>
+              {sync.pending ? "Syncing…" : "Sync now"}
+            </Button>
+            <span className="mn-mono">
+              synced on open ·{" "}
+              {sync.phase === "synced"
+                ? `${sync.count} ${sync.count === 1 ? "assignment" : "assignments"}`
+                : syncedText(settings.lastSyncedAt)}
+            </span>
+          </div>
+        ) : (
+          <span className="mn-mono">No feed connected.</span>
+        )}
         <Message>Imported items land at the bottom of the checklist. Drag them up when they matter.</Message>
       </div>
     </section>

@@ -7,6 +7,8 @@ import { eq, inArray, sql } from "drizzle-orm";
 import type { z } from "zod";
 import { classes, getDb, settings, status, tasks } from "@/db";
 import { assertOwner } from "@/lib/owner";
+import { runCanvasSync } from "./canvas-sync";
+import type { SyncResult } from "./canvas-sync-types";
 import { leastUsedColor } from "./colors";
 import { encryptFeed } from "./crypto";
 import { invalidateFromAction } from "./invalidate";
@@ -337,4 +339,29 @@ export async function saveCanvasFeed(input: CanvasFeedInput): Promise<FeedResult
     .onConflictDoUpdate({ target: settings.id, set: { canvasFeedEnc: enc } });
   invalidateFromAction({ now: false });
   return { ok: true, masked: url ? maskFeedUrl(url) : null };
+}
+
+// ---------- Canvas sync
+
+/**
+ * Syncs the saved Canvas feed. Called by the planner on open (`manual`
+ * false: skipped if a sync succeeded or started < 2 min ago) and by
+ * "Try again" / "Sync now" (`manual` true: 15 s guard). See canvas-sync.ts.
+ */
+export async function syncCanvas(input?: { manual?: boolean }): Promise<SyncResult> {
+  const owner = await assertOwner();
+  if (!owner.ok) return owner;
+  // Public POST endpoint: accept only a literal true.
+  const manual = input?.manual === true;
+
+  let result: SyncResult;
+  try {
+    result = await runCanvasSync({ manual });
+  } catch {
+    // The claim/lookup itself failed (database unreachable).
+    return { ok: false, error: "sync", reason: "save_failed" };
+  }
+  // Imports change the checklist, the calendar, classes and /now's counts.
+  if (result.ok && result.state === "synced") invalidateFromAction({ now: true });
+  return result;
 }

@@ -35,6 +35,13 @@
   gap: 8px;
 }
 
+/* Canvas sync error: the message, then its Try again / Open Settings row. */
+.syncError {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* ---------- today ---------- */
 .todayGrid {
   display: grid;

@@ -13,6 +13,7 @@ import { applyClassAction, applyTaskAction } from "../_lib/tasks";
 import { PLANNER_VIEWS, type PlannerView } from "../_lib/views";
 import styles from "../planner.module.css";
 import { CalendarView } from "./CalendarView";
+import { CanvasSyncError } from "./CanvasSyncLine";
 import { ClassesView } from "./ClassesView";
 import { PlannerContext, type PlannerCtx, type RunOptions } from "./context";
 import { SettingsView } from "./SettingsView";
@@ -132,6 +133,7 @@ export function Planner(props: PlannerProps) {
           {error.lead}
         </Message>
       ) : null}
+      <CanvasSyncError inSettings={view === "settings"} onOpenSettings={() => selectView("settings")} />
 
       {view === "today" ? (
         <TodayView panelId="planner-panel-today" tabId="planner-tab-today" dueSoon={props.dueSoon} />

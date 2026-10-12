@@ -4,7 +4,7 @@ import { cx } from "@/components/types";
 import { requireOwner } from "@/lib/owner";
 import { getDueSoon, getSettingsMasked, getStatus, listClasses, listTasks } from "@/lib/planner/queries";
 import { plannerToday } from "@/lib/planner/time";
-import { CanvasSyncLine } from "./_components/CanvasSyncLine";
+import { CanvasSyncLine, CanvasSyncProvider } from "./_components/CanvasSyncLine";
 import { Planner } from "./_components/Planner";
 import { parseView } from "./_lib/views";
 import styles from "./planner.module.css";
@@ -32,30 +32,33 @@ export default async function PlannerPage({ searchParams }: PageProps<"/planner"
 
   return (
     <main className={cx("mn-section", styles.me)}>
-      <header className="mn-section__head">
-        <div className={styles.headCol}>
-          {/* Only the owner (GitHub MasaCTC, checked by id) gets past requireOwner. */}
-          <span className="mn-label">Private · only you · signed in as MasaCTC</span>
-          <h1 className="mn-display-lg">Planner</h1>
-        </div>
-        <div className="mn-row">
-          <CanvasSyncLine />
-          <form action={signOutAction} className={styles.signOut}>
-            <button type="submit" className={cx("mn-link", linkStyles.asButton)}>
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
-      <Planner
-        today={plannerToday()}
-        tasks={tasks}
-        classes={classes}
-        status={status}
-        dueSoon={dueSoon}
-        settings={settings}
-        initialView={parseView(params.view)}
-      />
+      {/* Canvas sync runs after the page is shown (see CanvasSyncLine). */}
+      <CanvasSyncProvider hasFeed={settings.hasFeed}>
+        <header className="mn-section__head">
+          <div className={styles.headCol}>
+            {/* Only the owner (GitHub MasaCTC, checked by id) gets past requireOwner. */}
+            <span className="mn-label">Private · only you · signed in as MasaCTC</span>
+            <h1 className="mn-display-lg">Planner</h1>
+          </div>
+          <div className="mn-row">
+            <CanvasSyncLine />
+            <form action={signOutAction} className={styles.signOut}>
+              <button type="submit" className={cx("mn-link", linkStyles.asButton)}>
+                Sign out
+              </button>
+            </form>
+          </div>
+        </header>
+        <Planner
+          today={plannerToday()}
+          tasks={tasks}
+          classes={classes}
+          status={status}
+          dueSoon={dueSoon}
+          settings={settings}
+          initialView={parseView(params.view)}
+        />
+      </CanvasSyncProvider>
     </main>
   );
 }

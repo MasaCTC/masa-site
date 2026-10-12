@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { DemoArea } from "@/components/DemoArea";
-import { Pill } from "@/components/Pill";
+import { StatusLabel } from "@/components/StatusLabel";
 import { ProgressTrack } from "@/components/ProgressTrack";
 import {
   COFURA,
@@ -58,7 +58,7 @@ export default function ProjectsPage() {
         <div className={styles.col}>
           <div className="mn-card__row">
             <h2 className="mn-heading-md">{ONE_BASKET.name}</h2>
-            <Pill variant={ONE_BASKET.status}>{ONE_BASKET.statusLabel}</Pill>
+            <StatusLabel variant={ONE_BASKET.status}>{ONE_BASKET.statusLabel}</StatusLabel>
           </div>
           <p className="mn-body-lg">{ONE_BASKET.summary}</p>
           <div className={styles.map}>
@@ -73,7 +73,7 @@ export default function ProjectsPage() {
         <div className={styles.col}>
           <div className="mn-card__row">
             <h2 className="mn-heading-md">{COFURA.name}</h2>
-            <Pill variant={COFURA.status}>{COFURA.statusLabel}</Pill>
+            <StatusLabel variant={COFURA.status}>{COFURA.statusLabel}</StatusLabel>
           </div>
           <p className="mn-body-lg">{COFURA.summary}</p>
           <div className={`mn-meter ${styles.myPart}`}>
@@ -100,7 +100,7 @@ export default function ProjectsPage() {
         <div className={styles.col}>
           <div className="mn-card__row">
             <h2 className={`mn-heading-sm ${styles.deadTitle}`}>{PULLPILOT.name}</h2>
-            <Pill variant={PULLPILOT.status}>{PULLPILOT.statusLabel}</Pill>
+            <StatusLabel variant={PULLPILOT.status}>{PULLPILOT.statusLabel}</StatusLabel>
           </div>
           <p className="mn-body-lg">{PULLPILOT.summary}</p>
           <ProgressTrack phases={PULLPILOT.phases} ariaLabel={PULLPILOT.mapAriaLabel} />

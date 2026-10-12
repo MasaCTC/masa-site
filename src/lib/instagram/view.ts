@@ -37,10 +37,18 @@ export function followerHistoryOf(stats: InstagramStats): FollowerSeries[] | nul
 }
 
 // ---------------------------------------------------------------------------------------
-// Status row (Stats hero): pill + mono date line.
+// Status row (Stats hero): .mn-state label, with the detail inline (<small>) or as a mono line.
 // ---------------------------------------------------------------------------------------
 
-export type StatusView = { pillLabel: string; pillVariant: "neutral" | "live"; mono: string };
+export type StatusView = {
+  label: string;
+  variant: "neutral" | "live";
+  /** Date/detail text. `inline` = rendered in <small> after the label, else a separate mono span. */
+  detail: string;
+  inline: boolean;
+  /** Just the date line ("updated Oct 11, 2026"), for Home's compact header. */
+  dateLine: string;
+};
 
 /** The date shown for the current status: last good pull on error, else the pull date. */
 export function statusDate(stats: InstagramStats): string {
@@ -50,13 +58,23 @@ export function statusDate(stats: InstagramStats): string {
 export function statusView(stats: InstagramStats): StatusView {
   const copy = INSTAGRAM_COPY[stats.source];
   const date = statusDate(stats);
-  if (stats.status === "error") {
-    return { pillLabel: STATS_COPY.staleLabel, pillVariant: "neutral", mono: `${STATS_COPY.staleMeta} · ${date}` };
+  if (stats.status === "error" || stats.status === "empty") {
+    const [label, meta] =
+      stats.status === "error"
+        ? [STATS_COPY.staleLabel, STATS_COPY.staleMeta]
+        : [STATS_COPY.newLabel, STATS_COPY.newMeta];
+    const line = `${meta} · ${date}`;
+    return { label, variant: "neutral", detail: line, inline: false, dateLine: line };
   }
-  if (stats.status === "empty") {
-    return { pillLabel: STATS_COPY.newLabel, pillVariant: "neutral", mono: `${STATS_COPY.newMeta} · ${date}` };
-  }
-  return { pillLabel: copy.pillLabel, pillVariant: copy.pillVariant, mono: `${copy.updatedPrefix} ${date}` };
+  const updated = `${copy.updatedPrefix} ${date}`;
+  const inline = copy.statusDetail !== "";
+  return {
+    label: copy.statusLabel,
+    variant: copy.statusVariant,
+    detail: inline ? `${copy.statusDetail} · ${updated}` : updated,
+    inline,
+    dateLine: updated,
+  };
 }
 
 // ---------------------------------------------------------------------------------------

@@ -41,13 +41,16 @@ export const TAGLINE = "CS at UC Irvine. I build apps in public and post the rea
 export const PDF_URL: string | null = null;
 export const ONE_BASKET_DEMO_URL: string | null = null;
 
+/** Dock follower chip: "14.2K followers". */
+export const NAV_FOLLOWERS_LABEL = "followers";
+
 export const HOME = {
   eyebrow: "@masamcodes · UC Irvine CS",
   rightNow: {
     label: "Right now",
     rows: [
-      { text: "Building One Basket", pill: "building", pillLabel: "Building" },
-      { text: "Building Cofura on a team of three", pill: "building", pillLabel: "Building" },
+      { text: "Building One Basket", status: "building", statusLabel: "Building" },
+      { text: "Building Cofura on a team of three", status: "building", statusLabel: "Building" },
       { text: "CS at UCI, graduating early", mono: "Mar 2028" },
     ],
   },
@@ -77,9 +80,11 @@ export const NAV_LOADING_ARIA = "Followers loading. Open stats";
 export type InstagramCopy = {
   /** Stats hero line under the h1. */
   heroLine: string;
-  /** Status pill label and variant ('neutral' = plain mn-pill, 'live' = green). */
-  pillLabel: string;
-  pillVariant: "neutral" | "live";
+  /** Status label and variant ('neutral' = muted .mn-state, 'live' = green). */
+  statusLabel: string;
+  statusVariant: "neutral" | "live";
+  /** Detail set in <small> right after the label ("Manual · entered by hand · updated …"); empty = the date stays a separate mono line. */
+  statusDetail: string;
   /** Prefix before the pull date: `${updatedPrefix} ${formatPulledDate(pulledAt)}`. */
   updatedPrefix: string;
   /** Footer source note on /stats. */
@@ -93,8 +98,9 @@ export const INSTAGRAM_COPY: Record<SourceKind, InstagramCopy> = {
     // NEW copy (not from the design): honest manual wording per decision 5.
     heroLine:
       "These numbers are entered by hand from Instagram until the API is connected. Not rounded up, not cherry-picked.",
-    pillLabel: "Manual",
-    pillVariant: "neutral",
+    statusLabel: "Manual",
+    statusVariant: "neutral",
+    statusDetail: "entered by hand",
     updatedPrefix: "updated",
     sourceNote:
       "Source: entered by hand from Instagram (creator account). Views = reel plays. The Graph API and daily follower snapshots are coming.",
@@ -103,8 +109,9 @@ export const INSTAGRAM_COPY: Record<SourceKind, InstagramCopy> = {
   "instagram-api": {
     // Design's original strings (Stats.dc.html / Home / NavBar), restored for the live source.
     heroLine: "Pulled straight from the Instagram API. Not rounded up, not cherry-picked.",
-    pillLabel: "Live",
-    pillVariant: "live",
+    statusLabel: "Live",
+    statusVariant: "live",
+    statusDetail: "",
     updatedPrefix: "updated",
     sourceNote:
       "Source: Instagram Graph API (creator account). Views = reel plays. Followers are snapshotted daily for the growth chart.",

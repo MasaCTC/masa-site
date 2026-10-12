@@ -1,11 +1,11 @@
 "use client";
 // NavBar (NavBar.md): the site header, dock variant only (decided Oct 11, 2026).
 // MC badge (home), the three links (aria-current="page" from the pathname), and the
-// follower stat chip. The chip shows "—" until a number is passed (loading).
+// follower stat chip. The chip ("14.2K followers", no dot, no well) shows "—" until a number is passed (loading).
 import NextLink from "next/link";
 import type { MouseEvent } from "react";
 import { usePathname } from "next/navigation";
-import { NAV_LINKS } from "@/content/site";
+import { NAV_FOLLOWERS_LABEL, NAV_LINKS } from "@/content/site";
 import styles from "./NavBar.module.css";
 import { cx } from "./types";
 import { useSlidingThumb } from "./useSlidingThumb";
@@ -73,7 +73,7 @@ export function NavBar({ followersText, ariaLabel }: NavBarProps) {
         href="/stats"
         aria-label={ariaLabel}
       >
-        {hasValue ? followersText : "—"}
+        {hasValue ? followersText : "—"} <span>{NAV_FOLLOWERS_LABEL}</span>
       </NextLink>
     </nav>
   );

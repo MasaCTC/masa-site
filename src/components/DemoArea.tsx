@@ -1,5 +1,5 @@
 // DemoArea (DemoArea.md, Projects.dc.html): the inset well on a project card.
-// Modes: live (preview frame + "Try the live demo" link + optional Live pill),
+// Modes: live (preview frame + "Try the live demo" link + optional Live label),
 // clip (poster frame + raised play button + clip length), none (three phone screenshot
 // slots + honest caption), message (the "nothing to show yet" well).
 // States: loading (frame as a 16:10 skeleton), error (danger message in the frame, then the
@@ -8,7 +8,7 @@
 import type { ReactNode } from "react";
 import { Message, Skeleton } from "./Feedback";
 import { Link } from "./Link";
-import { Pill } from "./Pill";
+import { StatusLabel } from "./StatusLabel";
 import { PlayIcon } from "./icons";
 import styles from "./DemoArea.module.css";
 import { cx, type DataState } from "./types";
@@ -21,7 +21,7 @@ export type DemoAreaProps =
       /** Demo URL. Omitted = link renders disabled (decision 4). */
       href?: string;
       linkText?: string;
-      /** Show the Live pill (deployed). */
+      /** Show the Live status label (deployed). */
       deployed?: boolean;
     })
   | (DemoBase & {
@@ -112,7 +112,7 @@ export function DemoArea(props: DemoAreaProps) {
             <Link href={props.href} arrow="external" disabled={!props.href}>
               {props.linkText ?? "Try the live demo"}
             </Link>
-            {props.deployed ? <Pill variant="live">Live</Pill> : null}
+            {props.deployed ? <StatusLabel variant="live">Live</StatusLabel> : null}
           </div>
         </div>
       );

@@ -8,7 +8,7 @@ import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { Message } from "@/components/Feedback";
 import { Meter } from "@/components/Meter";
-import { Pill } from "@/components/Pill";
+import { StatusLabel } from "@/components/StatusLabel";
 import { ReelCard } from "@/components/ReelCard";
 import { StatTile } from "@/components/StatTile";
 import { CONTACT, INSTAGRAM_COPY, STATS_COPY } from "@/content/site";
@@ -75,8 +75,16 @@ function StatsBody({ stats }: { stats: InstagramStats | null }) {
           <div className="mn-row">
             {status ? (
               <>
-                <Pill variant={status.pillVariant}>{status.pillLabel}</Pill>
-                <span className="mn-mono">{status.mono}</span>
+                {status.inline ? (
+                  <StatusLabel variant={status.variant} detail={`· ${status.detail}`}>
+                    {status.label}
+                  </StatusLabel>
+                ) : (
+                  <>
+                    <StatusLabel variant={status.variant}>{status.label}</StatusLabel>
+                    <span className="mn-mono">{status.detail}</span>
+                  </>
+                )}
               </>
             ) : (
               <Message tone="loading" as="span">

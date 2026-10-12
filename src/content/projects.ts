@@ -1,5 +1,5 @@
 // Projects content, copied from design/screens/Projects.dc.html and the Home
-// "What I'm building" cards. Types map onto src/components props (ProgressTrack, DemoArea, Pill).
+// "What I'm building" cards. Types map onto src/components props (ProgressTrack, DemoArea, StatusLabel).
 import type { Phase } from "@/components/ProgressTrack";
 import { ONE_BASKET_DEMO_URL } from "./site";
 

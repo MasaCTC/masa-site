@@ -11,7 +11,7 @@ import { Message } from "@/components/Feedback";
 import { ArrowUpRightIcon, DownloadIcon } from "@/components/icons";
 import { Link } from "@/components/Link";
 import { Meter } from "@/components/Meter";
-import { Pill } from "@/components/Pill";
+import { StatusLabel } from "@/components/StatusLabel";
 import { ProgressTrack } from "@/components/ProgressTrack";
 import { StatTile } from "@/components/StatTile";
 import { HOME_PROJECT_CARDS, COFURA, ONE_BASKET, PULLPILOT } from "@/content/projects";
@@ -80,7 +80,7 @@ async function HomeStats() {
   const bars = viewsBars(stats);
   return (
     <HomeStatsFrame
-      status={<span className="mn-mono">{status.mono}</span>}
+      status={<span className="mn-mono">{status.dateLine}</span>}
       tiles={tiles.map((t) => <Tile key={t.label} t={t} />)}
       chart={
         <Chart
@@ -175,8 +175,8 @@ export default function Home() {
             {HOME.rightNow.rows.map((row) => (
               <div key={row.text} className="mn-card__row">
                 <span>{row.text}</span>
-                {"pill" in row ? (
-                  <Pill variant={row.pill}>{row.pillLabel}</Pill>
+                {"status" in row ? (
+                  <StatusLabel variant={row.status}>{row.statusLabel}</StatusLabel>
                 ) : (
                   <span className="mn-mono">{row.mono}</span>
                 )}
@@ -201,7 +201,7 @@ export default function Home() {
           <Card href="/projects">
             <div className="mn-card__row">
               <h3 className="mn-heading-sm">{oneBasket.name}</h3>
-              <Pill variant={oneBasket.status}>{oneBasket.statusLabel}</Pill>
+              <StatusLabel variant={oneBasket.status}>{oneBasket.statusLabel}</StatusLabel>
             </div>
             <p className="mn-body-sm">{oneBasket.summary}</p>
             <ProgressTrack phases={dots(ONE_BASKET.phases)} ariaLabel={ONE_BASKET.homeMapAriaLabel} note={ONE_BASKET.homeCaption} />
@@ -209,7 +209,7 @@ export default function Home() {
           <Card href="/projects">
             <div className="mn-card__row">
               <h3 className="mn-heading-sm">{cofura.name}</h3>
-              <Pill variant={cofura.status}>{cofura.statusLabel}</Pill>
+              <StatusLabel variant={cofura.status}>{cofura.statusLabel}</StatusLabel>
             </div>
             <p className="mn-body-sm">{cofura.homeSummary}</p>
             <ProgressTrack phases={dots(COFURA.phases)} ariaLabel={COFURA.homeMapAriaLabel} note={COFURA.homeCaption} />
@@ -217,7 +217,7 @@ export default function Home() {
           <Card variant="dead">
             <div className="mn-card__row">
               <h3 className="mn-heading-sm">{pullpilot.name}</h3>
-              <Pill variant={pullpilot.status}>{pullpilot.statusLabel}</Pill>
+              <StatusLabel variant={pullpilot.status}>{pullpilot.statusLabel}</StatusLabel>
             </div>
             <p className="mn-body-sm">{pullpilot.summary}</p>
             <p className={styles.deadBody}>{PULLPILOT.homeBody}</p>

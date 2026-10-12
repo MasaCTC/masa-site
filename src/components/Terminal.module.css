@@ -1,0 +1,9 @@
+/* Resume.dc.html: <section class="mn-term" style="min-height: 560px;"> */
+:global(.mn-term).term {
+  min-height: 560px;
+}
+
+/* Resume.dc.html: <div class="mn-term__out" ... style="flex: 1;"> */
+:global(.mn-term__out).out {
+  flex: 1;
+}

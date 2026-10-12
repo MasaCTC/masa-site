@@ -1,0 +1,5 @@
+/* Dock brand: <a class="mn-nav__brand" style="padding-right: 4px;"> (all screens).
+   Two classes so it wins over .mn-nav__brand (padding-right: 12px) regardless of order. */
+:global(.mn-nav__brand).brand {
+  padding-right: 4px;
+}

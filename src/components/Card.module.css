@@ -1,0 +1,10 @@
+/* Card loading skeletons. Values from States.dc.html "Card · link / Loading":
+   <span class="mn-skel" style="height: 18px; width: 60%;"> and <span class="mn-skel" style="height: 12px;">. */
+.skelTitle {
+  height: 18px;
+  width: 60%;
+}
+
+.skelLine {
+  height: 12px;
+}

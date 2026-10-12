@@ -1,0 +1,11 @@
+/* Stats.dc.html reel loading: <span class="mn-skel" style="height: 16px;"> x3 */
+.skelRow {
+  height: 16px;
+}
+
+/* Stats.dc.html empty slot:
+   <div class="mn-card mn-card--inset" style="min-height: 200px; justify-content: center;"> */
+:global(.mn-card).emptySlot {
+  min-height: 200px;
+  justify-content: center;
+}

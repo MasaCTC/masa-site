@@ -1,0 +1,7 @@
+/* HomeA / Projects / States: <ol class="mn-track is-empty"
+   style="grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: row;">.
+   Two classes so it wins over .mn-track regardless of stylesheet order. */
+:global(.mn-track).empty {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: row;
+}

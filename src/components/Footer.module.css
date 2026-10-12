@@ -1,0 +1,13 @@
+/* Resume.dc.html footer:
+   <footer class="mn-row" style="justify-content: space-between; border-top: 1px solid var(--line); padding-top: 24px;">
+   <div class="mn-row" style="gap: 20px;">
+   Two classes so these win over .mn-row regardless of stylesheet order. */
+:global(.mn-row).footer {
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+}
+
+:global(.mn-row).links {
+  gap: 20px;
+}

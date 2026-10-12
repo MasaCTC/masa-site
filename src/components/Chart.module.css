@@ -1,0 +1,46 @@
+/* Stats.dc.html: <figure class="mn-chart" style="margin: 0;"> */
+:global(.mn-chart).figure {
+  margin: 0;
+}
+
+/* HomeA.dc.html chart with a figcaption:
+   <figure class="mn-chart" style="margin: 0; display: flex; flex-direction: column; gap: 10px;"> */
+:global(.mn-chart).withCaption {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Stats.dc.html tooltip: style="... transform: translate(-50%, -110%); pointer-events: none;"
+   (left/top are data and stay as a style prop). */
+.tip {
+  transform: translate(-50%, -110%);
+  pointer-events: none;
+}
+
+/* Stats.dc.html annotation guide: <line class="guide" ... style="opacity: .5;"> */
+.noteGuide {
+  opacity: 0.5;
+}
+
+/* Stats.dc.html loading center:
+   <span class="mn-skel" style="height: 10px; width: 70%;"> / (height: 10px; width: 50%;) */
+.skelWide {
+  height: 10px;
+  width: 70%;
+}
+
+.skelNarrow {
+  height: 10px;
+  width: 50%;
+}
+
+/* Design-CSS collision: `.mn-chart svg { display: block; width: 100%; height: auto }` comes
+   after `.mn-msg svg` in bundle.css with equal specificity, so a message icon inside the chart
+   well would stretch to the full width. Re-apply .mn-msg svg's own values (no new styling). */
+:global(.mn-msg).centerMsg svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin-top: 1px;
+}

@@ -1,0 +1,34 @@
+/* Projects.dc.html clip poster: <span class="mn-placeholder" style="position: absolute; top: 10px; left: 10px;"> */
+.poster {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+/* Projects.dc.html play button: <button class="mn-btn mn-btn--icon" style="width: 64px; min-height: 64px;">.
+   Three classes so it wins over .mn-btn / .mn-btn--icon regardless of stylesheet order. */
+:global(.mn-btn.mn-btn--icon).play {
+  width: 64px;
+  min-height: 64px;
+}
+
+/* Projects.dc.html stock tool: <div class="mn-demo" style="min-height: 220px; justify-content: center;"> */
+:global(.mn-demo).messageWell {
+  min-height: 220px;
+  justify-content: center;
+}
+
+/* ...containing <div class="mn-msg" style="padding: 12px;"> */
+:global(.mn-msg).messagePad {
+  padding: 12px;
+}
+
+/* States.dc.html "Demo area / Loading": <span class="mn-skel" style="aspect-ratio: 16/10;"> */
+.skelMedia {
+  aspect-ratio: 16 / 10;
+}
+
+/* States.dc.html "Demo area / Error": <span class="mn-msg mn-msg--error" style="... padding: 8px;"> */
+:global(.mn-msg).errorMsg {
+  padding: 8px;
+}

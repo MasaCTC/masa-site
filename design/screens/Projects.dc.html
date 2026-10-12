@@ -18,7 +18,7 @@
   <nav class="mn-nav mn-nav--dock" aria-label="Main">
     <a class="mn-nav__brand" href="HomeA.dc.html" style="padding-right: 4px;" aria-label="Masa Chien, home"><span class="mn-nav__mark" aria-hidden="true">MC</span></a>
     <div class="mn-nav__links"><a href="Stats.dc.html">Stats</a><a href="Projects.dc.html" aria-current="page">Projects</a><a href="Resume.dc.html">Resume</a></div>
-    <a class="mn-nav__stat" href="Stats.dc.html" aria-label="14,136 followers. Open stats">14.1K</a>
+    <a class="mn-nav__stat" href="Stats.dc.html" aria-label="14,136 followers. Open stats">14.1K <span>followers</span></a>
   </nav>
 
   <header class="mn-section__head">
@@ -32,7 +32,7 @@
 
   <article class="mn-card mn-card--lg" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr)); gap: 40px; align-items: start;">
     <div style="display: flex; flex-direction: column; gap: 22px; min-width: 0;">
-      <div class="mn-card__row"><h2 class="mn-heading-md">One Basket</h2><span class="mn-pill mn-pill--building">Building</span></div>
+      <div class="mn-card__row"><h2 class="mn-heading-md">One Basket</h2><span class="mn-state mn-state--building">Building</span></div>
       <p class="mn-body-lg">Recipes in, buyable grocery quantities out.</p>
       <div style="display: flex; flex-direction: column; gap: 14px;">
         <span class="mn-label">Build map</span>
@@ -50,7 +50,7 @@
     <div class="mn-demo">
       <sc-if value="{{demoLive}}" hint-placeholder-val="{{false}}">
         <div class="mn-demo__media"><span class="mn-placeholder">[ONE BASKET SCREENSHOT]</span></div>
-        <div class="mn-demo__bar"><a class="mn-link" href="#">Try the live demo<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a><span class="mn-pill mn-pill--live">Live</span></div>
+        <div class="mn-demo__bar"><a class="mn-link" href="#">Try the live demo<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a><span class="mn-state mn-state--live">Live</span></div>
       </sc-if>
       <sc-if value="{{demoClip}}" hint-placeholder-val="{{true}}">
         <div class="mn-demo__media"><span class="mn-placeholder" style="position: absolute; top: 10px; left: 10px;">[CLIP POSTER]</span><button class="mn-btn mn-btn--icon" style="width: 64px; min-height: 64px;" aria-label="Play 0:24 clip: a recipe becomes a basket"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button></div>
@@ -65,7 +65,7 @@
 
   <article class="mn-card mn-card--lg" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr)); gap: 40px; align-items: start;">
     <div style="display: flex; flex-direction: column; gap: 22px; min-width: 0;">
-      <div class="mn-card__row"><h2 class="mn-heading-md">Cofura</h2><span class="mn-pill mn-pill--building">Building</span></div>
+      <div class="mn-card__row"><h2 class="mn-heading-md">Cofura</h2><span class="mn-state mn-state--building">Building</span></div>
       <p class="mn-body-lg">A phone app where UCI students find cofounders and teammates. Swipe, match, chat. Not a dating app.</p>
       <div class="mn-meter" style="max-width: 460px;">
         <div class="mn-meter__head"><span class="mn-label">My part</span><span class="mn-meter__value">chat + safety</span></div>
@@ -93,7 +93,7 @@
 
   <article class="mn-card mn-card--lg mn-card--dead" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr)); gap: 40px; align-items: start;">
     <div style="display: flex; flex-direction: column; gap: 22px; min-width: 0;">
-      <div class="mn-card__row"><h2 class="mn-heading-sm" style="font-size: 28px; line-height: 34px;">PullPilot</h2><span class="mn-pill mn-pill--dead">Dead</span></div>
+      <div class="mn-card__row"><h2 class="mn-heading-sm" style="font-size: 28px; line-height: 34px;">PullPilot</h2><span class="mn-state mn-state--dead">Dead</span></div>
       <p class="mn-body-lg">A crowdsourced auto-parts platform. My earlier app.</p>
       <ol class="mn-track" aria-label="Build map: stopped after features">
         <li class="mn-track__fill" aria-hidden="true" style="width: calc(100% / 3 * 2);"></li>

@@ -1,14 +1,14 @@
-# Pill
+# Status label (formerly Pill)
 
-A read-only status label pressed into the surface: colored dot + uppercase word. Variants: `--building` (green), `--scoping` (blue), `--dead` (grey, dash instead of dot), `--live` (pulsing dot, for "live" data).
+A read-only status word set in the status color: plain uppercase mono text, with no capsule and no dot (changed Oct 2026, because the pills read as generic and "vibe-coded"). Variants: `--building` (green), `--scoping` (blue), `--dead` (grey), `--live` (green), and no modifier for muted (e.g. "Manual"). Extra detail goes in a `<small>` on the same line: `Manual · entered by hand · updated Oct 11, 2026`.
 
-**Markup**: `<span class="mn-pill mn-pill--building">Building</span>`. The word is always present: color is never the only signal.
+**Markup**: `<span class="mn-state mn-state--building">Building</span>`. The word is always present, so color is never the only signal. `.mn-pill` / `.mn-pill--*` still work as aliases and render the new look; new markup should use `.mn-state`.
 
 | State | Look | Trigger |
 |---|---|---|
-| Default | `neu-inset-sm`, status color text + dot | — |
-| Hover / Pressed / Focus | N/A: pills are not interactive. Need a clickable chip? That is a Tag | — |
+| Default | Status-color uppercase mono, 12px, .08em tracking | — |
+| Hover / Pressed / Focus | N/A: not interactive. Need a clickable chip? That is a Tag | — |
 | Disabled | N/A: use `--dead` for retired things | — |
-| Loading | `--live` pulses while data is fresh-pulling; otherwise N/A | `.mn-pill--live` |
-| Empty | N/A: no status → no pill | — |
-| Error | N/A: errors are Feedback messages, not pills | — |
+| Loading | N/A: the page's own loading state covers it (no pulsing dot any more) | — |
+| Empty | N/A: no status, no label | — |
+| Error | N/A: errors are Feedback messages | — |

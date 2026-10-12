@@ -1,18 +1,21 @@
 /* Masa Neu Design System — generated from tokens.json */
 :root, [data-theme="light"] {
-  --surface: #ece6dd; --surface-sunken: #e4ddd2; --shadow-dark: #c9bfb0; --shadow-light: #ffffff; --line: #d6cdbf;
+  --surface: #ece6dd; --surface-sunken: #e4ddd2; --shadow-dark: #c9bfb0; --shadow-light: #f7f3ed; --line: #d6cdbf;
   --ink: #2a241e; --ink-muted: #5a5147; --ink-subtle: #6a6055; --ink-disabled: #857a6d;
   --red: #b42a1a; --red-hover: #c2321f; --red-pressed: #962216; --on-red: #ffffff; --focus-ring: #2a241e;
   --status-building: #3e6a35; --status-scoping: #2f5d86; --status-dead: #6b6259; --danger: #9a4a12;
   --chart-line: var(--ink); --chart-point: var(--status-scoping);
-  --neu-raised-sm: 4px 4px 8px #c9bfb0, -4px -4px 8px #ffffff;
-  --neu-raised-md: 8px 8px 16px #c9bfb0, -8px -8px 16px #ffffff;
-  --neu-raised-lg: 14px 14px 28px #c9bfb0, -14px -14px 28px #ffffff;
-  --neu-inset-sm: inset 3px 3px 6px #c9bfb0, inset -3px -3px 6px #ffffff;
-  --neu-inset-md: inset 6px 6px 12px #c9bfb0, inset -6px -6px 12px #ffffff;
-  --neu-red-raised: 6px 6px 14px #c9bfb0, -6px -6px 14px #ffffff;
+  --neu-raised-sm: 4px 4px 8px #c9bfb0, -4px -4px 8px #f7f3ed;
+  --neu-raised-md: 8px 8px 16px #c9bfb0, -8px -8px 16px #f7f3ed;
+  --neu-raised-lg: 14px 14px 28px #c9bfb0, -14px -14px 28px #f7f3ed;
+  --neu-inset-sm: inset 3px 3px 6px #c9bfb0, inset -3px -3px 6px #f7f3ed;
+  --neu-inset-md: inset 6px 6px 12px #c9bfb0, inset -6px -6px 12px #f7f3ed;
+  --neu-red-raised: 6px 6px 14px #c9bfb0, -6px -6px 14px #f7f3ed;
   --neu-red-pressed: inset 3px 3px 7px #7a1a10, inset -3px -3px 7px #cf4430;
   --neu-flat: none;
+  --neu-raised-xs: 2px 2px 4px #c9bfb0, -2px -2px 4px #f7f3ed;
+  --neu-float: 0 2px 6px -2px #c9bfb0, 0 24px 48px -20px #9c907e;
+  --cls-clay: #b4643c; --cls-moss: #5f7f3a; --cls-sea: #2f6f8a; --cls-plum: #7a4f86; --cls-ochre: #a87a1c; --cls-slate: #5a6378; --cls-rose: #a8506a; --cls-teal: #2f7d6d;
 }
 [data-theme="dark"] {
   --surface: #2b2722; --surface-sunken: #24211d; --shadow-dark: #1a1714; --shadow-light: #332f29; --line: #3d3832;
@@ -28,6 +31,9 @@
   --neu-red-raised: 6px 6px 14px #1a1714, -6px -6px 14px #332f29;
   --neu-red-pressed: inset 3px 3px 7px #7a1f17, inset -3px -3px 7px #de5545;
   --neu-flat: none;
+  --neu-raised-xs: 2px 2px 4px #1a1714, -2px -2px 4px #332f29;
+  --neu-float: 0 2px 6px -2px #12100e, 0 24px 48px -20px #000000;
+  --cls-clay: #d98a5f; --cls-moss: #9cbf73; --cls-sea: #7fb6cf; --cls-plum: #b993c4; --cls-ochre: #d9b04f; --cls-slate: #9aa3b8; --cls-rose: #d98aa0; --cls-teal: #74c2b0;
 }
 :root {
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px;

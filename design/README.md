@@ -21,6 +21,7 @@ Exported from Claude Design (canvas "Masa — Personal Site", design system "Mas
 | `Stats.dc.html` | `/stats` | Has live / loading / error / empty states driven by a `status` value. Range tabs 30D / 90D / All. Chart hover + arrow-key focus. |
 | `Projects.dc.html` | `/projects` | One Basket demo area supports 3 modes: clip / live / none. PullPilot uses the dead card variant. |
 | `Resume.dc.html` | `/resume` | Timeline tab (default) + `$ terminal` tab. Skill tags in the Skills card filter the timeline and time lanes. |
+| `Planner.prototype.html` | `/planner` (private) and `/now` (public) | A clickable prototype (plain HTML + JS), not a template file. Use its markup, classes and behaviour; its sample tasks and classes are fake. The "prototype · view as" bar at the top is a design-time switch, not part of the site. `/planner` = Today (running checklist + public status setter + due-next-3-days), Calendar (week/month), Classes (cards → detail view with color picker), Settings (Canvas feed). `/now` = the public status page. Unauthenticated visitors to `/planner` get the normal 404. |
 | `Main.dc.html`, `States.dc.html` | — | Reference only: token sheet and every component in every state. Not routes. |
 
 ## Things that are NOT in the screen files
@@ -28,6 +29,13 @@ Exported from Claude Design (canvas "Masa — Personal Site", design system "Mas
 - `{{…}}` holes, `<sc-if>`, `<sc-for>`, `data-props`, `<x-dc>`, `<helmet>`, `support.js` are the design tool's template syntax. Translate them into React (conditionals, `.map`, props). Don't copy them literally.
 - "Tweaks" (`theme`, `typeSet`, `header`, `tagline`, `oneBasketDemo`, `status`, `startView`) are design-time switches. Final decisions: **type = A (Space Grotesk + IBM Plex Mono)**, header = **dock**, light theme default with a dark theme available via `data-theme="dark"` on `<html>`.
 - Fonts load from Google Fonts in the mocks; in Next.js use `next/font/google` (Space Grotesk, IBM Plex Mono) and map them to `--font-display`, `--font-body`, `--font-mono`.
+
+## Changes on Oct 12, 2026
+
+- **No pills anywhere:** status words use `.mn-state` (plain colored text). `.mn-pill` still renders the new look as an alias, but new code should use `mn-state`. The "Live"/"Manual" line on Stats is a `.mn-state` with a `<small>` detail.
+- **Dock follower count** is plain text after a divider: `14.2K <span>followers</span>`, no well, no dot.
+- **Softer light highlight** (`#f7f3ed`), new shadow tokens `neu-raised-xs` (nested thumbs) and `neu-float` (Modal), concentric radii on Tabs.
+- **Planner components** in `system/components/`: Field, Checkbox, Checklist, Calendar, Modal, StatusLine, ClassColor. Class colors (`cls-*` tokens) are planner-only.
 
 ## Data that is placeholder
 

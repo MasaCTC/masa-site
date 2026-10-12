@@ -20,6 +20,8 @@ A segmented control in an inset rail; the selected tab is raised out of it by on
 
 The raised piece is ONE element (`<span class="mn-thumb" aria-hidden="true">`, first child of `.mn-tabs`), not a style on the selected tab. A script measures the selected tab and sets `--thumb-x`, `--thumb-y`, `--thumb-w`, `--thumb-h` on the thumb; CSS animates between them. The script adds `.has-thumb` (turns off the tab's own raised fill) and, one frame later, `.is-thumb-ready` (turns on the transition, so the first paint doesn't animate in from 0,0). Re-measure on resize and once fonts load.
 
+**Fit inside the rail (Oct 2026):** the rail has 6px padding and `radius-md`; the tabs and the thumb use `radius-md - 6px` (concentric radii: inner radius = outer radius minus the gap, so the curves stay parallel), and the thumb uses `neu-raised-xs` so its shadow stays inside the well.
+
 Without the script, the selected tab keeps its own `neu-raised-sm`, so the control still works and still shows the selection. The thumb is decorative: selection is carried by `aria-selected` and the `ink` label.
 
-Reference script: `design/system/thumb.js` (`mnThumb(container, getTarget)`). Port it into a React hook; keep the behaviour.
+Reference script: the `mnThumb(container, getTarget)` function in `preview.html`.

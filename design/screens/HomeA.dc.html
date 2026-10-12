@@ -28,7 +28,7 @@
     <nav class="mn-nav mn-nav--dock" aria-label="Main">
       <a class="mn-nav__brand" href="HomeA.dc.html" style="padding-right: 4px;" aria-label="Masa Chien, home" aria-current="page"><span class="mn-nav__mark" aria-hidden="true">MC</span></a>
       <div class="mn-nav__links"><a href="Stats.dc.html">Stats</a><a href="Projects.dc.html">Projects</a><a href="Resume.dc.html">Resume</a></div>
-      <a class="mn-nav__stat" href="Stats.dc.html" aria-label="14,136 followers. Open stats">14.1K</a>
+      <a class="mn-nav__stat" href="Stats.dc.html" aria-label="14,136 followers. Open stats">14.1K <span>followers</span></a>
     </nav>
   </sc-if>
   <sc-if value="{{navSplit}}" hint-placeholder-val="{{false}}">
@@ -54,8 +54,8 @@
     <div class="mn-card mn-card--inset" style="gap: 14px;">
       <span class="mn-label">Right now</span>
       <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div class="mn-card__row"><span>Building One Basket</span><span class="mn-pill mn-pill--building">Building</span></div>
-        <div class="mn-card__row"><span>Building Cofura on a team of three</span><span class="mn-pill mn-pill--building">Building</span></div>
+        <div class="mn-card__row"><span>Building One Basket</span><span class="mn-state mn-state--building">Building</span></div>
+        <div class="mn-card__row"><span>Building Cofura on a team of three</span><span class="mn-state mn-state--building">Building</span></div>
         <div class="mn-card__row"><span>CS at UCI, graduating early</span><span class="mn-mono">Mar 2028</span></div>
       </div>
     </div>
@@ -106,7 +106,7 @@
     </div>
     <div class="mn-grid">
       <a class="mn-card mn-card--link" href="Projects.dc.html">
-        <div class="mn-card__row"><h3 class="mn-heading-sm">One Basket</h3><span class="mn-pill mn-pill--building">Building</span></div>
+        <div class="mn-card__row"><h3 class="mn-heading-sm">One Basket</h3><span class="mn-state mn-state--building">Building</span></div>
         <p class="mn-body-sm">Recipes in, buyable grocery quantities out.</p>
         <ol class="mn-track" aria-label="Build map: phase 2 of 6">
           <li class="mn-track__fill" aria-hidden="true" style="width: calc(100% / 6);"></li>
@@ -115,7 +115,7 @@
         <span class="mn-mono">phase 2 of 6 · Vertical slice</span>
       </a>
       <a class="mn-card mn-card--link" href="Projects.dc.html">
-        <div class="mn-card__row"><h3 class="mn-heading-sm">Cofura</h3><span class="mn-pill mn-pill--building">Building</span></div>
+        <div class="mn-card__row"><h3 class="mn-heading-sm">Cofura</h3><span class="mn-state mn-state--building">Building</span></div>
         <p class="mn-body-sm">Cofounder matching for UCI students. I own chat + safety.</p>
         <ol class="mn-track" aria-label="Build map: phase 2 of 6">
           <li class="mn-track__fill" aria-hidden="true" style="width: calc(100% / 6);"></li>
@@ -124,7 +124,7 @@
         <span class="mn-mono">phase 2 of 6 · Core loop (MVP)</span>
       </a>
       <article class="mn-card mn-card--dead">
-        <div class="mn-card__row"><h3 class="mn-heading-sm">PullPilot</h3><span class="mn-pill mn-pill--dead">Dead</span></div>
+        <div class="mn-card__row"><h3 class="mn-heading-sm">PullPilot</h3><span class="mn-state mn-state--dead">Dead</span></div>
         <p class="mn-body-sm">A crowdsourced auto-parts platform. My earlier app.</p>
         <p style="margin: 0; font-size: 14px; line-height: 20px;">No design planned, so every screen looked different. Fixing it meant a rewrite.</p>
         <a class="mn-link" href="Projects.dc.html">What I learned</a>

@@ -2,11 +2,11 @@
 
 The site header: a floating, sticky pill that stays 16px below the top of the window while the page scrolls under it. It is the most raised thing on the page (`neu-raised-lg`) and slightly translucent with a background blur, so content visibly passes beneath it.
 
-**Markup**: `<nav class="mn-nav" aria-label="Main">` → `<a class="mn-nav__brand" href="/"><span class="mn-nav__mark" aria-hidden="true">MC</span>Masa Chien</a>` + `<div class="mn-nav__right">` holding an optional live stat chip `<a class="mn-nav__stat" href="/stats">10.2K <span>followers</span></a>` and `<div class="mn-nav__links">` of `<a href>` (current page: `aria-current="page"`).
+**Markup**: `<nav class="mn-nav" aria-label="Main">` → `<a class="mn-nav__brand" href="/"><span class="mn-nav__mark" aria-hidden="true">MC</span>Masa Chien</a>` + `<div class="mn-nav__right">` holding an optional live stat chip `<a class="mn-nav__stat" href="/stats">14.2K <span>followers</span></a>` and `<div class="mn-nav__links">` of `<a href>` (current page: `aria-current="page"`).
 
 **Variants**
 - **`mn-nav--dock` — the site header (decided Oct 11, 2026).** Compact capsule centered over the page: MC badge (links home, `aria-label="Masa Chien, home"`), the three links, and the follower chip. Use this on every page.
-- **Sliding thumb (dock, added Oct 11, 2026).** The raised circle behind "MC" is the current-page marker. On Home it sits on the badge; on any other page it has slid over and stretched into a pill behind that link. The badge and links themselves are flat. The current item is RAISED (it used to be inset). The follower chip stays inset: it's a readout, not a place.
+- **Sliding thumb (dock, added Oct 11, 2026).** The raised circle behind "MC" is the current-page marker. On Home it sits on the badge; on any other page it has slid over and stretched into a pill behind that link. The badge and links themselves are flat. The current item is RAISED (it used to be inset). The follower count is plain text after a thin divider (`14.2K followers`): no inset well and no dot (Oct 2026). The thumb uses `neu-raised-xs`, the nested-depth shadow.
 - Default (float): full-width pill. Explored, not used.
 - Split: wrap a brand capsule (`mn-nav__brand mn-nav__brand--capsule`) and a `mn-nav` of links in `<div class="mn-navsplit">`.
 

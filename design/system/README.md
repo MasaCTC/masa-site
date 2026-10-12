@@ -22,9 +22,17 @@ Down-to-earth and honest. Real numbers, no hype.
 
 Never hand-write a shadow in a screen. If a new depth is needed, add a token.
 
-Dark theme highlight (`shadow-light` dark) is `#332f29`, toned down on Oct 11, 2026 from `#3a352f` because it read as a glow around raised things.
+Highlights are toned down in both themes (Oct 2026): `shadow-light` is `#f7f3ed` in light (was pure white) and `#332f29` in dark (was `#3a352f`). Pure highlights read as a glow.
+
+**Nested depth.** A raised piece that sits *inside* another surface or well (the sliding thumb in Tabs and the dock) uses `neu-raised-xs`, so its shadow stays inside the parent's edge, and a **concentric radius**: inner radius = outer radius minus the gap between them.
+
+**Floating depth.** Things that float over a dimmed page (Modal) use `neu-float`, a plain drop shadow with no light half. Neumorphism only works on the same surface; over a backdrop the light half becomes a halo.
+
+**No pills.** Status is plain words in the status color (`.mn-state`), not capsules with dots. The follower count in the dock is plain text after a thin divider.
 
 **Motion: selection slides.** Where one item out of a row is selected (Tabs, the dock NavBar), the raised piece is a single thumb that slides to the new item and morphs to its size (340 ms, `cubic-bezier(.3, .8, .25, 1.06)`, a slight overshoot). Nothing else on the site animates position. Respect `prefers-reduced-motion`: the thumb jumps.
+
+**Class colors (planner only).** Eight muted `cls-*` tokens, one per class or category, shown as a swatch and a light tint, always next to the printed name. This is the one deliberate exception to "one hue for data", and it never appears on public pages.
 
 **One red.** `red` is the fill of the primary button and nothing else: one per view, so the eye goes there. Errors use `danger` (burnt amber), status uses the `status-*` colors, the current build phase uses `status-scoping` (blue). Red never marks data.
 
@@ -59,8 +67,9 @@ All components are plain CSS classes in `components/bundle.css` (prefix `mn-`), 
 | Actions | Button, Link, Tag, Tabs |
 | Containers | Card (incl. dead variant), NavBar |
 | Data | StatTile (with sparkline), Chart, BarList, Meter, ReelCard |
-| Projects | Pill, ProgressTrack, DemoArea |
+| Projects | Status label (was Pill), ProgressTrack, DemoArea |
 | Resume | Timeline, TimeLanes, Terminal |
+| Planner (private) | Field, Checkbox, Checklist, Calendar, Modal, StatusLine, ClassColor |
 
 **Show numbers as graphics.** Wherever a number has history or a comparison, pair it with a graphic: stat tiles carry a sparkline, comparisons use a BarList, ratios use a Meter, time spans use TimeLanes. One hue for data (ink / ink-muted), `chart-point` blue for "latest" or "hovered". The number is always printed next to its graphic.
 | Feedback | Feedback (spinner, skeleton, state message) |

@@ -102,7 +102,7 @@ function StatsBody({ stats }: { stats: InstagramStats | null }) {
         </div>
       ) : null}
 
-      <section className="mn-section" aria-label="Headline numbers">
+      <section className="mn-section" aria-label={STATS_COPY.headlineAria}>
         <div className={`mn-grid ${styles.tiles}`}>
           {tiles
             ? tiles.map((t) => (

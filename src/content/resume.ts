@@ -168,13 +168,14 @@ export const TERMINAL_CHIPS = ["help", "whoami", "projects", "experience", "skil
 export const TERMINAL_CLEAR_HINT = "type help, or tap a command";
 
 export const TERMINAL_RESPONSES: Record<string, TermLine[]> = {
-  help: [M("commands:"), L("  whoami       who I am"), L("  projects     what I’m building"), L("  experience   jobs"), L("  skills       languages, tools, hardware"), L("  education    school + coursework"), L("  contact      email, github, linkedin"), L("  resume.pdf   download the pdf"), L("  clear        clear the screen")],
+  // NEW copy: the design says "download the pdf", but PDF_URL is null so nothing can be downloaded yet.
+  help: [M("commands:"), L("  whoami       who I am"), L("  projects     what I’m building"), L("  experience   jobs"), L("  skills       languages, tools, hardware"), L("  education    school + coursework"), L("  contact      email, github, linkedin"), L("  resume.pdf   not available yet"), L("  clear        clear the screen")],
   whoami: [L('masaki "masa" chien · cs @ uc irvine · graduating mar 2028 (early)'), M("builds apps in public as @masamcodes")],
   projects: [L("cofura           sep 2026–now   cofounder · messaging + safety slice · supabase, ci"), L("one basket       aug 2026–now   recipes → buyable grocery quantities · claude code"), L("retrolink        jul 2026–now   stm32 sensor node · can bus @ 500 kbps · ltspice"), L("dungeon dilemma  jan–mar 2026   unity multiplayer · 15+ person team · c#"), M("pullpilot        dead           no design planned → every screen differed → rewrite")],
   experience: [L("stem instructor intern         lavner education      jun–aug 2026"), L("3d printing production intern  kav helmets           oct–dec 2023"), L("youth hockey assistant coach   ice center cupertino  aug 2020–jun 2024")],
   skills: [L("proficient   python, c++"), L("working      c, c#, java"), L("tools        git, github, supabase, linear, unity, vs code, cursor"), L("ai           claude code, claude cowork, claude design, gemini api"), L("hardware     ltspice, fusion 360, 3d printing, automotive diagnostics")],
   education: [L("uc irvine · b.s. computer science · sep 2025 – mar 2028 (expected)"), M("python · c/c++ · data structures & algorithms (in progress) · intro to software engineering · computer organization · probability & statistics")],
-  contact: [L(`email     ${CONTACT.email}`), L("github    github.com/MasaCTC"), L("linkedin  linkedin.com/in/masakichien"), L("instagram @masamcodes")],
+  contact: [L(`email     ${CONTACT.email}`), L(`github    ${CONTACT.github.replace("https://", "")}`), L(`linkedin  ${CONTACT.linkedin.replace("https://", "")}`), L("instagram @masamcodes")],
   // NEW copy (not from the design): PDF_URL is null, so nothing can be downloaded yet (decision 4).
   // Design's line, for when PDF_URL exists: [M("preparing pdf…"), { text: "✓ downloaded masaki_chien_resume.pdf", tone: "ok" }]
   "resume.pdf": [M("no pdf yet. type contact to reach me for a copy")],

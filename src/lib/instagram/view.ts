@@ -119,7 +119,8 @@ export function likesSharesTile(stats: InstagramStats): TileView {
   const label = STATS_COPY.likesSharesLabel;
   const { likes, shares } = stats.totals;
   if (stats.status === "empty") return { label, meta: STATS_COPY.emptyTotalsMeta, metaKind: "meta", state: "empty" };
-  const sharesText = `${metricCompact(shares)} shares`;
+  // Placeholders read "[TOTAL SHARES]" with no trailing word (it would double up); real numbers get "shares".
+  const sharesText = isKnown(shares) ? `${metricCompact(shares)} shares` : shares.label;
   if (!isKnown(likes)) return { label, meta: `${likes.label} · ${sharesText}`, metaKind: "meta", state: "empty" };
   return { label, valueText: compact(likes.value), title: `${exact(likes.value)} likes`, meta: sharesText, metaKind: "meta", state: "ready" };
 }

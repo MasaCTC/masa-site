@@ -10,7 +10,7 @@ export type SparklineProps = {
 };
 
 /** Last "x y" pair of an M/L path. Pure. */
-export function lastPathPoint(d: string): { x: number; y: number } {
+function lastPathPoint(d: string): { x: number; y: number } {
   const nums = d.match(/-?\d*\.?\d+/g) ?? [];
   const x = Number(nums[nums.length - 2] ?? 0);
   const y = Number(nums[nums.length - 1] ?? 0);

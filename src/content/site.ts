@@ -15,13 +15,6 @@ export const NAV_LINKS = [
 ] as const;
 
 /** Resume footer, used on every page (decision 3). */
-export const FOOTER_LINKS = [
-  { href: "mailto:masakic@uci.edu", label: "Email" },
-  { href: "https://github.com/MasaCTC", label: "GitHub" },
-  { href: "https://linkedin.com/in/masakichien", label: "LinkedIn" },
-  { href: "https://instagram.com/masamcodes", label: "Instagram" },
-] as const;
-
 export const CONTACT = {
   email: "masakic@uci.edu",
   emailHref: "mailto:masakic@uci.edu",
@@ -29,6 +22,13 @@ export const CONTACT = {
   linkedin: "https://linkedin.com/in/masakichien",
   instagram: "https://instagram.com/masamcodes",
 } as const;
+
+export const FOOTER_LINKS = [
+  { href: CONTACT.emailHref, label: "Email" },
+  { href: CONTACT.github, label: "GitHub" },
+  { href: CONTACT.linkedin, label: "LinkedIn" },
+  { href: CONTACT.instagram, label: "Instagram" },
+] as const;
 
 /** Home tagline, option 1 (decided). */
 export const TAGLINE = "CS at UC Irvine. I build apps in public and post the real numbers.";
@@ -114,6 +114,7 @@ export const INSTAGRAM_COPY: Record<SourceKind, InstagramCopy> = {
 
 /** Stats page static strings from the design (labels, headings, error/empty copy). */
 export const STATS_COPY = {
+  headlineAria: "Headline numbers",
   title: "Instagram, in numbers",
   eyebrow: "@masamcodes",
   follow: "Follow @masamcodes",

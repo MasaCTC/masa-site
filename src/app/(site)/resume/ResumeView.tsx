@@ -44,6 +44,7 @@ export type ResumeViewProps = {
 
 type View = "timeline" | "terminal";
 const PANEL_ID: Record<View, string> = { timeline: "resume-timeline", terminal: "resume-terminal" };
+const TAB_ID: Record<View, string> = { timeline: "resume-tab-timeline", terminal: "resume-tab-terminal" };
 
 export function ResumeView({ head, education, entries }: ResumeViewProps) {
   const [view, setView] = useState<View>("timeline");
@@ -63,15 +64,15 @@ export function ResumeView({ head, education, entries }: ResumeViewProps) {
           className={styles.tabs}
           ariaLabel={RESUME_PAGE.tabsAria}
           tabs={[
-            { id: "timeline", label: RESUME_PAGE.tabs.timeline, controls: PANEL_ID.timeline },
-            { id: "terminal", label: RESUME_PAGE.tabs.terminal, mono: true, controls: PANEL_ID.terminal },
+            { id: "timeline", label: RESUME_PAGE.tabs.timeline, controls: PANEL_ID.timeline, domId: TAB_ID.timeline },
+            { id: "terminal", label: RESUME_PAGE.tabs.terminal, mono: true, controls: PANEL_ID.terminal, domId: TAB_ID.terminal },
           ]}
           selected={view}
           onSelect={(id) => setView(id as View)}
         />
       </header>
 
-      <div id={PANEL_ID.timeline} role="tabpanel" className={styles.layout} hidden={view !== "timeline"}>
+      <div id={PANEL_ID.timeline} role="tabpanel" aria-labelledby={TAB_ID.timeline} className={styles.layout} hidden={view !== "timeline"}>
         <div className={styles.col}>
           <Card as="section" className={styles.glance} ariaLabel={RESUME_PAGE.glance.title}>
             <div className="mn-card__row">
@@ -143,7 +144,7 @@ export function ResumeView({ head, education, entries }: ResumeViewProps) {
         </aside>
       </div>
 
-      <div id={PANEL_ID.terminal} role="tabpanel" className={styles.panel} hidden={view !== "terminal"}>
+      <div id={PANEL_ID.terminal} role="tabpanel" aria-labelledby={TAB_ID.terminal} className={styles.panel} hidden={view !== "terminal"}>
         <Terminal
           initialLog={TERMINAL_INITIAL_LOG}
           responses={TERMINAL_RESPONSES}

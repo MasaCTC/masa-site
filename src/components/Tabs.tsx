@@ -14,6 +14,8 @@ export type TabItem = {
   mono?: boolean;
   /** id of the panel this tab controls. */
   controls?: string;
+  /** DOM id for the tab button (a tabpanel points back with aria-labelledby). */
+  domId?: string;
 };
 
 export type TabsProps = {
@@ -48,6 +50,7 @@ export function Tabs({
       {tabs.map((tab) => (
         <button
           key={tab.id}
+          id={tab.domId}
           type="button"
           className={cx("mn-tab", tab.mono && styles.mono)}
           role="tab"

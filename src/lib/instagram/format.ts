@@ -1,9 +1,6 @@
 // Pure, typed display helpers. Placeholders pass through verbatim; known values are formatted.
 // Components receive the resulting strings/ratios, never a Metric.
-import { fillWidth } from "@/components/types";
 import type { Metric, TextField } from "./types";
-
-export { fillWidth };
 
 /**
  * Compact rule (one rule, matches every design example):
@@ -32,7 +29,7 @@ export function exact(n: number): string {
   return Math.round(n).toLocaleString("en-US");
 }
 
-/** value / max clamped to 0-1. 0 when max <= 0. Use fillWidth(ratio) for the CSS width. */
+/** value / max clamped to 0-1. 0 when max <= 0. */
 export function barRatio(value: number, max: number): number {
   if (!(max > 0)) return 0;
   return Math.min(1, Math.max(0, value / max));
@@ -45,27 +42,6 @@ export function isKnown(m: Metric): m is { kind: "value"; value: number } {
 /** "14.1K", or the placeholder label verbatim. */
 export function metricCompact(m: Metric): string {
   return m.kind === "value" ? compact(m.value) : m.label;
-}
-
-/** "14,136", or the placeholder label verbatim. */
-export function metricExact(m: Metric): string {
-  return m.kind === "value" ? exact(m.value) : m.label;
-}
-
-/** Tooltip/title text: `${exact} ${unit}` ("14,136 followers"), or the placeholder label. */
-export function metricTitle(m: Metric, unit: string): string {
-  return m.kind === "value" ? `${exact(m.value)} ${unit}` : m.label;
-}
-
-/** 0-1 ratio of a known metric to a known max; undefined if either is unknown (no fill). */
-export function metricRatio(m: Metric, max: Metric): number | undefined {
-  return m.kind === "value" && max.kind === "value" ? barRatio(m.value, max.value) : undefined;
-}
-
-/** CSS width for a metric's bar fill, or undefined when unknown (omit the fill element). */
-export function metricFillWidth(m: Metric, max: Metric): string | undefined {
-  const r = metricRatio(m, max);
-  return r === undefined ? undefined : fillWidth(r);
 }
 
 export function textFieldText(t: TextField): string {

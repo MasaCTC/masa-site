@@ -23,7 +23,7 @@ import {
   followerHistoryOf,
   followersTile,
   growthViews,
-  likesSharesTile,
+  interactionsTile,
   statusView,
   topShareText,
   totalTile,
@@ -48,7 +48,7 @@ function Tile({ t }: { t: TileView }) {
 
 /** The stats section in its loading state (Suspense fallback). */
 function HomeStatsLoading() {
-  const labels = [STATS_COPY.tileLabels.followers, STATS_COPY.tileLabels.views, STATS_COPY.likesSharesLabel];
+  const labels = [STATS_COPY.tileLabels.followers, STATS_COPY.tileLabels.views, STATS_COPY.tileLabels.interactions];
   return (
     <HomeStatsFrame
       status={<Message tone="loading" as="span">{STATS_COPY.loadingHeadline}</Message>}
@@ -69,13 +69,13 @@ function HomeStatsLoading() {
 async function HomeStats() {
   const stats = await getInstagramStats();
   const status = statusView(stats);
-  const views = growthViews(followerHistoryOf(stats));
+  const views = growthViews(followerHistoryOf(stats), stats.startDate);
   const series = views?.["90D"];
   const state = chartState(stats, series);
   const tiles = [
     followersTile(stats),
     totalTile(stats, STATS_COPY.tileLabels.views, stats.totals.views, "views"),
-    likesSharesTile(stats),
+    interactionsTile(stats),
   ];
   const bars = viewsBars(stats);
   return (

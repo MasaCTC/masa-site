@@ -11,7 +11,7 @@ import { Meter } from "@/components/Meter";
 import { EDUCATION, ENTRIES, RESUME_PAGE } from "@/content/resume";
 import { CONTACT, PDF_URL } from "@/content/site";
 import { getInstagramStats, INSTAGRAM_SOURCE_KIND } from "@/lib/instagram";
-import { metricCompact } from "@/lib/instagram/format";
+import { formatMonthYear, metricCompact } from "@/lib/instagram/format";
 import type { InstagramStats, SourceKind } from "@/lib/instagram/types";
 import main from "../main.module.css";
 import { ResumeView, type ResumeViewEntry } from "./ResumeView";
@@ -34,7 +34,8 @@ function finishEntries(source: SourceKind, stats: InstagramStats | null): Resume
         : undefined;
       bullets = e.bulletsBySource?.[source] ?? e.bullets;
     }
-    return { id: e.id, title: e.title, sub: e.sub, when: e.when, bullets, stack, tags: e.tags };
+    const when = e.when.replace("{start} – ", stats ? `${formatMonthYear(stats.startDate)} – ` : "");
+    return { id: e.id, title: e.title, sub: e.sub, when, bullets, stack, tags: e.tags };
   });
 }
 

@@ -13,10 +13,18 @@ export type TextField =
 export type Reel = {
   /** 1-based rank by views. */
   rank: number;
+  /** ISO date (YYYY-MM-DD) the reel was posted. */
+  postedOn: string;
+  /** Reel URL; omitted = the card is not a link. */
+  url?: string;
   views: Metric;
+  /** The dashboard only gave a rounded figure: show the compact value but no exact-count tooltip. */
+  viewsRounded?: true;
   likes: Metric;
+  comments: Metric;
   shares: Metric;
   saves: Metric;
+  follows: Metric;
   caption: TextField;
   thumbnail: TextField;
 };
@@ -51,7 +59,20 @@ export type InstagramStats = {
   /** ISO date of the last good pull (status 'error'). */
   lastGoodAt?: string;
   followers: Metric;
-  totals: { views: Metric; likes: Metric; shares: Metric; saves: Metric };
+  /** ISO date (YYYY-MM-DD) of the first post: start of the account window and the resume entry. */
+  startDate: string;
+  /**
+   * ACCOUNT-level numbers (one window, from account insights). Never combine with per-reel
+   * numbers below: they come from different sources and windows.
+   */
+  totals: {
+    views: Metric;
+    /** Likes + comments + shares + saves; Instagram doesn't split it at account level. */
+    interactions: Metric;
+    likes: Metric;
+    shares: Metric;
+    saves: Metric;
+  };
   /** Ranked by views, best first. */
   topReels: Reel[];
   othersViews: Metric;

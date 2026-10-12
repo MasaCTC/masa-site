@@ -42,7 +42,7 @@ export type ResumeEntry = {
   bullets: string[];
   /**
    * Instagram entry only: `stack` is a template for Task 4 to fill from getInstagramStats()
-   * ({followers} -> compact followers, {views} -> compact views or its placeholder) so no
+   * ({followers} -> compact followers, {start} -> first-post month, {views} -> compact views or its placeholder) so no
    * number is hard-coded here (decision 5).
    */
   stackFromStats?: true;
@@ -57,7 +57,7 @@ export const ENTRIES: ResumeEntry[] = [
     bullets: ["Building with Claude Code as the implementer: scoping each task, constraining it with written system invariants, and verifying changes before they land.", "Run AI work in parallel on isolated branches with declared file ownership, so concurrent changes can’t collide.", "Settle visual direction in Claude Design before production art is drawn."] },
   { id: "retrolink", now: true, title: "RetroLink", sub: "Automotive embedded sensor node", when: "Jul 2026 – now", stack: "C · STM32 · CAN bus · LTspice", tags: ["C", "Hardware", "Claude Code"],
     bullets: ["Designed an analog front end in LTspice scaling 0–5 V automotive sensor signals into the STM32F446RE’s 3.3 V ADC range; bench-tested with potentiometers.", "Streamed ADC readings as CAN frames at 500 kbps through a TJA1050 transceiver, with live readout on an I2C OLED.", "Root-caused a CAN init timeout to a floating RX pin reading dominant; fixed with an internal pull-up."] },
-  { id: "ig", now: true, title: "@masamcodes", sub: "Building apps in public on Instagram", when: "[START] – now", stack: "{followers} followers · {views} views", stackFromStats: true, tags: [],
+  { id: "ig", now: true, title: "@masamcodes", sub: "Building apps in public on Instagram", when: "{start} – now", stack: "{followers} followers · {views} views", stackFromStats: true, tags: [],
     // bullets = the design's original (live) text; manual wording lives in bulletsBySource (NEW copy).
     bullets: ["Posting what I build, numbers included. Live stats on the Stats page."],
     bulletsBySource: {

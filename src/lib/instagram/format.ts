@@ -66,6 +66,13 @@ export function signedExact(n: number): string {
   return "0";
 }
 
+/** "2026-09-07" -> "Sep 2026" (resume dates). */
+export function formatMonthYear(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-\d{2}$/.exec(iso);
+  const month = m ? MONTHS[Number(m[2]) - 1] : undefined;
+  return m && month ? `${month} ${m[1]}` : iso;
+}
+
 /** "2026-10-11" -> "Oct 11, 2026". Pure string math: no Date, no timezone drift. */
 export function formatPulledDate(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);

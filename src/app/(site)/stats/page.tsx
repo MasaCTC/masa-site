@@ -19,6 +19,7 @@ import {
   engagementBars,
   followerHistoryOf,
   followersTile,
+  interactionsTile,
   growthViews,
   percentMeter,
   reelViews,
@@ -40,8 +41,7 @@ export const metadata: Metadata = {
 const TILE_LABELS = [
   STATS_COPY.tileLabels.followers,
   STATS_COPY.tileLabels.views,
-  STATS_COPY.tileLabels.likes,
-  STATS_COPY.tileLabels.shares,
+  STATS_COPY.tileLabels.interactions,
 ];
 
 /** The whole screen. `stats` null = loading (Suspense fallback). */
@@ -55,15 +55,14 @@ function StatsBody({ stats }: { stats: InstagramStats | null }) {
     ? [
         followersTile(stats),
         totalTile(stats, STATS_COPY.tileLabels.views, stats.totals.views, "views"),
-        totalTile(stats, STATS_COPY.tileLabels.likes, stats.totals.likes, "likes"),
-        totalTile(stats, STATS_COPY.tileLabels.shares, stats.totals.shares, "shares"),
+        interactionsTile(stats),
       ]
     : null;
 
-  const views = stats ? growthViews(followerHistoryOf(stats)) : null;
+  const views = stats ? growthViews(followerHistoryOf(stats), stats.startDate) : null;
   const reels = stats ? reelViews(stats) : null;
   const engage = stats ? engagementBars(stats) : [];
-  const topShare = stats ? percentMeter(stats.topReelShare) : null;
+  const topShare = stats ? percentMeter(stats.topReelShare, true) : null;
   const rate = stats ? percentMeter(stats.engagementRate) : null;
 
   return (
@@ -180,7 +179,7 @@ function StatsBody({ stats }: { stats: InstagramStats | null }) {
                 rank={r.rank}
                 viewsText={r.viewsText}
                 viewsTitle={r.viewsTitle}
-                href={CONTACT.instagram}
+                href={r.href}
                 thumbPlaceholder={r.thumbPlaceholder}
                 engagement={r.engagement}
                 engagementState={r.engagement.length === 0 ? "empty" : "ready"}

@@ -130,23 +130,24 @@ export const STATS_COPY = {
   chartErrorTitle: "Couldn't load follower history.",
   chartErrorDetail: "Daily snapshots resume on the next pull.",
   chartEmpty: "Not enough history yet. Growth shows after 2 days of snapshots.",
-  tileLabels: { followers: "Followers", views: "Total views", likes: "Total likes", shares: "Total shares" },
-  tileMetaAll: "across all reels",
+  tileLabels: { followers: "Followers", views: "Total views", interactions: "Interactions" },
+  /** Account-level window (account insights). */
+  tileMetaWindow: "last 90 days",
+  /** Prefix for numbers that mix sources / windows (top reel share). */
+  approx: "≈",
   followersGainMeta: "last 30 days",
-  likesSharesLabel: "Likes · shares",
   viewsCard: { title: "Where the views come from", total: "total", topShareLabel: "Top reel's share", topShareAria: "Top reel's share of all views" },
-  engageCard: { title: "How people engage", meta: "all reels", meterLabel: "Engagement per view", meterAria: "Engagement rate: likes, shares and saves per view" },
+  engageCard: { title: "How people engage", meta: "last 90 days", meterLabel: "Engagement per view", meterAria: "Engagement rate: interactions per view (likes, comments, shares and saves)" },
   growth: {
     title: "Follower growth",
     ranges: ["30D", "90D", "All"] as const,
     rangesAria: "Range",
     chartAria: "Follower growth chart. Use left and right arrow keys to move between days.",
-    // Summary line pieces (design: "10.2K today · +3,114 in 30 days" / "10.2K today · since [START DATE]").
+    // Summary line pieces (design: "10.2K today · +3,114 in 30 days" / "10.2K today · since Sep 7, 2026").
     // Only rendered when a real series exists; with no history the line is omitted.
     today: "today",
     window: { "30D": "in 30 days", "90D": "in 90 days" },
-    allSince: "since [START DATE]",
-    allStartLabel: "[START]",
+    allSince: "since",
   },
   /** Error / empty tile metas (Stats.dc.html script). */
   asOf: "as of",

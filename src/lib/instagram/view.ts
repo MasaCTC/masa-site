@@ -110,19 +110,13 @@ export function followersTile(stats: InstagramStats): TileView {
 /** A totals tile (views / likes / shares). */
 export function totalTile(stats: InstagramStats, label: string, m: Metric, unit: string): TileView {
   if (stats.status === "empty") return { label, meta: STATS_COPY.emptyTotalsMeta, metaKind: "meta", state: "empty" };
-  const meta = stats.status === "error" ? `${STATS_COPY.asOf} ${statusDate(stats)}` : STATS_COPY.tileMetaAll;
+  const meta = stats.status === "error" ? `${STATS_COPY.asOf} ${statusDate(stats)}` : STATS_COPY.tileMetaWindow;
   return metricTile(label, m, unit, meta);
 }
 
-/** Home "Likes · shares" tile: likes as the value, shares in the meta line. */
-export function likesSharesTile(stats: InstagramStats): TileView {
-  const label = STATS_COPY.likesSharesLabel;
-  const { likes, shares } = stats.totals;
-  if (stats.status === "empty") return { label, meta: STATS_COPY.emptyTotalsMeta, metaKind: "meta", state: "empty" };
-  // Placeholders read "[TOTAL SHARES]" with no trailing word (it would double up); real numbers get "shares".
-  const sharesText = isKnown(shares) ? `${metricCompact(shares)} shares` : shares.label;
-  if (!isKnown(likes)) return { label, meta: `${likes.label} · ${sharesText}`, metaKind: "meta", state: "empty" };
-  return { label, valueText: compact(likes.value), title: `${exact(likes.value)} likes`, meta: sharesText, metaKind: "meta", state: "ready" };
+/** Interactions tile (Home and Stats): account-level likes + comments + shares + saves. */
+export function interactionsTile(stats: InstagramStats): TileView {
+  return totalTile(stats, STATS_COPY.tileLabels.interactions, stats.totals.interactions, "interactions");
 }
 
 // ---------------------------------------------------------------------------------------
@@ -159,16 +153,19 @@ export function engagementBars(stats: InstagramStats): BarItem[] {
   });
 }
 
-/** Percent metric (68 = 68%) as a Meter value; unknown = the designed empty meter. */
-export function percentMeter(m: Metric): { valueText: string; ratio?: number } {
+/**
+ * Percent metric (68 = 68%) as a Meter value; unknown = the designed empty meter.
+ * `approx` prefixes "≈" (the top-reel share mixes sources, see manual-data.ts).
+ */
+export function percentMeter(m: Metric, approx = false): { valueText: string; ratio?: number } {
   if (!isKnown(m)) return { valueText: "—" };
-  return { valueText: `${m.value}%`, ratio: barRatio(m.value, 100) };
+  return { valueText: `${approx ? STATS_COPY.approx : ""}${m.value}%`, ratio: barRatio(m.value, 100) };
 }
 
 /** Home bars header: "top reel = 68% of all views", or the placeholder label. */
 export function topShareText(stats: InstagramStats): string {
   const s = stats.topReelShare;
-  return isKnown(s) ? `top reel = ${s.value}% ${STATS_COPY.homeTopShare}` : s.label;
+  return isKnown(s) ? `top reel = ${STATS_COPY.approx}${s.value}% ${STATS_COPY.homeTopShare}` : s.label;
 }
 
 /** "of [TOTAL VIEWS] total" / "of 6.0M total". */
@@ -184,6 +181,7 @@ export type ReelView = {
   rank: number;
   viewsText: string;
   viewsTitle?: string;
+  href?: string;
   thumbPlaceholder: string;
   caption: string;
   engagement: BarItem[];
@@ -214,7 +212,8 @@ export function reelViews(stats: InstagramStats): { reels: ReelView[]; anyEngage
     return {
       rank: r.rank,
       viewsText: metricCompact(r.views),
-      viewsTitle: isKnown(r.views) ? `${exact(r.views.value)} views` : undefined,
+      viewsTitle: isKnown(r.views) && !r.viewsRounded ? `${exact(r.views.value)} views` : undefined,
+      href: r.url,
       thumbPlaceholder: textFieldText(r.thumbnail),
       caption: textFieldText(r.caption),
       engagement,
@@ -269,7 +268,7 @@ function midDate(a: string, b: string): string {
   return formatShortDate(mid);
 }
 
-function seriesView(s: FollowerSeries): ChartView | null {
+function seriesView(s: FollowerSeries, startDate: string): ChartView | null {
   const pts = s.points;
   if (pts.length < 2) return null;
   const first = pts[0];
@@ -282,7 +281,7 @@ function seriesView(s: FollowerSeries): ChartView | null {
   const { line, area } = chartPaths(points);
   const g = STATS_COPY.growth;
   const isAll = s.range === "All";
-  const start = isAll ? g.allStartLabel : formatShortDate(first.date);
+  const start = isAll ? formatShortDate(startDate) : formatShortDate(first.date);
   const end = formatShortDate(last.date);
   return {
     points,
@@ -295,18 +294,21 @@ function seriesView(s: FollowerSeries): ChartView | null {
       : `Followers grew from ${compact(first.value)} on ${start} to ${compact(last.value)} on ${end}.`,
     summary:
       s.range === "All"
-        ? `${compact(last.value)} ${g.today} · ${g.allSince}`
+        ? `${compact(last.value)} ${g.today} · ${g.allSince} ${formatPulledDate(startDate)}`
         : `${compact(last.value)} ${g.today} · ${signedExact(last.value - first.value)} ${g.window[s.range]}`,
     change: signedExact(last.value - first.value),
   };
 }
 
 /** One ChartView per range that has at least 2 points; null when there is no history. */
-export function growthViews(history: FollowerSeries[] | null): Partial<Record<FollowerRange, ChartView>> | null {
+export function growthViews(
+  history: FollowerSeries[] | null,
+  startDate: string,
+): Partial<Record<FollowerRange, ChartView>> | null {
   if (!history) return null;
   const out: Partial<Record<FollowerRange, ChartView>> = {};
   for (const s of history) {
-    const v = seriesView(s);
+    const v = seriesView(s, startDate);
     if (v) out[s.range] = v;
   }
   return Object.keys(out).length > 0 ? out : null;

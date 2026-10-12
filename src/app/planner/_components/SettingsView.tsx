@@ -1,5 +1,176 @@
 "use client";
+// Settings (prototype "settings" panel): the Canvas calendar feed. The saved
+// link is only ever shown masked (getSettingsMasked / saveCanvasFeed return
+// scheme + host + ••••). Save replaces it, Remove clears it. Syncing itself
+// is Task 5.
+import { useId, useRef, useState } from "react";
+import { Button } from "@/components/Button";
+import { Message } from "@/components/Feedback";
+import { cx } from "@/components/types";
+import { saveCanvasFeed } from "@/lib/planner/actions";
 import type { SettingsView as Settings } from "@/lib/planner/queries";
-export function SettingsView({ panelId, tabId }: { panelId: string; tabId: string; settings: Settings }) {
-  return <section id={panelId} role="tabpanel" aria-labelledby={tabId} className="mn-grid" />;
+import { PLANNER_TZ } from "@/lib/planner/time";
+import { fieldError } from "../_lib/errors";
+import styles from "../planner.module.css";
+import { usePlanner } from "./context";
+
+type Props = { panelId: string; tabId: string; settings: Settings };
+
+function syncedText(at: Date | null): string {
+  if (!at) return "not synced yet";
+  const d = new Date(at);
+  const opts = { timeZone: PLANNER_TZ } as const;
+  return `last synced ${d.toLocaleDateString("en-US", { ...opts, month: "short", day: "numeric" })}, ${d.toLocaleTimeString("en-US", { ...opts, hour: "numeric", minute: "2-digit" })}`;
+}
+
+export function SettingsView({ panelId, tabId, settings }: Props) {
+  const { run } = usePlanner();
+  const uid = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+  // What is saved, as far as this page knows (updated from saveCanvasFeed).
+  const [saved, setSaved] = useState({
+    has: settings.hasFeed,
+    masked: settings.feedMasked,
+    readable: settings.feedReadable,
+  });
+  const [editing, setEditing] = useState(!settings.hasFeed);
+  const [url, setUrl] = useState("");
+  const [urlError, setUrlError] = useState<string | null>(null);
+  const [busy, setBusy] = useState<"save" | "remove" | null>(null);
+  const errId = `${uid}-err`;
+
+  const save = (value: string, kind: "save" | "remove") => {
+    setUrlError(null);
+    setBusy(kind);
+    run({
+      call: () => saveCanvasFeed({ url: value }),
+      success: kind === "save" ? "Canvas link saved." : "Canvas link removed.",
+      onOk: (r) => {
+        setBusy(null);
+        setSaved({ has: r.masked !== null, masked: r.masked, readable: true });
+        setUrl("");
+        setEditing(r.masked === null);
+      },
+      onFail: (r) => {
+        setBusy(null);
+        const msg = fieldError(r, "url");
+        if (msg) {
+          setUrlError(msg);
+          inputRef.current?.focus();
+          return true;
+        }
+      },
+    });
+  };
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!url.trim()) {
+      setUrlError("Paste the feed link first.");
+      inputRef.current?.focus();
+      return;
+    }
+    save(url, "save");
+  };
+
+  return (
+    <section id={panelId} role="tabpanel" aria-labelledby={tabId} className={cx("mn-grid", styles.settingsGrid)}>
+      <div className={cx("mn-card", styles.gap16)}>
+        <h2 className="mn-heading-sm">Canvas import</h2>
+        <p className={cx("mn-body-sm", styles.calNote)}>
+          Paste your Canvas calendar feed (Canvas → Calendar → Calendar Feed). It syncs every time you open the
+          planner, so new assignments are already there. You can still edit or reorder them here. The link is stored
+          encrypted and never shown in full.
+        </p>
+
+        {saved.has && !saved.readable ? (
+          <Message tone="error" detail="The key that protects it may have changed. Paste the link again, or remove it.">
+            Couldn&apos;t read the saved Canvas link.
+          </Message>
+        ) : null}
+
+        {editing ? (
+          <form className={styles.modalForm} onSubmit={submit} autoComplete="off" noValidate>
+            <div className="mn-field">
+              <label className="mn-label" htmlFor={`${uid}-url`}>
+                Calendar feed URL
+              </label>
+              <input
+                ref={inputRef}
+                className="mn-input mn-input--mono"
+                id={`${uid}-url`}
+                type="url"
+                inputMode="url"
+                spellCheck={false}
+                placeholder="https://canvas.example.edu/feeds/calendars/user_….ics"
+                value={url}
+                onChange={(e) => {
+                  setUrl(e.target.value);
+                  setUrlError(null);
+                }}
+                aria-invalid={urlError ? true : undefined}
+                aria-describedby={urlError ? errId : undefined}
+              />
+              {urlError ? (
+                <span id={errId}>
+                  <Message tone="error" as="span">
+                    {urlError}
+                  </Message>
+                </span>
+              ) : null}
+            </div>
+            <div className="mn-row">
+              <Button type="submit" loading={busy === "save"} disabled={busy !== null}>
+                {busy === "save" ? "Saving…" : "Save link"}
+              </Button>
+              {saved.has ? (
+                <button
+                  type="button"
+                  className={cx("mn-link", styles.closeLink)}
+                  onClick={() => {
+                    setEditing(false);
+                    setUrl("");
+                    setUrlError(null);
+                  }}
+                >
+                  Cancel
+                </button>
+              ) : null}
+            </div>
+          </form>
+        ) : (
+          <>
+            <div className="mn-field">
+              <label className="mn-label" htmlFor={`${uid}-masked`}>
+                Calendar feed URL
+              </label>
+              <input
+                className="mn-input mn-input--mono"
+                id={`${uid}-masked`}
+                readOnly
+                value={saved.masked ?? "Saved link (can't be shown)"}
+              />
+            </div>
+            <div className="mn-row">
+              <Button
+                onClick={() => {
+                  setEditing(true);
+                  requestAnimationFrame(() => inputRef.current?.focus());
+                }}
+                disabled={busy !== null}
+              >
+                Replace link
+              </Button>
+              <Button onClick={() => save("", "remove")} loading={busy === "remove"} disabled={busy !== null}>
+                {busy === "remove" ? "Removing…" : "Remove"}
+              </Button>
+            </div>
+          </>
+        )}
+
+        <span className="mn-mono">{saved.has ? `synced on open · ${syncedText(settings.lastSyncedAt)}` : "No feed connected."}</span>
+        <Message>Imported items land at the bottom of the checklist. Drag them up when they matter.</Message>
+      </div>
+    </section>
+  );
 }

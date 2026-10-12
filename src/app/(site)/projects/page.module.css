@@ -1,0 +1,40 @@
+/* Projects.dc.html inline styles, values unchanged. Overrides of mn- rules use enough classes
+   to win regardless of stylesheet order. */
+
+/* <div style="display: flex; flex-direction: column; gap: 12px; max-width: 680px;"> */
+.headCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 680px;
+}
+
+/* <article class="mn-card mn-card--lg" style="display: grid; grid-template-columns:
+   repeat(auto-fit, minmax(min(440px, 100%), 1fr)); gap: 40px; align-items: start;"> */
+:global(.mn-card.mn-card--lg).article {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr));
+  gap: 40px;
+  align-items: start;
+}
+
+/* <div style="display: flex; flex-direction: column; gap: 22px; min-width: 0;"> */
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+
+/* <div style="display: flex; flex-direction: column; gap: 14px;"> (build map) */
+.map {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* <h2 class="mn-heading-sm" style="font-size: 28px; line-height: 34px;"> (PullPilot) */
+:global(.mn-heading-sm).deadTitle {
+  font-size: 28px;
+  line-height: 34px;
+}

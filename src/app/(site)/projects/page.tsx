@@ -7,12 +7,12 @@ import { DemoArea } from "@/components/DemoArea";
 import { Pill } from "@/components/Pill";
 import { ProgressTrack } from "@/components/ProgressTrack";
 import {
+  COFURA,
   ONE_BASKET,
   ONE_BASKET_DEMO,
   ONE_BASKET_DEMO_MODE,
   PROJECTS_PAGE,
   PULLPILOT,
-  SECTOR_SCANNER,
 } from "@/content/projects";
 import { CONTACT } from "@/content/site";
 import main from "../main.module.css";
@@ -72,21 +72,28 @@ export default function ProjectsPage() {
       <Card size="lg" className={styles.article}>
         <div className={styles.col}>
           <div className="mn-card__row">
-            <h2 className="mn-heading-md">{SECTOR_SCANNER.name}</h2>
-            <Pill variant={SECTOR_SCANNER.status}>{SECTOR_SCANNER.statusLabel}</Pill>
+            <h2 className="mn-heading-md">{COFURA.name}</h2>
+            <Pill variant={COFURA.status}>{COFURA.statusLabel}</Pill>
           </div>
-          <p className="mn-body-lg">{SECTOR_SCANNER.summary}</p>
+          <p className="mn-body-lg">{COFURA.summary}</p>
+          <div className={`mn-meter ${styles.myPart}`}>
+            <div className="mn-meter__head">
+              <span className="mn-label">{COFURA.myPart.label}</span>
+              <span className="mn-meter__value">{COFURA.myPart.value}</span>
+            </div>
+            <span className="mn-body-sm">{COFURA.myPart.body}</span>
+          </div>
           <div className={styles.map}>
             <span className="mn-label">{PROJECTS_PAGE.buildMapLabel}</span>
             <ProgressTrack
-              phases={SECTOR_SCANNER.phases}
-              ariaLabel={SECTOR_SCANNER.mapAriaLabel}
-              empty
-              note={SECTOR_SCANNER.mapNote}
+              phases={COFURA.phases}
+              ariaLabel={COFURA.mapAriaLabel}
+              layout="stack-sm"
+              note={COFURA.stack}
             />
           </div>
         </div>
-        <DemoArea mode="message" message={SECTOR_SCANNER.demoMessage} />
+        <DemoArea mode="none" shots={[...COFURA.demo.shots]} caption={COFURA.demo.caption} />
       </Card>
 
       <Card size="lg" variant="dead" className={styles.article}>

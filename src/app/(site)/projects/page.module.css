@@ -38,3 +38,8 @@
   font-size: 28px;
   line-height: 34px;
 }
+
+/* <div class="mn-meter" style="max-width: 460px;"> (Cofura "My part") */
+.myPart {
+  max-width: 460px;
+}

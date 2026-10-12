@@ -6,7 +6,7 @@ import { ONE_BASKET_DEMO_URL } from "./site";
 export type ProjectStatus = "building" | "scoping" | "dead";
 
 export const PROJECTS_PAGE = {
-  eyebrow: "1 building · 1 scoping · 1 dead",
+  eyebrow: "2 building · 1 dead",
   title: "Projects",
   lead: "What I'm building, where each one actually is, and one that didn't make it.",
   cta: "Follow the build",
@@ -60,22 +60,37 @@ export const ONE_BASKET = {
   homeCaption: "phase 2 of 6 · Vertical slice",
 } as const;
 
-export const SECTOR_SCANNER = {
-  id: "stock-analysis-tool",
-  name: "Stock analysis tool",
-  status: "scoping",
-  statusLabel: "Scoping",
-  summary: "A sector trend scanner using technical analysis.",
+export const COFURA = {
+  id: "cofura",
+  name: "Cofura",
+  status: "building",
+  statusLabel: "Building",
+  summary:
+    "A phone app where UCI students find cofounders and teammates. Swipe, match, chat. Not a dating app.",
+  /** Home card blurb (shorter than the Projects page summary). */
+  homeSummary: "Cofounder matching for UCI students. I own chat + safety.",
+  myPart: {
+    label: "My part",
+    value: "chat + safety",
+    body: "One of three engineers. I own conversation and safety (unmatch, block, report, message filtering), plus CI and the build setup.",
+  },
+  /** Current phase = Foundations: no track fill (nothing done yet). */
   phases: [
-    { name: "Scoping", status: "current" },
-    { name: "First build: sector scanner", status: "upcoming" },
+    { name: "Foundations", status: "current" },
+    { name: "Core loop (MVP)", status: "upcoming" },
+    { name: "Launch at UCI", status: "upcoming" },
+    { name: "Trust + polish", status: "upcoming" },
+    { name: "Growth", status: "upcoming" },
+    { name: "Business", status: "upcoming" },
   ] satisfies Phase[],
-  mapAriaLabel: "Build map: scoping",
-  homeMapAriaLabel: "Build map: scoping",
-  mapNote: "phases get mapped once scoping is done",
-  homeCaption: "first build · the sector scanner",
-  demoMessage:
-    "Nothing to show yet. Still deciding what the scanner measures. Screenshots land here once the first build runs.",
+  mapAriaLabel: "Build map: phase 1 of 6, Foundations",
+  homeMapAriaLabel: "Build map: phase 1 of 6",
+  stack: "Expo · Supabase · GitHub Actions",
+  homeCaption: "phase 1 of 6 · Foundations",
+  demo: {
+    shots: ["[SCREEN 1]", "[SCREEN 2]", "[SCREEN 3]"],
+    caption: "No public build yet. Screens from the current dev build.",
+  },
 } as const;
 
 export const PULLPILOT = {
@@ -105,4 +120,4 @@ export const PULLPILOT = {
 } as const;
 
 /** Home "What I'm building" cards, in order. */
-export const HOME_PROJECT_CARDS = [ONE_BASKET, SECTOR_SCANNER, PULLPILOT] as const;
+export const HOME_PROJECT_CARDS = [ONE_BASKET, COFURA, PULLPILOT] as const;

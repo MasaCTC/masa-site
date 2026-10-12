@@ -14,7 +14,7 @@ import { Meter } from "@/components/Meter";
 import { Pill } from "@/components/Pill";
 import { ProgressTrack } from "@/components/ProgressTrack";
 import { StatTile } from "@/components/StatTile";
-import { HOME_PROJECT_CARDS, ONE_BASKET, PULLPILOT, SECTOR_SCANNER } from "@/content/projects";
+import { HOME_PROJECT_CARDS, COFURA, ONE_BASKET, PULLPILOT } from "@/content/projects";
 import { EDUCATION } from "@/content/resume";
 import { CONTACT, HOME, PDF_URL, STATS_COPY, TAGLINE } from "@/content/site";
 import { getInstagramStats } from "@/lib/instagram";
@@ -152,7 +152,7 @@ function HomeStatsFrame({
 }
 
 export default function Home() {
-  const [oneBasket, scanner, pullpilot] = HOME_PROJECT_CARDS;
+  const [oneBasket, cofura, pullpilot] = HOME_PROJECT_CARDS;
   return (
     <main className={main.main}>
       <Card as="section" size="lg" className={styles.hero}>
@@ -208,16 +208,11 @@ export default function Home() {
           </Card>
           <Card href="/projects">
             <div className="mn-card__row">
-              <h3 className="mn-heading-sm">{scanner.name}</h3>
-              <Pill variant={scanner.status}>{scanner.statusLabel}</Pill>
+              <h3 className="mn-heading-sm">{cofura.name}</h3>
+              <Pill variant={cofura.status}>{cofura.statusLabel}</Pill>
             </div>
-            <p className="mn-body-sm">{scanner.summary}</p>
-            <ProgressTrack
-              phases={dots(SECTOR_SCANNER.phases)}
-              ariaLabel={SECTOR_SCANNER.homeMapAriaLabel}
-              empty
-              note={SECTOR_SCANNER.homeCaption}
-            />
+            <p className="mn-body-sm">{cofura.homeSummary}</p>
+            <ProgressTrack phases={dots(COFURA.phases)} ariaLabel={COFURA.homeMapAriaLabel} note={COFURA.homeCaption} />
           </Card>
           <Card variant="dead">
             <div className="mn-card__row">

@@ -12,7 +12,7 @@
   min-height: 64px;
 }
 
-/* Projects.dc.html stock tool: <div class="mn-demo" style="min-height: 220px; justify-content: center;"> */
+/* Message well: <div class="mn-demo" style="min-height: 220px; justify-content: center;"> */
 :global(.mn-demo).messageWell {
   min-height: 220px;
   justify-content: center;

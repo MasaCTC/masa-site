@@ -69,7 +69,7 @@ export function ChartIcon(props: IconProps) {
   );
 }
 
-/** "Nothing to show yet" box (Projects, stock tool demo well). */
+/** "Nothing to show yet" box (message wells). */
 export function EmptyBoxIcon(props: IconProps) {
   return (
     <svg {...stroke} {...props}>

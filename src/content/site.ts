@@ -47,7 +47,7 @@ export const HOME = {
     label: "Right now",
     rows: [
       { text: "Building One Basket", pill: "building", pillLabel: "Building" },
-      { text: "Scoping a sector scanner", pill: "scoping", pillLabel: "Scoping" },
+      { text: "Building Cofura on a team of three", pill: "building", pillLabel: "Building" },
       { text: "CS at UCI, graduating early", mono: "Mar 2028" },
     ],
   },

@@ -1,7 +1,7 @@
 // DemoArea (DemoArea.md, Projects.dc.html): the inset well on a project card.
 // Modes: live (preview frame + "Try the live demo" link + optional Live pill),
 // clip (poster frame + raised play button + clip length), none (three phone screenshot
-// slots + honest caption), message (the "nothing to show yet" well, Projects stock tool).
+// slots + honest caption), message (the "nothing to show yet" well).
 // States: loading (frame as a 16:10 skeleton), error (danger message in the frame, then the
 // screenshot fallback when `shots` are given), empty (the same "nothing to show" well as
 // mode="message", with `emptyText`).

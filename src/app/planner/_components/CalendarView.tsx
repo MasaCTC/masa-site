@@ -8,6 +8,7 @@ import { Tabs } from "@/components/Tabs";
 import { cx } from "@/components/types";
 import type { Task } from "@/db/schema";
 import { addDays, addMonths, fmtDate, fmtMinutes, monthGrid, monthOf, weekStart } from "../_lib/dates";
+import { isTemp } from "../_lib/tasks";
 import styles from "../planner.module.css";
 import { Swatch } from "./bits";
 import { colorVar, usePlanner } from "./context";
@@ -17,17 +18,12 @@ const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const FULL_DAY = 480; // 8h fills the week view's load bar
 
 export function CalendarView({ panelId, tabId }: { panelId: string; tabId: string }) {
-  const { tasks, today } = usePlanner();
+  const { tasks, today, announce } = usePlanner();
   const [mode, setMode] = useState<Mode>("month");
   const [anchor, setAnchor] = useState(today);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const focusTitle = useRef(false);
-
-  useEffect(() => {
-    if (!focusTitle.current) return;
-    focusTitle.current = false;
-    titleRef.current?.focus();
-  });
+  const lastTitle = useRef<string | null>(null);
 
   const byDay = new Map<string, Task[]>();
   for (const t of tasks) {
@@ -45,6 +41,17 @@ export function CalendarView({ panelId, tabId }: { panelId: string; tabId: strin
       ? `Week of ${fmtDate(start, { month: "short", day: "numeric" })}`
       : fmtDate(start, { month: "long", year: "numeric" });
 
+  // A new range is spoken once: by focusing the title after "+N more", or
+  // through the planner's live region after Today / ← / → / Week / Month.
+  useEffect(() => {
+    const changed = lastTitle.current !== null && lastTitle.current !== title;
+    lastTitle.current = title;
+    if (focusTitle.current) {
+      focusTitle.current = false;
+      titleRef.current?.focus();
+    } else if (changed) announce(title);
+  }, [title, announce]);
+
   const step = (dir: 1 | -1) => setAnchor((a) => (mode === "week" ? addDays(a, 7 * dir) : addMonths(a, dir)));
   const showWeek = (day: string) => {
     setMode("week");
@@ -56,7 +63,7 @@ export function CalendarView({ panelId, tabId }: { panelId: string; tabId: strin
     <section id={panelId} role="tabpanel" aria-labelledby={tabId} className="mn-section">
       <div className="mn-section__head">
         <div className={cx("mn-row", styles.calTitleRow)}>
-          <h2 className={cx("mn-heading-md", styles.calTitle)} ref={titleRef} tabIndex={-1} aria-live="polite">
+          <h2 className={cx("mn-heading-md", styles.calTitle)} ref={titleRef} tabIndex={-1}>
             {title}
           </h2>
           <Tabs
@@ -100,8 +107,18 @@ export function CalendarView({ panelId, tabId }: { panelId: string; tabId: strin
 function TaskOpener({ task, className, children, label }: { task: Task; className: string; children: React.ReactNode; label?: string }) {
   const { openTask, classById } = usePlanner();
   const cls = task.classId ? classById.get(task.classId) : undefined;
+  // Unsaved (temp) tasks have no details to open yet.
+  const temp = isTemp(task.id);
   return (
-    <button type="button" className={className} style={colorVar(cls)} aria-label={label} onClick={() => openTask(task.id)}>
+    <button
+      type="button"
+      className={className}
+      style={colorVar(cls)}
+      aria-label={label}
+      disabled={temp}
+      data-task-opener={temp ? undefined : task.id}
+      onClick={() => openTask(task.id)}
+    >
       {children}
     </button>
   );

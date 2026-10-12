@@ -74,6 +74,7 @@ export function AddForm({ inputRef }: { inputRef: RefObject<HTMLInputElement | n
         </label>
         <input
           ref={inputRef}
+          data-planner-add=""
           className="mn-input"
           id={`${uid}-t`}
           placeholder="Add a task… (just type and press Enter)"

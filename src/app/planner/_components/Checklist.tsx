@@ -78,7 +78,7 @@ export function TaskTitle({ task }: { task: Task }) {
       {isTemp(task.id) ? (
         task.title
       ) : (
-        <button type="button" className={styles.titleBtn} onClick={() => openTask(task.id)}>
+        <button type="button" className={styles.titleBtn} data-task-opener={task.id} onClick={() => openTask(task.id)}>
           {task.title}
         </button>
       )}
@@ -316,10 +316,7 @@ export function Checklist({ items, fallbackFocus }: ChecklistProps) {
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onDragCancel={() => setActiveId(null)}
-      accessibility={{
-        announcements,
-        screenReaderInstructions: { draggable: "Focus the grip and use the up and down arrows to reorder." },
-      }}
+      accessibility={{ announcements }}
     >
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         <ol className="mn-checklist" aria-label="Running checklist, most important first">

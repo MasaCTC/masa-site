@@ -102,7 +102,11 @@ export function Planner(props: PlannerProps) {
     applyClass,
     run,
     announce,
-    openTask: setOpenTaskId,
+    openTask: (id: string | null) => {
+      // A banner from an earlier action should not reappear inside the modal.
+      if (id) setError(null);
+      setOpenTaskId(id);
+    },
     error,
   };
 

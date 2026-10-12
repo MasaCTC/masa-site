@@ -12,6 +12,11 @@ export function fieldError(r: ActionFail, field: string): string | undefined {
 }
 
 export function errorCopy(r: ActionFail, undo = "Your change was undone."): ErrorCopy {
+  const c = copyFor(r, undo);
+  return { lead: c.lead, detail: c.detail.trim() };
+}
+
+function copyFor(r: ActionFail, undo: string): ErrorCopy {
   switch (r.error) {
     case "unauthorized":
       return { lead: "Your session ended.", detail: "Sign in again to keep editing. " + undo };

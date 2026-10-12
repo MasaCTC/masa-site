@@ -73,7 +73,8 @@ export function Planner(props: PlannerProps) {
         // when the transition ends). A missing row means our copy is old.
         if (r.error === "stale" || r.error === "not_found") router.refresh();
         if (opts.onFail?.(r) === true) return;
-        const copy = errorCopy(r);
+        // Only say "undone" when something was actually shown and rolled back.
+        const copy = opts.optimistic ? errorCopy(r) : errorCopy(r, "");
         setError(copy);
         announce(copy.lead);
       });

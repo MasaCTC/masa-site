@@ -22,14 +22,18 @@ import {
   signedExact,
   textFieldText,
 } from "./format";
+import { SAMPLE_FOLLOWER_HISTORY } from "./manual-data";
 import type { FollowerRange, FollowerSeries, InstagramStats, Metric, Reel } from "./types";
 
 /**
- * The follower series the charts draw. Task 5 swaps this one line to
- * `return SAMPLE_FOLLOWER_HISTORY;` (from ./manual-data) to exercise hover + arrow keys.
+ * Verification switch (Task 5): true feeds the design's SAMPLE series (not real, never shipped)
+ * to every chart, to exercise hover + arrow keys. Must stay false.
  */
+const USE_SAMPLE_HISTORY = false;
+
+/** The follower series the charts draw (Home + Stats). */
 export function followerHistoryOf(stats: InstagramStats): FollowerSeries[] | null {
-  return stats.followerHistory;
+  return USE_SAMPLE_HISTORY ? SAMPLE_FOLLOWER_HISTORY : stats.followerHistory;
 }
 
 // ---------------------------------------------------------------------------------------

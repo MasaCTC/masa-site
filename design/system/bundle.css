@@ -312,7 +312,7 @@
 @media (prefers-reduced-motion: reduce) { .has-thumb.is-thumb-ready > .mn-thumb { transition: none; } }
 
 /* ===================== Planner components (Oct 2026) ===================== */
-/* ---------- NEW (proposed for the DS): Field, Checkbox, Checklist, Status, Week ---------- */
+/* Field, Checkbox, Checklist, StatusLine, Calendar (week + month), ClassColor, Modal */
 .mn-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .mn-field > .mn-label { font-size: 12px; }
 .mn-input, .mn-select { min-height: 44px; width: 100%; padding: 0 14px; border: 0; border-radius: var(--radius-md); background: var(--surface-sunken); box-shadow: var(--neu-inset-sm); color: var(--ink); font: 400 15px/20px var(--font-body); }
@@ -415,9 +415,5 @@
 .mn-color { appearance: none; width: 32px; height: 32px; border-radius: 10px; border: 0; cursor: pointer; background: var(--c); box-shadow: var(--neu-raised-sm); }
 .mn-color[aria-checked="true"] { box-shadow: var(--neu-inset-sm); outline: 2px solid var(--ink); outline-offset: 3px; }
 .mn-color:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
-
-.mn-modal .mn-btn { box-shadow: var(--neu-raised-sm); }
-
-   inside the well's edge, and a concentric radius (outer radius - padding) so the curves line up */
 
 .mn-modal .mn-btn { box-shadow: var(--neu-raised-sm); }

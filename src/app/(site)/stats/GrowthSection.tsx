@@ -41,6 +41,7 @@ export function GrowthSection({ views, state, errorAction }: GrowthSectionProps)
           onSelect={(id) => setRange(id as FollowerRange)}
         />
       </div>
+      {/* TODO: the design annotates the chart with a "reel #1 posted" note (Chart `note` prop); omitted until the posting date is known. */}
       <Chart
         key={range}
         state={chartState}

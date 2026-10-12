@@ -132,7 +132,6 @@ export const STATS_COPY = {
   tileLabels: { followers: "Followers", views: "Total views", likes: "Total likes", shares: "Total shares" },
   tileMetaAll: "across all reels",
   followersGainMeta: "last 30 days",
-  homeViewsMeta: "across all reels · last 90 days shown",
   likesSharesLabel: "Likes · shares",
   viewsCard: { title: "Where the views come from", total: "total", topShareLabel: "Top reel's share", topShareAria: "Top reel's share of all views" },
   engageCard: { title: "How people engage", meta: "all reels", meterLabel: "Engagement per view", meterAria: "Engagement rate: likes, shares and saves per view" },
@@ -158,9 +157,7 @@ export const STATS_COPY = {
   homeTopShare: "of all views",
   viewsBarsAria: "Views by reel",
   engageBarsAria: "Likes, shares and saves",
-  allOthersLabel: "All others",
   topReels: { title: "Top 3 reels", meta: "ranked by views", emptySlot: "Post more reels to fill this slot.", scaleNote: "Engagement bars inside each reel share one scale (Reel 1's likes = full bar), so reels can be compared." },
-  allOthersTitle: "Every other reel combined",
   // NEW copy (not from the design): designed empty states for unknown numbers (decision 5).
   noEngagementYet: "No engagement numbers yet.",
   noReelEngagementYet: "No per-reel numbers yet.",

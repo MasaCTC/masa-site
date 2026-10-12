@@ -3,14 +3,15 @@
 // clip (poster frame + raised play button + clip length), none (three phone screenshot
 // slots + honest caption), message (the "nothing to show yet" well, Projects stock tool).
 // States: loading (frame as a 16:10 skeleton), error (danger message in the frame, then the
-// screenshot fallback when `shots` are given).
+// screenshot fallback when `shots` are given), empty (the same "nothing to show" well as
+// mode="message", with `emptyText`).
 import type { ReactNode } from "react";
 import { Message, Skeleton } from "./Feedback";
 import { Link } from "./Link";
 import { Pill } from "./Pill";
 import { PlayIcon } from "./icons";
 import styles from "./DemoArea.module.css";
-import { cx } from "./types";
+import { cx, type DataState } from "./types";
 
 export type DemoAreaProps =
   | (DemoBase & {
@@ -45,7 +46,9 @@ export type DemoAreaProps =
     });
 
 type DemoBase = {
-  state?: "ready" | "loading" | "error";
+  state?: DataState;
+  /** Copy for state="empty" (rendered as the message well). */
+  emptyText?: ReactNode;
   errorText?: ReactNode;
   /** Error fallback screenshots (shown under the error frame). */
   fallbackShots?: string[];
@@ -84,6 +87,16 @@ export function DemoArea(props: DemoAreaProps) {
           </Message>
         </div>
         {props.fallbackShots?.length ? <Shots shots={props.fallbackShots} /> : null}
+      </div>
+    );
+  }
+
+  if (state === "empty") {
+    return (
+      <div className={cx("mn-demo", styles.messageWell, className)}>
+        <Message icon="box" className={styles.messagePad}>
+          {props.emptyText ?? "Nothing to show yet."}
+        </Message>
       </div>
     );
   }

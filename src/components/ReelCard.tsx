@@ -1,7 +1,8 @@
 // ReelCard (ReelCard.md, Stats.dc.html): top-reel card. 9:12 inset thumbnail with rank badge
 // and a raised views label, then the engagement BarList (compact) and a 2-line caption.
 // States: ready (wrapped in <a> when `href` is given), loading (skeletons), empty (the
-// "Post more reels" inset slot), thumbError (thumbnail shows "Preview unavailable", numbers stay).
+// "Post more reels" inset slot), thumbError (thumbnail shows "Preview unavailable", numbers stay),
+// error (whole-card failure: the thumbError thumbnail + the BarList error line).
 import type { ReactNode } from "react";
 import { BarList, type BarItem } from "./BarList";
 import { Message, Skeleton } from "./Feedback";
@@ -9,7 +10,7 @@ import styles from "./ReelCard.module.css";
 import { cx, isExternalHref, type DataState } from "./types";
 
 export type ReelCardProps = {
-  state?: "ready" | "loading" | "empty";
+  state?: DataState;
   rank?: number;
   /** Display-ready views ("7.7M"). */
   viewsText?: string;
@@ -65,20 +66,21 @@ export function ReelCard({
     );
   }
 
+  const isError = state === "error";
   const body = (
     <>
       <div className="mn-reel__thumb">
         {rank != null ? <span className="mn-reel__rank">{rank}</span> : null}
-        <span className="mn-placeholder">{thumbError ? "Preview unavailable" : thumbPlaceholder}</span>
+        <span className="mn-placeholder">{thumbError || isError ? "Preview unavailable" : thumbPlaceholder}</span>
         <div className="mn-reel__views" title={viewsTitle}>
           <span className="mn-label">Views</span>
-          <b>{viewsText}</b>
+          <b>{isError ? "—" : viewsText}</b>
         </div>
       </div>
       <BarList
         variant="compact"
         items={engagement}
-        state={engagementState}
+        state={isError ? "error" : engagementState}
         emptyText={engagementEmptyText}
         ariaLabel={`Reel ${rank ?? ""} engagement`.replace(/\s+/g, " ").trim()}
       />

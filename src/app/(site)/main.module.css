@@ -1,0 +1,5 @@
+/* The <main> landmark wraps each page's sections without adding a box, so its children stay
+   direct flex items of .mn-page and keep the drawn page gap. */
+.main {
+  display: contents;
+}

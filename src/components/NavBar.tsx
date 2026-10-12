@@ -4,14 +4,9 @@
 // follower stat chip. The chip shows "—" until a number is passed (loading).
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
+import { NAV_LINKS } from "@/content/site";
 import styles from "./NavBar.module.css";
 import { cx } from "./types";
-
-const LINKS = [
-  { href: "/stats", label: "Stats" },
-  { href: "/projects", label: "Projects" },
-  { href: "/resume", label: "Resume" },
-] as const;
 
 export type NavBarProps = {
   /** Display-ready follower count ("14.1K"). Undefined = loading, chip shows "—". */
@@ -35,7 +30,7 @@ export function NavBar({ followersText, ariaLabel }: NavBarProps) {
         </span>
       </NextLink>
       <div className="mn-nav__links">
-        {LINKS.map((l) => (
+        {NAV_LINKS.map((l) => (
           <NextLink
             key={l.href}
             href={l.href}

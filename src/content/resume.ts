@@ -175,7 +175,7 @@ export const TERMINAL_RESPONSES: Record<string, TermLine[]> = {
   skills: [L("proficient   python, c++"), L("working      c, c#, java"), L("tools        git, github, supabase, linear, unity, vs code, cursor"), L("ai           claude code, claude cowork, claude design, gemini api"), L("hardware     ltspice, fusion 360, 3d printing, automotive diagnostics")],
   education: [L("uc irvine · b.s. computer science · sep 2025 – mar 2028 (expected)"), M("python · c/c++ · data structures & algorithms (in progress) · intro to software engineering · computer organization · probability & statistics")],
   contact: [L(`email     ${CONTACT.email}`), L("github    github.com/MasaCTC"), L("linkedin  linkedin.com/in/masakichien"), L("instagram @masamcodes")],
-  // TODO(decision 4): while PDF_URL is null the PDF does not exist; Task 4 should swap this
-  // response for an honest "not available yet" line (NEW copy) instead of "downloaded".
-  "resume.pdf": [M("preparing pdf…"), { text: "✓ downloaded masaki_chien_resume.pdf", tone: "ok" }],
+  // NEW copy (not from the design): PDF_URL is null, so nothing can be downloaded yet (decision 4).
+  // Design's line, for when PDF_URL exists: [M("preparing pdf…"), { text: "✓ downloaded masaki_chien_resume.pdf", tone: "ok" }]
+  "resume.pdf": [M("no pdf yet. type contact to reach me for a copy")],
 };

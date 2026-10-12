@@ -63,5 +63,7 @@ export type InstagramStats = {
 };
 
 export interface InstagramSource {
+  /** Known without fetching, so loading fallbacks can pick the honest copy set. */
+  readonly kind: SourceKind;
   getStats(): Promise<InstagramStats>;
 }

@@ -18,6 +18,9 @@ export type {
 // (e.g. `const source: InstagramSource = graphApiSource;`). Pages only call getInstagramStats().
 const source: InstagramSource = manualSource;
 
+/** The active source's kind, for copy that renders before the stats resolve (loading fallbacks). */
+export const INSTAGRAM_SOURCE_KIND = source.kind;
+
 /**
  * Cached with Cache Components (`'use cache'` + cacheLife). Pages await this inside <Suspense>;
  * the Suspense fallback IS the "loading" state (see InstagramStatus in types.ts).

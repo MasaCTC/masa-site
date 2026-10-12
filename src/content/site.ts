@@ -66,6 +66,9 @@ export const HOME = {
   },
 } as const;
 
+/** NEW copy (not from the design): nav chip aria-label while the follower count loads ("—"). */
+export const NAV_LOADING_ARIA = "Followers loading. Open stats";
+
 /**
  * Honest wording keyed by source kind. 'manual' is what ships today; 'instagram-api' is the
  * design's original live copy, restored automatically when the Graph API source is wired in.
@@ -133,7 +136,29 @@ export const STATS_COPY = {
   likesSharesLabel: "Likes · shares",
   viewsCard: { title: "Where the views come from", total: "total", topShareLabel: "Top reel's share", topShareAria: "Top reel's share of all views" },
   engageCard: { title: "How people engage", meta: "all reels", meterLabel: "Engagement per view", meterAria: "Engagement rate: likes, shares and saves per view" },
-  growth: { title: "Follower growth", ranges: ["30D", "90D", "All"] as const, chartAria: "Follower growth chart. Use left and right arrow keys to move between days." },
+  growth: {
+    title: "Follower growth",
+    ranges: ["30D", "90D", "All"] as const,
+    rangesAria: "Range",
+    chartAria: "Follower growth chart. Use left and right arrow keys to move between days.",
+    // Summary line pieces (design: "10.2K today · +3,114 in 30 days" / "10.2K today · since [START DATE]").
+    // Only rendered when a real series exists; with no history the line is omitted.
+    today: "today",
+    window: { "30D": "in 30 days", "90D": "in 90 days" },
+    allSince: "since [START DATE]",
+    allStartLabel: "[START]",
+  },
+  /** Error / empty tile metas (Stats.dc.html script). */
+  asOf: "as of",
+  emptyFollowersMeta: "first snapshot",
+  emptyTotalsMeta: "no reels yet",
+  /** Home chart caption + top reels card (HomeA.dc.html). */
+  homeChartLabel: "Follower growth · 90 days",
+  homeTopReelsLabel: "Top reels by views",
+  homeTopShare: "of all views",
+  viewsBarsAria: "Views by reel",
+  engageBarsAria: "Likes, shares and saves",
+  allOthersLabel: "All others",
   topReels: { title: "Top 3 reels", meta: "ranked by views", emptySlot: "Post more reels to fill this slot.", scaleNote: "Engagement bars inside each reel share one scale (Reel 1's likes = full bar), so reels can be compared." },
   allOthersTitle: "Every other reel combined",
   // NEW copy (not from the design): designed empty states for unknown numbers (decision 5).

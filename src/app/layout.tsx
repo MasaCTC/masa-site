@@ -16,7 +16,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Masa Chien",
+  title: { default: "Masa Chien", template: "%s · Masa Chien" },
 };
 
 // Runs before paint: light by default, follows the OS, updates on change.

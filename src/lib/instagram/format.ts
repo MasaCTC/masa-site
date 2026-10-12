@@ -74,6 +74,22 @@ export function textFieldText(t: TextField): string {
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
 
+/** "2026-10-11" -> "Oct 11" (chart axis / tooltip). Pure string math, like formatPulledDate. */
+export function formatShortDate(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return iso;
+  const month = MONTHS[Number(m[2]) - 1];
+  return month ? `${month} ${Number(m[3])}` : iso;
+}
+
+/** Signed exact change: "+3,114", "−120" (U+2212, StatTile.md), "0". */
+export function signedExact(n: number): string {
+  const v = Math.round(n);
+  if (v > 0) return `+${exact(v)}`;
+  if (v < 0) return `\u2212${exact(-v)}`;
+  return "0";
+}
+
 /** "2026-10-11" -> "Oct 11, 2026". Pure string math: no Date, no timezone drift. */
 export function formatPulledDate(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);

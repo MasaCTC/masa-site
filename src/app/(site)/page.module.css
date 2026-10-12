@@ -1,0 +1,96 @@
+/* HomeA.dc.html inline styles, values unchanged. Overrides of mn- rules use two (or three)
+   classes so they win regardless of stylesheet order. */
+
+/* <section class="mn-card mn-card--lg" style="display: grid; grid-template-columns:
+   repeat(auto-fit, minmax(min(380px, 100%), 1fr)); gap: 40px; align-items: center; padding: 48px;"> */
+:global(.mn-card.mn-card--lg).hero {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr));
+  gap: 40px;
+  align-items: center;
+  padding: 48px;
+}
+
+/* style="display: flex; flex-direction: column; gap: 20px; min-width: 0;" */
+.heroCol {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* <p class="mn-body-lg" style="max-width: 520px;"> */
+.tagline {
+  max-width: 520px;
+}
+
+/* <div class="mn-row" style="gap: 16px;"> */
+:global(.mn-row).buttons {
+  gap: 16px;
+}
+
+/* <div class="mn-card mn-card--inset" style="gap: 14px;"> */
+:global(.mn-card).rightNow {
+  gap: 14px;
+}
+
+/* style="display: flex; flex-direction: column; gap: 12px;" */
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* style="display: flex; flex-direction: column; gap: 8px;" */
+.headCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 24px;" */
+.chartGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+  gap: 24px;
+}
+
+/* <div class="mn-card" style="gap: 20px;"> */
+:global(.mn-card).barsCard {
+  gap: 20px;
+}
+
+/* <p style="margin: 0; font-size: 14px; line-height: 20px;"> */
+.deadBody {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* <section class="mn-card mn-card--lg" style="display: grid; grid-template-columns:
+   repeat(auto-fit, minmax(min(360px, 100%), 1fr)); gap: 28px; align-items: center;"> */
+:global(.mn-card.mn-card--lg).resume {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+  gap: 28px;
+  align-items: center;
+}
+
+/* style="display: flex; flex-direction: column; gap: 10px;" */
+.resumeCol {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* <div class="mn-meter" ... style="max-width: 420px; margin-top: 6px;"> */
+:global(.mn-meter).meter {
+  max-width: 420px;
+  margin-top: 6px;
+}
+
+/* <div class="mn-row" style="justify-content: flex-end; gap: 16px;"> */
+:global(.mn-row).resumeButtons {
+  justify-content: flex-end;
+  gap: 16px;
+}

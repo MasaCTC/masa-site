@@ -1,0 +1,305 @@
+/* Planner page rules. Values come from design/screens/Planner.prototype.html
+   (its page <style> block and inline styles). Rules that sit on a design-system
+   class use the two-class form (:global(.mn-x).y) so they win over bundle.css,
+   including its media queries, the way the prototype's inline styles did. */
+
+/* ---------- shell ---------- */
+:global(.mn-section).me {
+  gap: 32px;
+}
+
+.headCol {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signOut {
+  margin: 0;
+}
+
+:global(.mn-tabs).tabs {
+  align-self: flex-start;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+/* Canvas sync line slot (filled by Task 5). */
+:global(.mn-row).syncLine {
+  gap: 8px;
+}
+
+/* ---------- today ---------- */
+.todayGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .todayGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+:global(.mn-card).todayCard {
+  gap: 20px;
+}
+
+.addForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.addQuick {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+}
+
+:global(.mn-link).addMore {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.addRow {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr) minmax(0, 1fr) 90px auto;
+  grid-template-areas: "t c d e b";
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .addRow {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "t t" "c c" "d e" "b b";
+  }
+}
+
+.areaC {
+  grid-area: c;
+}
+
+.areaD {
+  grid-area: d;
+}
+
+.areaE {
+  grid-area: e;
+}
+
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+:global(.mn-card).gap16 {
+  gap: 16px;
+}
+
+:global(.mn-card).preview {
+  gap: 10px;
+  padding: 16px;
+}
+
+:global(.mn-status__text).previewText {
+  font-size: 17px;
+  line-height: 22px;
+}
+
+/* The grip is the only drag handle; touch-action lets a finger drag it
+   without the page scrolling (pointer sensor). */
+:global(.mn-grip).grip {
+  touch-action: none;
+}
+
+/* Task title opens the task modal: a bare button that reads as the title.
+   Focus ring matches .mn-check__pub (bundle.css). */
+.titleBtn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.titleBtn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------- calendar ---------- */
+:global(.mn-row).calTitleRow {
+  gap: 16px;
+}
+
+.calTitle:focus {
+  outline: none;
+}
+
+:global(.mn-mono).nothingDue {
+  color: var(--ink-subtle);
+}
+
+.calNote {
+  margin: 0;
+}
+
+:global(.mn-link).moreBtn {
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* ---------- classes ---------- */
+.classList {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.classGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.classGroupHead {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+:global(.mn-card).classCard {
+  appearance: none;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+  width: 100%;
+  gap: 12px;
+}
+
+.classCardList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.classCardCount {
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.classCardCount b {
+  font: 600 22px/1 var(--font-mono);
+  color: var(--ink);
+  margin-right: 4px;
+}
+
+:global(.mn-body-sm).subtle {
+  color: var(--ink-subtle);
+}
+
+:global(.mn-link).backBtn {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.detailHeadCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+:global(.mn-display-lg).detailTitle {
+  font-size: 36px;
+  line-height: 40px;
+}
+
+.detailTitle:focus {
+  outline: none;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+:global(.mn-card).gap14 {
+  gap: 14px;
+}
+
+:global(.mn-card).gap12 {
+  gap: 12px;
+}
+
+/* Class detail rows: checkbox, body, relative due (no grip / rank / remove). */
+:global(.mn-check).detailRow {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+:global(.mn-label).subLabel {
+  margin-top: 8px;
+}
+
+/* ---------- settings ---------- */
+:global(.mn-grid).settingsGrid {
+  align-items: start;
+}
+
+/* ---------- modal ---------- */
+.modalTitleCol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+:global(.mn-link).closeLink {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

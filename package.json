@@ -12,6 +12,8 @@
     "test": "node --experimental-strip-types --no-warnings=MODULE_TYPELESS_PACKAGE_JSON --test 'src/**/*.test.ts'"
   },
   "dependencies": {
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0",
     "@neondatabase/serverless": "1.2.0",
     "drizzle-orm": "0.45.4",
     "next": "16.4.0",

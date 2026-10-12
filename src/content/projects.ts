@@ -74,19 +74,19 @@ export const COFURA = {
     value: "chat + safety",
     body: "One of three engineers. I own conversation and safety (unmatch, block, report, message filtering), plus CI and the build setup.",
   },
-  /** Current phase = Foundations: no track fill (nothing done yet). */
+  /** Current phase = Core loop (MVP); Foundations done, so the track fills to 1/6. */
   phases: [
-    { name: "Foundations", status: "current" },
-    { name: "Core loop (MVP)", status: "upcoming" },
+    { name: "Foundations", status: "done" },
+    { name: "Core loop (MVP)", status: "current" },
     { name: "Launch at UCI", status: "upcoming" },
     { name: "Trust + polish", status: "upcoming" },
     { name: "Growth", status: "upcoming" },
     { name: "Business", status: "upcoming" },
   ] satisfies Phase[],
-  mapAriaLabel: "Build map: phase 1 of 6, Foundations",
-  homeMapAriaLabel: "Build map: phase 1 of 6",
+  mapAriaLabel: "Build map: phase 2 of 6, Core loop (MVP)",
+  homeMapAriaLabel: "Build map: phase 2 of 6",
   stack: "Expo · Supabase · GitHub Actions",
-  homeCaption: "phase 1 of 6 · Foundations",
+  homeCaption: "phase 2 of 6 · Core loop (MVP)",
   demo: {
     shots: ["[SCREEN 1]", "[SCREEN 2]", "[SCREEN 3]"],
     caption: "No public build yet. Screens from the current dev build.",

@@ -11,19 +11,9 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
+import { CLASS_COLORS } from "./class-colors";
 
-// The 8 class colors from design/system (ClassColor.md, tokens.css --cls-*).
-export const CLASS_COLORS = [
-  "clay",
-  "moss",
-  "sea",
-  "plum",
-  "ochre",
-  "slate",
-  "rose",
-  "teal",
-] as const;
-export type ClassColor = (typeof CLASS_COLORS)[number];
+export { CLASS_COLORS, type ClassColor } from "./class-colors";
 
 export const classKind = pgEnum("class_kind", ["class", "category"]);
 export const classColor = pgEnum("class_color", CLASS_COLORS);

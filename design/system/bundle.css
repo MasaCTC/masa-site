@@ -223,7 +223,7 @@
 .mn-nav__brand--capsule { padding: 8px 20px 8px 8px; background: var(--surface); background: color-mix(in srgb, var(--surface) 82%, transparent); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); box-shadow: var(--neu-raised-lg); }
 @media (max-width: 640px) { .mn-nav { top: 8px; border-radius: var(--radius-lg); } .mn-nav__brand { font-size: 16px; } .mn-nav__links a { padding: 0 12px; font-size: 14px; } .mn-navsplit { top: 8px; } }
 .mn-nav__links a:hover, .mn-nav__links a.is-hover { color: var(--ink); }
-.mn-nav__links a[aria-current="page"] { color: var(--ink); box-shadow: var(--neu-inset-sm); background: var(--surface-sunken); }
+.mn-nav__links a[aria-current="page"] { color: var(--ink); box-shadow: var(--neu-raised-sm); background: var(--surface); }
 
 /* ---------- Demo area ---------- */
 .mn-demo { border-radius: var(--radius-md); background: var(--surface-sunken); box-shadow: var(--neu-inset-md); padding: 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
@@ -290,3 +290,22 @@
 .mn-grid { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); }
 .mn-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 @media (max-width: 640px) { .mn-page { padding: 16px 16px 64px; gap: 36px; } }
+
+/* ---------- Sliding thumb (Tabs + NavBar dock) ----------
+   ONE raised piece that travels to whatever is selected and morphs to its size
+   (a 44px circle on the MC badge, a pill on a link, a rounded rect on a tab).
+   Without the script the static rules above still show the selection, so nothing breaks.
+   The script sets --thumb-x/-y/-w/-h on the thumb and adds .has-thumb to the container. */
+.mn-tabs { position: relative; } /* .mn-nav is already position: sticky, which also anchors the thumb */
+.mn-thumb { position: absolute; top: 0; left: 0; z-index: 0; pointer-events: none; width: var(--thumb-w, 0px); height: var(--thumb-h, 0px); transform: translate(var(--thumb-x, 0px), var(--thumb-y, 0px)); border-radius: var(--radius-pill); background: var(--surface); box-shadow: var(--neu-raised-sm); opacity: 0; }
+.has-thumb > .mn-thumb { opacity: 1; }
+.has-thumb.is-thumb-ready > .mn-thumb { transition: transform 340ms cubic-bezier(.3, .8, .25, 1.06), width 340ms cubic-bezier(.3, .8, .25, 1.06), height 340ms cubic-bezier(.3, .8, .25, 1.06); }
+.mn-tabs > .mn-thumb { border-radius: 12px; }
+.mn-tabs.has-thumb .mn-tab { position: relative; z-index: 1; }
+.mn-tabs.has-thumb .mn-tab[aria-selected="true"], .mn-tabs.has-thumb .mn-tab.is-selected { background: transparent; box-shadow: none; }
+.mn-nav--dock.has-thumb .mn-nav__brand, .mn-nav--dock.has-thumb .mn-nav__links a { position: relative; z-index: 1; }
+.mn-nav--dock.has-thumb .mn-nav__mark { background: transparent; box-shadow: none; transition: color 200ms; }
+.mn-nav--dock.has-thumb .mn-nav__brand:not([aria-current="page"]) .mn-nav__mark { color: var(--ink-muted); }
+.mn-nav--dock.has-thumb .mn-nav__brand:hover .mn-nav__mark { color: var(--ink); }
+.mn-nav--dock.has-thumb .mn-nav__links a[aria-current="page"] { background: transparent; box-shadow: none; }
+@media (prefers-reduced-motion: reduce) { .has-thumb.is-thumb-ready > .mn-thumb { transition: none; } }

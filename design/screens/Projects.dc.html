@@ -18,12 +18,12 @@
   <nav class="mn-nav mn-nav--dock" aria-label="Main">
     <a class="mn-nav__brand" href="HomeA.dc.html" style="padding-right: 4px;" aria-label="Masa Chien, home"><span class="mn-nav__mark" aria-hidden="true">MC</span></a>
     <div class="mn-nav__links"><a href="Stats.dc.html">Stats</a><a href="Projects.dc.html" aria-current="page">Projects</a><a href="Resume.dc.html">Resume</a></div>
-    <a class="mn-nav__stat" href="Stats.dc.html" aria-label="10,214 followers, live. Open stats">10.2K</a>
+    <a class="mn-nav__stat" href="Stats.dc.html" aria-label="14,136 followers. Open stats">14.1K</a>
   </nav>
 
   <header class="mn-section__head">
     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 680px;">
-      <span class="mn-label">1 building · 1 scoping · 1 dead</span>
+      <span class="mn-label">2 building · 1 dead</span>
       <h1 class="mn-display-lg">Projects</h1>
       <p class="mn-body-lg">What I'm building, where each one actually is, and one that didn't make it.</p>
     </div>
@@ -65,19 +65,28 @@
 
   <article class="mn-card mn-card--lg" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(440px, 100%), 1fr)); gap: 40px; align-items: start;">
     <div style="display: flex; flex-direction: column; gap: 22px; min-width: 0;">
-      <div class="mn-card__row"><h2 class="mn-heading-md">Stock analysis tool</h2><span class="mn-pill mn-pill--scoping">Scoping</span></div>
-      <p class="mn-body-lg">A sector trend scanner using technical analysis.</p>
+      <div class="mn-card__row"><h2 class="mn-heading-md">Cofura</h2><span class="mn-pill mn-pill--building">Building</span></div>
+      <p class="mn-body-lg">A phone app where UCI students find cofounders and teammates. Swipe, match, chat. Not a dating app.</p>
+      <div class="mn-meter" style="max-width: 460px;">
+        <div class="mn-meter__head"><span class="mn-label">My part</span><span class="mn-meter__value">chat + safety</span></div>
+        <span class="mn-body-sm">One of three engineers. I own conversation and safety (unmatch, block, report, message filtering), plus CI and the build setup.</span>
+      </div>
       <div style="display: flex; flex-direction: column; gap: 14px;">
         <span class="mn-label">Build map</span>
-        <ol class="mn-track is-empty" aria-label="Build map: scoping" style="grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: row;">
-          <li class="mn-phase is-current" aria-current="step"><span class="mn-phase__dot"></span><span class="mn-phase__name">Scoping</span></li>
-          <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">First build: sector scanner</span></li>
+        <ol class="mn-track mn-track--stack-sm" aria-label="Build map: phase 1 of 6, Foundations">
+          <li class="mn-phase is-current" aria-current="step"><span class="mn-phase__dot"></span><span class="mn-phase__name">Foundations</span></li>
+          <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Core loop (MVP)</span></li>
+          <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Launch at UCI</span></li>
+          <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Trust + polish</span></li>
+          <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Growth</span></li>
+          <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Business</span></li>
         </ol>
-        <span class="mn-mono">phases get mapped once scoping is done</span>
+        <span class="mn-mono">Expo · Supabase · GitHub Actions</span>
       </div>
     </div>
-    <div class="mn-demo" style="min-height: 220px; justify-content: center;">
-      <div class="mn-msg" style="padding: 12px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12h6"/></svg>Nothing to show yet. Still deciding what the scanner measures. Screenshots land here once the first build runs.</div>
+    <div class="mn-demo">
+      <div class="mn-demo__shots"><div class="mn-demo__shot">[SCREEN 1]</div><div class="mn-demo__shot">[SCREEN 2]</div><div class="mn-demo__shot">[SCREEN 3]</div></div>
+      <p class="mn-body-sm">No public build yet. Screens from the current dev build.</p>
     </div>
   </article>
 

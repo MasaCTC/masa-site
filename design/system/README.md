@@ -22,6 +22,10 @@ Down-to-earth and honest. Real numbers, no hype.
 
 Never hand-write a shadow in a screen. If a new depth is needed, add a token.
 
+Dark theme highlight (`shadow-light` dark) is `#332f29`, toned down on Oct 11, 2026 from `#3a352f` because it read as a glow around raised things.
+
+**Motion: selection slides.** Where one item out of a row is selected (Tabs, the dock NavBar), the raised piece is a single thumb that slides to the new item and morphs to its size (340 ms, `cubic-bezier(.3, .8, .25, 1.06)`, a slight overshoot). Nothing else on the site animates position. Respect `prefers-reduced-motion`: the thumb jumps.
+
 **One red.** `red` is the fill of the primary button and nothing else: one per view, so the eye goes there. Errors use `danger` (burnt amber), status uses the `status-*` colors, the current build phase uses `status-scoping` (blue). Red never marks data.
 
 **Contrast rules** (neumorphism is famous for failing these, so they are hard rules):

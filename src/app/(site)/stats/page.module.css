@@ -1,0 +1,54 @@
+/* Stats.dc.html inline styles, values unchanged. Overrides of mn- rules use two classes so
+   they win regardless of stylesheet order. */
+
+/* <div style="display: flex; flex-direction: column; gap: 12px; max-width: 680px;"> */
+.heroCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 680px;
+}
+
+/* <div class="mn-card mn-card--inset" role="alert" style="flex-direction: row; align-items: center;
+   justify-content: space-between; flex-wrap: wrap; padding: 20px 24px;"> */
+:global(.mn-card).banner {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 20px 24px;
+}
+
+/* <div class="mn-grid" style="grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));"> */
+:global(.mn-grid).tiles {
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+}
+
+/* style="display: flex; flex-direction: column; gap: 8px;" (growth section head) */
+.headCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 24px;" */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+  gap: 24px;
+}
+
+/* <section class="mn-card" style="gap: 20px;"> */
+:global(.mn-card).card {
+  gap: 20px;
+}
+
+/* <div class="mn-grid" style="grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));"> */
+:global(.mn-grid).reels {
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+}
+
+/* <p class="mn-mono" style="margin: 0;"> */
+:global(.mn-mono).note {
+  margin: 0;
+}

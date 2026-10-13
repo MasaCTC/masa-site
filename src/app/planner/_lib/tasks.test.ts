@@ -6,7 +6,7 @@ import { applyTaskAction, neighboursAfterMove, onTodaysList } from "./tasks.ts";
 function t(id: string, extra: Partial<Task> = {}): Task {
   return {
     id, title: id, classId: null, dueDate: null, estMinutes: null, done: false, doneAt: null,
-    rank: "V", source: "manual", canvasUid: null, canvasUrl: null, handEdited: false,
+    rank: "V", source: "manual", canvasUid: null, canvasUrl: null, handEdited: false, onToday: false,
     createdAt: new Date(0), ...extra,
   };
 }

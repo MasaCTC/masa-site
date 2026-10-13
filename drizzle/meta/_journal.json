@@ -8,6 +8,13 @@
       "when": 1791834881569,
       "tag": "0000_gifted_leopardon",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791925345243,
+      "tag": "0001_soft_reaper",
+      "breakpoints": true
     }
   ]
 }

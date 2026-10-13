@@ -54,6 +54,8 @@ export const tasks = pgTable(
     // Set when a Canvas task is edited/reordered/toggled by hand, so Canvas
     // sync never overwrites its title/rank/done.
     handEdited: boolean("hand_edited").notNull().default(false),
+    // Today's list membership; Canvas sync never changes it.
+    onToday: boolean("on_today").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

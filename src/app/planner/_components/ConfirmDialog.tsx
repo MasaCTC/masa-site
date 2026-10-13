@@ -76,7 +76,7 @@ export function ConfirmDialog({ open, title, sentence, onConfirm, onClosed }: Pr
   return (
     <dialog
       ref={ref}
-      className="mn-modal"
+      className="mn-modal mn-modal--confirm"
       aria-labelledby={titleId}
       aria-describedby={textId}
       onClose={onClose}
@@ -97,11 +97,11 @@ export function ConfirmDialog({ open, title, sentence, onConfirm, onClosed }: Pr
       {open ? (
         <div className="mn-modal__in">
           <div className="mn-modal__head">
-            <h2 className={cx("mn-heading-md", styles.confirmTitle)} id={titleId}>
+            <h2 className={cx("mn-heading-sm", styles.confirmTitle)} id={titleId}>
               {title}
             </h2>
           </div>
-          <p className="mn-body-lg" id={textId}>
+          <p className="mn-body-sm" id={textId}>
             {sentence}
           </p>
           <div className="mn-row">

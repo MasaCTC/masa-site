@@ -15,4 +15,8 @@ A centered card that floats over a dimmed, blurred page. The dim layer is the `s
 
 ## Confirm variant
 
-Destructive actions (delete task, delete class, remove Canvas feed) ask first with the same Modal: title "Delete \"{task}\"?", one plain sentence on what happens, then **Keep it** (default focus) and **Delete** (`mn-btn`, label in `danger`). Never red: red is only the primary CTA. Escape or backdrop click = Keep it.
+Destructive actions (delete task, delete class, remove Canvas feed) ask first with the same Modal plus `mn-modal--confirm` (420px wide, 24px padding): title "Delete \"{task}\"?" in `mn-heading-sm` (20px), one plain sentence in `mn-body-sm` (14px), then **Keep it** (default focus) and **Delete** (`mn-btn mn-btn--sm`, label in `danger`). Never red: red is only the primary CTA. Escape or backdrop click = Keep it.
+
+## Pressed buttons
+
+Pressing a button pushes it into the surface: the raised shadow turns into an inset well (`neu-inset-md`, or `neu-inset-sm` for the smaller buttons inside a modal) on `surface-sunken`. The footprint never changes: no scale, no translate. A button that only loses its shadow reads as shrinking, not pressing.

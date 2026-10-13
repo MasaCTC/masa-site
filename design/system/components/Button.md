@@ -8,7 +8,7 @@ A raised neumorphic control that performs an action; `--primary` is the one red 
 |---|---|---|
 | Default | Raised `neu-raised-md` (primary: red fill) | — |
 | Hover | Lifts to `neu-raised-lg`; primary goes `red-hover` | `:hover` / `.is-hover` |
-| Pressed | Sinks to `neu-inset-sm`, 1px down; primary `red-pressed` + `neu-red-pressed` | `:active` / `.is-pressed` |
+| Pressed | Pushed into the surface: the raised shadow becomes an inset well (`neu-inset-md`; `neu-inset-sm` inside a modal) on `surface-sunken`. Same footprint: no scale, no translate. Primary: `red-pressed` + `neu-red-pressed` | `:active` / `.is-pressed` |
 | Focus | 3px `focus-ring` outline, 4px offset | `:focus-visible` / `.is-focus` |
 | Disabled | Flat (`neu-flat`), `ink-disabled` label, dashed edge. Primary loses its red: a disabled CTA must not pull the eye | `disabled` / `.is-disabled` + `aria-disabled` |
 | Loading | Spinner replaces the icon, label says what is happening ("Preparing PDF…"), `aria-busy="true"`, keeps its size | `.is-loading` |

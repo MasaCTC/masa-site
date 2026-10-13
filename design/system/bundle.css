@@ -38,7 +38,7 @@
 /* ---------- Button ---------- */
 .mn-btn { appearance: none; border: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px 22px; border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: 600 15px/20px var(--font-body); text-decoration: none; box-shadow: var(--neu-raised-md); transition: box-shadow .15s ease, transform .15s ease, background-color .15s ease; }
 .mn-btn:hover, .mn-btn.is-hover { box-shadow: var(--neu-raised-lg); }
-.mn-btn:active, .mn-btn.is-pressed { box-shadow: var(--neu-inset-sm); transform: translateY(1px); }
+.mn-btn:active, .mn-btn.is-pressed { box-shadow: var(--neu-inset-md); background: var(--surface-sunken); transform: none; transition-duration: .08s; }
 .mn-btn--primary { background: var(--red); color: var(--on-red); box-shadow: var(--neu-red-raised); }
 .mn-btn--primary:hover, .mn-btn--primary.is-hover { background: var(--red-hover); box-shadow: var(--neu-raised-lg); }
 .mn-btn--primary:active, .mn-btn--primary.is-pressed { background: var(--red-pressed); box-shadow: var(--neu-red-pressed); }
@@ -419,3 +419,9 @@
 .mn-color:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
 
 .mn-modal .mn-btn { box-shadow: var(--neu-raised-sm); }
+/* Pressed = pushed into the surface, never a smaller copy: same footprint, raised shadow becomes an inset well. */
+.mn-modal .mn-btn:active, .mn-modal .mn-btn.is-pressed { box-shadow: var(--neu-inset-sm); background: var(--surface-sunken); }
+/* confirm variant: a short question, so smaller type and a narrower card */
+.mn-modal--confirm { width: min(420px, calc(100vw - 32px)); }
+.mn-modal--confirm .mn-modal__in { padding: 24px; gap: 14px; }
+.mn-modal--confirm .mn-modal__in > .mn-row { margin-top: 4px; }

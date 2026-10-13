@@ -104,9 +104,13 @@ test("today-remove clears onToday in place", () => {
   assert.equal(out[1], list[1]);
 });
 
-test("todayPositionText ranks among on_today tasks only", () => {
+test("todayPositionText: position only while displayed, On Today otherwise", () => {
   const list = [t("a"), t("x", { onToday: false }), t("b"), t("c")];
-  assert.equal(todayPositionText(list, "b", "2026-10-13"), "#2 of 3 on the list");
+  assert.equal(todayPositionText(list, "b", "2026-10-13"), "On Today · #2 of 3 on the list");
   assert.equal(todayPositionText(list, "x", "2026-10-13"), "Not on the list");
   assert.equal(todayPositionText(list, "nope", "2026-10-13"), "Not on the list");
+  const old = t("d", { done: true, doneAt: new Date("2026-10-01T19:00:00.000Z") });
+  assert.equal(todayPositionText([...list, old], "d", "2026-10-13"), "On Today · done");
+  const doneToday = t("e", { done: true, doneAt: new Date("2026-10-13T19:00:00.000Z") });
+  assert.equal(todayPositionText([...list, doneToday], "e", "2026-10-13"), "On Today · done · #4 of 4 on the list");
 });

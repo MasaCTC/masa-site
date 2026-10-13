@@ -68,11 +68,20 @@ export function onTodaysList(t: Task, today: string): boolean {
   return t.doneAt !== null && plannerToday(new Date(t.doneAt)) === today;
 }
 
-/** Task modal "Today" fact: "#n of N on the list" or "Not on the list". */
+/**
+ * Task modal "Today" fact. On Today: "On Today", plus "done" when done, plus
+ * "#n of N on the list" only while the task is in the displayed list.
+ * Otherwise "Not on the list".
+ */
 export function todayPositionText(tasks: Task[], id: string, today: string): string {
+  const task = tasks.find((t) => t.id === id);
+  if (!task?.onToday) return "Not on the list";
   const list = tasks.filter((t) => onTodaysList(t, today));
   const pos = list.findIndex((t) => t.id === id);
-  return pos >= 0 ? `#${pos + 1} of ${list.length} on the list` : "Not on the list";
+  const parts = ["On Today"];
+  if (task.done) parts.push("done");
+  if (pos >= 0) parts.push(`#${pos + 1} of ${list.length} on the list`);
+  return parts.join(" · ");
 }
 
 /**

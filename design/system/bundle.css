@@ -366,6 +366,8 @@
 @media (max-width: 640px) { .mn-check { grid-template-columns: auto auto minmax(0,1fr) auto; } .mn-check__rank, .mn-check__x { display: none; } }
 .mn-check__pub { border: 0; background: transparent; padding: 0; font: inherit; color: var(--ink-muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .mn-check__pub:hover { color: var(--ink); }
+/* Secondary row actions appear on hover or keyboard focus; on touch screens (no hover) they stay visible. */
+@media (hover: hover) { .mn-check .mn-check__pub { opacity: 0; transition: opacity 120ms; } .mn-check:hover .mn-check__pub, .mn-check:focus-within .mn-check__pub { opacity: 1; } }
 .mn-check__pub:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; border-radius: 4px; }
 
 .mn-month { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 8px; }
@@ -401,7 +403,7 @@
 .mn-day.is-today .mn-due { background: color-mix(in srgb, var(--c) 14%, var(--surface-sunken)); }
 /* modal */
 .mn-modal { border: 0; padding: 0; border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); box-shadow: var(--neu-float); width: min(520px, calc(100vw - 32px)); }
-.mn-modal::backdrop { background: color-mix(in srgb, var(--ink) 28%, transparent); backdrop-filter: blur(3px); }
+.mn-modal::backdrop { background: var(--scrim); backdrop-filter: blur(3px); }
 .mn-modal[open] { animation: mn-pop 180ms cubic-bezier(.3,.8,.25,1.06); }
 @keyframes mn-pop { from { transform: scale(.96); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .mn-modal[open] { animation: none; } }

@@ -15,7 +15,7 @@ test('actions.ts is a "use server" module importing assertOwner', () => {
 test("the only exports are async functions", () => {
   const exportsAll = src.match(/^export\b.*$/gm) ?? [];
   const fns = exportsAll.filter((l) => /^export async function \w+\(/.test(l));
-  assert.ok(fns.length >= 11, `expected at least 11 actions, found ${fns.length}`);
+  assert.ok(fns.length >= 13, `expected at least 13 actions, found ${fns.length}`);
   assert.deepEqual(
     exportsAll.filter((l) => !fns.includes(l)),
     [],

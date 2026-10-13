@@ -17,15 +17,18 @@ import { PLANNER_TZ } from "./time";
 const todayDate = sql`(now() AT TIME ZONE ${PLANNER_TZ}::text)::date`;
 const startOfToday = sql`(date_trunc('day', now() AT TIME ZONE ${PLANNER_TZ}::text) AT TIME ZONE ${PLANNER_TZ}::text)`;
 
-/** Today's list = open tasks + tasks done today. Change the rule here. */
-const onTodaysList = or(eq(tasks.done, false), sql`${tasks.doneAt} >= ${startOfToday}`);
+/** Today's list = tasks put on Today that are open or were done today. */
+const onTodaysList = and(
+  eq(tasks.onToday, true),
+  or(eq(tasks.done, false), sql`${tasks.doneAt} >= ${startOfToday}`),
+);
 
 /** Every task, most important first (rank in byte order). */
 export async function listTasks(): Promise<Task[]> {
   return getDb().select().from(tasks).orderBy(...rankAsc);
 }
 
-/** The running checklist: open tasks plus those done today, in rank order. */
+/** The running checklist: on-Today tasks that are open or done today, in rank order. */
 export async function listChecklist(): Promise<Task[]> {
   return getDb().select().from(tasks).where(onTodaysList).orderBy(...rankAsc);
 }

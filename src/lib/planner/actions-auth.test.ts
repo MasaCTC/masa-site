@@ -24,6 +24,8 @@ const calls: Record<keyof typeof actions, () => Promise<unknown>> = {
   toggleDone: () => actions.toggleDone({ id: ID, done: true }),
   editTask: () => actions.editTask({ id: ID, title: "Renamed" }),
   deleteTask: () => actions.deleteTask({ id: ID }),
+  addToToday: () => actions.addToToday({ id: ID }),
+  removeFromToday: () => actions.removeFromToday({ id: ID }),
   reorderTask: () => actions.reorderTask({ id: ID, beforeId: ID2, afterId: null }),
   createClass: () => actions.createClass({ name: "ICS 46", kind: "class", color: "sea" }),
   renameClass: () => actions.renameClass({ id: ID, name: "ICS 51" }),

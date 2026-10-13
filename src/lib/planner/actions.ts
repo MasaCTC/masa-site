@@ -103,8 +103,51 @@ export async function addTask(input: AddTaskInput): Promise<TaskResult> {
   const rank = await bottomRank(db);
   const [task] = await db
     .insert(tasks)
-    .values({ title, classId, dueDate, estMinutes, rank, source: "manual" })
+    .values({ title, classId, dueDate, estMinutes, rank, source: "manual", onToday: true })
     .returning();
+  invalidateFromAction({ now: true });
+  return { ok: true, task };
+}
+
+/**
+ * Puts a task on Today, at the bottom of Today's order (ranks are global, so
+ * bottom-of-all is below every Today task). Already on Today: returned
+ * unchanged, not moved. One UPDATE; does not set hand_edited.
+ */
+export async function addToToday(input: IdInput): Promise<TaskResult> {
+  const owner = await assertOwner();
+  if (!owner.ok) return owner;
+  const parsed = idSchema.safeParse(input);
+  if (!parsed.success) return invalid(parsed.error);
+
+  const db = getDb();
+  const rank = await bottomRank(db);
+  const [task] = await db
+    .update(tasks)
+    .set({
+      onToday: true,
+      rank: sql`case when ${tasks.onToday} then ${tasks.rank} else ${rank} end`,
+    })
+    .where(eq(tasks.id, parsed.data.id))
+    .returning();
+  if (!task) return { ok: false, error: "not_found" };
+  invalidateFromAction({ now: true });
+  return { ok: true, task };
+}
+
+/** Takes a task off Today; its rank is untouched. */
+export async function removeFromToday(input: IdInput): Promise<TaskResult> {
+  const owner = await assertOwner();
+  if (!owner.ok) return owner;
+  const parsed = idSchema.safeParse(input);
+  if (!parsed.success) return invalid(parsed.error);
+
+  const [task] = await getDb()
+    .update(tasks)
+    .set({ onToday: false })
+    .where(eq(tasks.id, parsed.data.id))
+    .returning();
+  if (!task) return { ok: false, error: "not_found" };
   invalidateFromAction({ now: true });
   return { ok: true, task };
 }

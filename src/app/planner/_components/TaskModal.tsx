@@ -1,9 +1,10 @@
 "use client";
 // Task details (prototype #taskModal): a native <dialog class="mn-modal">
 // opened from a task title anywhere in the planner. Facts, Mark done / open,
-// Show on /now, plus Edit (editTask) and Delete (with a confirm step).
-// Escape, the x, Close and a backdrop click all close it; focus goes back to
-// whatever opened it.
+// Show on /now, plus Edit (editTask) and Delete. Delete asks first with the
+// shared ConfirmDialog, stacked on top of this dialog (showModal puts it in the
+// top layer and makes this one inert until it closes). Escape, the x, Close
+// and a backdrop click all close it; focus goes back to whatever opened it.
 import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/Button";
 import { Message } from "@/components/Feedback";
@@ -14,6 +15,7 @@ import { dueLabel, fmtDate, fmtMinutes } from "../_lib/dates";
 import { onTodaysList } from "../_lib/tasks";
 import styles from "../planner.module.css";
 import { ClassOptions, EST_OPTIONS, Swatch, XIcon } from "./bits";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { colorVar, usePlanner } from "./context";
 
 type Props = { task: Task | undefined; onClosed: () => void };
@@ -78,7 +80,10 @@ export function TaskModal({ task, onClosed }: Props) {
       ref={ref}
       className="mn-modal"
       aria-labelledby={titleId}
-      onClose={onClose}
+      onClose={(e) => {
+        // React also delivers a nested dialog's close here; only our own counts.
+        if (e.target === e.currentTarget) onClose();
+      }}
       onClick={(e) => {
         // A click on the dialog box itself (not its content) is the backdrop.
         if (e.target === e.currentTarget) e.currentTarget.close();
@@ -95,19 +100,18 @@ type BodyProps = { task: Task; titleId: string; close: () => void };
 
 function ModalBody({ task, titleId, close }: BodyProps) {
   const { today, tasks, classById, status, run, applyTask, error } = usePlanner();
-  const [mode, setMode] = useState<"view" | "edit" | "confirm">("view");
-  // Leaving Edit / the delete confirm puts focus back on the button that started it.
+  const [mode, setMode] = useState<"view" | "edit">("view");
+  const [confirming, setConfirming] = useState(false);
+  // Leaving Edit puts focus back on the Edit button.
   const editBtn = useRef<HTMLSpanElement>(null);
-  const deleteBtn = useRef<HTMLSpanElement>(null);
-  const back = useRef<"edit" | "delete" | null>(null);
+  const back = useRef(false);
   useEffect(() => {
     if (mode !== "view" || !back.current) return;
-    const wrap = back.current === "edit" ? editBtn.current : deleteBtn.current;
-    back.current = null;
-    wrap?.querySelector("button")?.focus();
+    back.current = false;
+    editBtn.current?.querySelector("button")?.focus();
   }, [mode]);
-  const toView = (from: "edit" | "delete") => {
-    back.current = from;
+  const toView = () => {
+    back.current = true;
     setMode("view");
   };
   const cls = task.classId ? classById.get(task.classId) : undefined;
@@ -131,7 +135,8 @@ function ModalBody({ task, titleId, close }: BodyProps) {
   };
 
   const remove = () => {
-    // Removing the task closes the dialog (the effect above).
+    // Removing the task closes the dialog (TaskModal's effect), and its
+    // onClose moves focus to the opener or the fallback chain.
     run({
       optimistic: () => applyTask({ type: "delete", id: task.id }),
       call: () => deleteTask({ id: task.id }),
@@ -169,7 +174,7 @@ function ModalBody({ task, titleId, close }: BodyProps) {
       ) : null}
 
       {mode === "edit" ? (
-        <EditForm task={task} onDone={() => toView("edit")} />
+        <EditForm task={task} onDone={toView} />
       ) : (
         <>
           <dl className="mn-facts">
@@ -210,36 +215,26 @@ function ModalBody({ task, titleId, close }: BodyProps) {
             <dd>{task.done ? "Done" : onNow ? "Open · on /now" : "Open"}</dd>
           </dl>
 
-          {mode === "confirm" ? (
-            <div className="mn-row" role="group" aria-label="Confirm delete">
-              <span>Delete this task for good?</span>
-              <Button size="sm" onClick={remove}>Delete</Button>
-              <button
-                type="button"
-                className={cx("mn-link", styles.closeLink)}
-                autoFocus
-                onClick={() => toView("delete")}
-              >
-                Keep it
-              </button>
-            </div>
-          ) : (
-            <div className="mn-row">
-              <Button size="sm" onClick={toggle}>{task.done ? "Mark open" : "Mark done"}</Button>
-              {task.done || onNow ? null : <Button size="sm" onClick={showOnNow}>Show on /now</Button>}
-              <span ref={editBtn} className={styles.contents}>
-                <Button size="sm" onClick={() => setMode("edit")}>Edit</Button>
-              </span>
-              <span ref={deleteBtn} className={styles.contents}>
-                <Button size="sm" onClick={() => setMode("confirm")}>Delete</Button>
-              </span>
-              <button type="button" className={cx("mn-link", styles.closeLink)} onClick={close}>
-                Close
-              </button>
-            </div>
-          )}
+          <div className="mn-row">
+            <Button size="sm" onClick={toggle}>{task.done ? "Mark open" : "Mark done"}</Button>
+            {task.done || onNow ? null : <Button size="sm" onClick={showOnNow}>Show on /now</Button>}
+            <span ref={editBtn} className={styles.contents}>
+              <Button size="sm" onClick={() => setMode("edit")}>Edit</Button>
+            </span>
+            <Button size="sm" onClick={() => setConfirming(true)}>Delete</Button>
+            <button type="button" className={cx("mn-link", styles.closeLink)} onClick={close}>
+              Close
+            </button>
+          </div>
         </>
       )}
+      <ConfirmDialog
+        open={confirming}
+        title={`Delete "${task.title}"?`}
+        sentence="It's removed from your list for good."
+        onClosed={() => setConfirming(false)}
+        onConfirm={remove}
+      />
     </div>
   );
 }

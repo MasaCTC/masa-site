@@ -2,7 +2,7 @@
 // Settings (prototype "settings" panel): the Canvas calendar feed. The saved
 // link is only ever shown masked (getSettingsMasked / saveCanvasFeed return
 // scheme + host + ••••). Save replaces it (and syncs it right away), Remove
-// clears it. "Sync now" runs a manual Canvas sync (CanvasSyncLine).
+// clears it after asking (ConfirmDialog). "Sync now" runs a manual Canvas sync (CanvasSyncLine).
 import { useId, useRef, useState } from "react";
 import { Button } from "@/components/Button";
 import { Message } from "@/components/Feedback";
@@ -13,6 +13,7 @@ import { PLANNER_TZ } from "@/lib/planner/time";
 import { fieldError } from "../_lib/errors";
 import styles from "../planner.module.css";
 import { useCanvasSync } from "./CanvasSyncLine";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { usePlanner } from "./context";
 
 type Props = { panelId: string; tabId: string; settings: Settings };
@@ -29,6 +30,8 @@ export function SettingsView({ panelId, tabId, settings }: Props) {
   const sync = useCanvasSync();
   const uid = useId();
   const inputRef = useRef<HTMLInputElement>(null);
+  const removeRef = useRef<HTMLSpanElement>(null);
+  const [confirming, setConfirming] = useState(false);
   // What is saved, as far as this page knows (updated from saveCanvasFeed).
   const [saved, setSaved] = useState({
     has: settings.hasFeed,
@@ -53,9 +56,13 @@ export function SettingsView({ panelId, tabId, settings }: Props) {
         setUrl("");
         setEditing(r.masked === null);
         if (r.masked !== null) sync.syncNow();
+        // Removed: the Remove button is gone, so focus the empty link field.
+        else if (kind === "remove") requestAnimationFrame(() => inputRef.current?.focus());
       },
       onFail: (r) => {
         setBusy(null);
+        // Remove failed: it was disabled while busy, so put focus back on it.
+        if (kind === "remove") requestAnimationFrame(() => removeRef.current?.querySelector("button")?.focus());
         const msg = fieldError(r, "url");
         if (msg) {
           setUrlError(msg);
@@ -164,10 +171,19 @@ export function SettingsView({ panelId, tabId, settings }: Props) {
               >
                 Replace link
               </Button>
-              <Button onClick={() => save("", "remove")} loading={busy === "remove"} disabled={busy !== null}>
-                {busy === "remove" ? "Removing…" : "Remove"}
-              </Button>
+              <span ref={removeRef} className={styles.contents}>
+                <Button onClick={() => setConfirming(true)} loading={busy === "remove"} disabled={busy !== null}>
+                  {busy === "remove" ? "Removing…" : "Remove"}
+                </Button>
+              </span>
             </div>
+            <ConfirmDialog
+              open={confirming}
+              title="Remove Canvas feed?"
+              sentence="Canvas stops syncing; tasks already imported stay."
+              onClosed={() => setConfirming(false)}
+              onConfirm={() => save("", "remove")}
+            />
           </>
         )}
 

@@ -33,6 +33,7 @@ import { dueLabel, fmtMinutes } from "../_lib/dates";
 import { isTemp, neighboursAfterMove } from "../_lib/tasks";
 import styles from "../planner.module.css";
 import { GripIcon, Swatch, XIcon } from "./bits";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { usePlanner } from "./context";
 
 const REDUCED = "(prefers-reduced-motion: reduce)";
@@ -167,7 +168,7 @@ type SortableRowProps = {
   gripRef: (id: string, el: HTMLButtonElement | null) => void;
   onGripKeyDown: (e: KeyboardEvent<HTMLButtonElement>, task: Task, index: number) => void;
   onGripBlur: (task: Task) => void;
-  onRemove: (task: Task, index: number) => void;
+  onRemove: (task: Task) => void;
 };
 
 function SortableRow({ task, index, count, lifted, reduced, gripRef, onGripKeyDown, onGripBlur, onRemove }: SortableRowProps) {
@@ -188,7 +189,7 @@ function SortableRow({ task, index, count, lifted, reduced, gripRef, onGripKeyDo
       <RowBody
         task={task}
         index={index}
-        onRemove={() => onRemove(task, index)}
+        onRemove={() => onRemove(task)}
         grip={
           <button
             type="button"
@@ -226,6 +227,8 @@ export function Checklist({ items, fallbackFocus }: ChecklistProps) {
   const grips = useRef(new Map<string, HTMLButtonElement>());
   // Set before a move/remove re-renders the list; the layout effect focuses it.
   const focusNext = useRef<string | "fallback" | null>(null);
+  // The row whose x was pressed: asks first (ConfirmDialog), then removes.
+  const [pending, setPending] = useState<Task | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
   const ids = items.map((t) => t.id);
@@ -275,7 +278,12 @@ export function Checklist({ items, fallbackFocus }: ChecklistProps) {
     setLiftedId((cur) => (cur === task.id ? null : cur));
   };
 
-  const onRemove = (task: Task, index: number) => {
+  const onRemove = (task: Task) => setPending(task);
+
+  const remove = (task: Task) => {
+    // Work out the neighbour now (the list may have changed while asking).
+    const index = ids.indexOf(task.id);
+    if (index === -1) return;
     const neighbour = items[index + 1] ?? items[index - 1];
     focusNext.current = neighbour ? neighbour.id : "fallback";
     run({
@@ -352,6 +360,15 @@ export function Checklist({ items, fallbackFocus }: ChecklistProps) {
           </div>
         ) : null}
       </DragOverlay>
+      <ConfirmDialog
+        open={pending !== null}
+        title={`Delete "${pending?.title ?? ""}"?`}
+        sentence="It's removed from your list for good."
+        onClosed={() => setPending(null)}
+        onConfirm={() => {
+          if (pending) remove(pending);
+        }}
+      />
     </DndContext>
   );
 }

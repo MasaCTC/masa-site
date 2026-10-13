@@ -324,3 +324,13 @@
 :global(.mn-body-sm).muted {
   color: var(--ink-muted);
 }
+
+/* ---------- confirm dialog (Modal.md "Confirm variant") ---------- */
+.confirmTitle {
+  overflow-wrap: anywhere;
+}
+
+/* Delete in the confirm: a plain mn-btn with its label in danger (never red). */
+:global(.mn-btn).dangerLabel {
+  color: var(--danger);
+}

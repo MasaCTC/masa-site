@@ -1,7 +1,7 @@
 "use client";
 // One class / category (prototype renderDetail): Upcoming by due date, No
 // date, Done; the 8-color picker (radiogroup, arrow keys); "When things are
-// due"; plus rename and delete. NO_CLASS is the "No class" pseudo-group.
+// due"; plus rename and delete (asks first with ConfirmDialog). NO_CLASS is the "No class" pseudo-group.
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { Button } from "@/components/Button";
 import { Message } from "@/components/Feedback";
@@ -14,6 +14,7 @@ import { fieldError } from "../_lib/errors";
 import styles from "../planner.module.css";
 import { Swatch } from "./bits";
 import { CheckBox, TaskTitle } from "./Checklist";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { usePlanner } from "./context";
 
 export const NO_CLASS = "__none__";
@@ -195,7 +196,6 @@ function ManageCard({ cls, onDeleted }: { cls: Class; onDeleted: () => void }) {
   const [name, setName] = useState(cls.name);
   const [nameError, setNameError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
-  const deleteRef = useRef<HTMLSpanElement>(null);
   const kind = cls.kind === "class" ? "class" : "category";
 
   const rename = (e: React.FormEvent) => {
@@ -224,6 +224,8 @@ function ManageCard({ cls, onDeleted }: { cls: Class; onDeleted: () => void }) {
   };
 
   const remove = () => {
+    // Back to the class list; ClassesView focuses the card, or its heading
+    // once the card is gone.
     onDeleted();
     run({
       optimistic: () => applyClass({ type: "delete", id: cls.id }),
@@ -265,33 +267,18 @@ function ManageCard({ cls, onDeleted }: { cls: Class; onDeleted: () => void }) {
           </Button>
         </div>
       </form>
-      {confirming ? (
-        <div className="mn-row" role="group" aria-label={`Confirm delete ${cls.name}`}>
-          <span className="mn-body-sm">Delete {cls.name}? Its tasks stay, with no class.</span>
-          <Button size="sm" onClick={remove}>
-            Delete
-          </Button>
-          <button
-            type="button"
-            className={cx("mn-link", styles.closeLink)}
-            autoFocus
-            onClick={() => {
-              setConfirming(false);
-              requestAnimationFrame(() => deleteRef.current?.querySelector("button")?.focus());
-            }}
-          >
-            Keep it
-          </button>
-        </div>
-      ) : (
-        <span ref={deleteRef} className={styles.contents}>
-          <span className="mn-row">
-            <Button size="sm" onClick={() => setConfirming(true)}>
-              Delete {kind}
-            </Button>
-          </span>
-        </span>
-      )}
+      <span className="mn-row">
+        <Button size="sm" onClick={() => setConfirming(true)}>
+          Delete {kind}
+        </Button>
+      </span>
+      <ConfirmDialog
+        open={confirming}
+        title={`Delete "${cls.name}"?`}
+        sentence="Its tasks stay, with no class."
+        onClosed={() => setConfirming(false)}
+        onConfirm={remove}
+      />
     </div>
   );
 }

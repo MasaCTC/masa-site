@@ -46,6 +46,11 @@ export function planNewClasses(
   return out;
 }
 
+/** Drops assignments due before `today` (YYYY-MM-DD, planner timezone). Due today and undated stay. */
+export function upcomingOnly(assignments: readonly CanvasAssignment[], today: string): CanvasAssignment[] {
+  return assignments.filter((x) => x.dueDate === null || x.dueDate >= today);
+}
+
 const byText = (x: string, y: string) => (x < y ? -1 : x > y ? 1 : 0);
 
 /** Import order (new rows land at the bottom in this order): due date, undated last, then title, uid. */
@@ -96,17 +101,19 @@ export function insertClassesSql(rows: readonly NewCanvasClass[]): SQL {
  * Upsert by canvas_uid. `rank` is used only when the row is new (bottom of
  * the checklist). Existing rows get due_date and canvas_url refreshed always,
  * and title only when not hand-edited; rank, done, class_id and source are
- * never touched (the owner may have moved, checked or re-filed it).
+ * never touched (the owner may have moved, checked or re-filed it). New rows
+ * start off Today (on_today = false); a resync never changes on_today on an
+ * existing row.
  */
 export function upsertTasksSql(rows: readonly { a: CanvasAssignment; rank: string }[]): SQL {
   const values = sql.join(
     rows.map(({ a, rank }) => {
       const classId = a.courseCode === null ? sql`NULL` : sql`(SELECT id FROM classes WHERE canvas_code = ${a.courseCode})`;
-      return sql`(${a.title}, ${classId}, ${a.dueDate}::date, ${rank}, 'canvas', ${a.uid}, ${a.url})`;
+      return sql`(${a.title}, ${classId}, ${a.dueDate}::date, ${rank}, 'canvas', ${a.uid}, ${a.url}, false)`;
     }),
     sql`, `,
   );
-  return sql`INSERT INTO tasks (title, class_id, due_date, rank, source, canvas_uid, canvas_url) VALUES ${values} ON CONFLICT (canvas_uid) DO UPDATE SET due_date = excluded.due_date, canvas_url = excluded.canvas_url, title = CASE WHEN tasks.hand_edited THEN tasks.title ELSE excluded.title END`;
+  return sql`INSERT INTO tasks (title, class_id, due_date, rank, source, canvas_uid, canvas_url, on_today) VALUES ${values} ON CONFLICT (canvas_uid) DO UPDATE SET due_date = excluded.due_date, canvas_url = excluded.canvas_url, title = CASE WHEN tasks.hand_edited THEN tasks.title ELSE excluded.title END`;
 }
 
 /**

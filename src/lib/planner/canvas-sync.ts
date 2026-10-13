@@ -13,11 +13,13 @@ import {
   releaseSql,
   statusTextFollowsTaskSql,
   SYNC_WINDOW_SECONDS,
+  upcomingOnly,
   upsertTasksSql,
 } from "./canvas-plan";
 import type { SyncOutcome } from "./canvas-sync-types";
 import { decryptFeed } from "./crypto";
 import { bottomRanks } from "./ranks-db";
+import { plannerToday } from "./time";
 
 // Canvas sync. Callers must check the owner first (the syncCanvas action).
 //
@@ -73,7 +75,8 @@ export async function runCanvasSync({ manual }: { manual: boolean }): Promise<Sy
 
   let assignments;
   try {
-    assignments = orderForImport(parseCanvasFeed(text));
+    // Only upcoming work is imported; overdue items never enter the planner.
+    assignments = orderForImport(upcomingOnly(parseCanvasFeed(text), plannerToday(new Date())));
   } catch (err) {
     return fail({ ok: false, error: "sync", reason: err instanceof CanvasFeedError ? err.reason : "not_ics" });
   }

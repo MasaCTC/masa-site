@@ -12,9 +12,11 @@ import {
   releaseSql,
   statusTextFollowsTaskSql,
   SYNC_WINDOW_SECONDS,
+  upcomingOnly,
   upsertTasksSql,
 } from "./canvas-plan.ts";
 import type { CanvasAssignment } from "./canvas-parse.ts";
+import { plannerToday } from "./time.ts";
 
 const render = (q: SQL) => new PgDialect().sqlToQuery(q);
 const flat = (s: string) => s.replace(/\s+/g, " ").trim();
@@ -88,14 +90,15 @@ test("task upsert: rank only on insert; hand-edited rows keep their title; done/
     ]),
   );
   const s = flat(sql);
-  assert.match(s, /^INSERT INTO tasks \(title, class_id, due_date, rank, source, canvas_uid, canvas_url\) VALUES /);
-  assert.match(s, /\(\$1, \(SELECT id FROM classes WHERE canvas_code = \$2\), \$3::date, \$4, 'canvas', \$5, \$6\)/);
-  assert.match(s, /\(\$7, NULL, \$8::date, \$9, 'canvas', \$10, \$11\)/);
+  assert.match(s, /^INSERT INTO tasks \(title, class_id, due_date, rank, source, canvas_uid, canvas_url, on_today\) VALUES /);
+  assert.match(s, /\(\$1, \(SELECT id FROM classes WHERE canvas_code = \$2\), \$3::date, \$4, 'canvas', \$5, \$6, false\)/);
+  assert.match(s, /\(\$7, NULL, \$8::date, \$9, 'canvas', \$10, \$11, false\)/);
   const set = s.slice(s.indexOf("ON CONFLICT"));
   assert.equal(
     set,
     "ON CONFLICT (canvas_uid) DO UPDATE SET due_date = excluded.due_date, canvas_url = excluded.canvas_url, title = CASE WHEN tasks.hand_edited THEN tasks.title ELSE excluded.title END",
   );
+  assert.ok(!set.includes("on_today"), "a resync never changes on_today");
   for (const col of ["rank", "done", "class_id", "source", "hand_edited ="]) {
     assert.ok(!set.includes(`${col} =`) && !set.includes(`SET ${col}`), `must not update ${col}`);
   }
@@ -148,4 +151,22 @@ test("status text follows a task renamed by sync, only for the task it shows", (
     "UPDATE status SET text = tasks.title FROM tasks WHERE status.task_id = tasks.id AND status.text IS DISTINCT FROM tasks.title",
   );
   assert.deepEqual(q.params, []);
+});
+
+test("upcomingOnly keeps today, future and undated; drops overdue", () => {
+  const now = new Date("2026-10-13T19:00:00Z");
+  const kept = upcomingOnly(
+    [a("old", { dueDate: "2026-10-12" }), a("today"), a("future", { dueDate: "2026-10-20" }), a("none", { dueDate: null })],
+    plannerToday(now),
+  );
+  assert.deepEqual(kept.map((x) => x.uid), ["today", "future", "none"]);
+});
+
+test("upcomingOnly: due-today flips at planner midnight (PDT and PST)", () => {
+  const due = [a("d", { dueDate: "2026-10-13" })];
+  assert.equal(upcomingOnly(due, plannerToday(new Date("2026-10-14T06:59:59Z"))).length, 1);
+  assert.equal(upcomingOnly(due, plannerToday(new Date("2026-10-14T07:00:00Z"))).length, 0);
+  const winter = [a("w", { dueDate: "2026-12-13" })];
+  assert.equal(upcomingOnly(winter, plannerToday(new Date("2026-12-14T07:59:59Z"))).length, 1);
+  assert.equal(upcomingOnly(winter, plannerToday(new Date("2026-12-14T08:00:00Z"))).length, 0);
 });

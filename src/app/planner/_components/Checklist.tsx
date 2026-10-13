@@ -28,7 +28,7 @@ import {
 } from "react";
 import { cx } from "@/components/types";
 import type { Task } from "@/db/schema";
-import { deleteTask, reorderTask, setStatus, toggleDone } from "@/lib/planner/actions";
+import { deleteTask, removeFromToday, reorderTask, setStatus, toggleDone } from "@/lib/planner/actions";
 import { dueLabel, fmtMinutes } from "../_lib/dates";
 import { isTemp, neighboursAfterMove } from "../_lib/tasks";
 import styles from "../planner.module.css";
@@ -99,6 +99,7 @@ function RowBody({ task, index, grip, onRemove }: RowBodyProps) {
   const { today, classById, status, run } = usePlanner();
   const cls = task.classId ? classById.get(task.classId) : undefined;
   const temp = isTemp(task.id);
+  const dated = task.dueDate !== null;
   const onNow = status.mode === "build" && status.taskId === task.id;
 
   const meta: Array<[string, ReactNode]> = [];
@@ -149,7 +150,8 @@ function RowBody({ task, index, grip, onRemove }: RowBodyProps) {
       <button
         type="button"
         className="mn-check__x"
-        aria-label={`Remove ${task.title}`}
+        aria-label={dated ? `Take ${task.title} off Today (stays on the calendar)` : `Delete ${task.title}`}
+        title={dated ? "Take off Today" : "Delete"}
         disabled={temp}
         onClick={onRemove}
       >
@@ -278,7 +280,21 @@ export function Checklist({ items, fallbackFocus }: ChecklistProps) {
     setLiftedId((cur) => (cur === task.id ? null : cur));
   };
 
-  const onRemove = (task: Task) => setPending(task);
+  const onRemove = (task: Task) => {
+    if (task.dueDate === null) {
+      setPending(task);
+      return;
+    }
+    // Dated: stays on the calendar, so no confirm.
+    const index = ids.indexOf(task.id);
+    const neighbour = items[index + 1] ?? items[index - 1];
+    focusNext.current = neighbour ? neighbour.id : "fallback";
+    run({
+      optimistic: () => applyTask({ type: "today-remove", id: task.id }),
+      call: () => removeFromToday({ id: task.id }),
+      success: "Taken off Today. Still on the calendar.",
+    });
+  };
 
   const remove = (task: Task) => {
     // Work out the neighbour now (the list may have changed while asking).

@@ -43,7 +43,7 @@ export function AddForm({ inputRef }: { inputRef: RefObject<HTMLInputElement | n
       canvasUid: null,
       canvasUrl: null,
       handEdited: false,
-      onToday: false,
+      onToday: true,
       createdAt: new Date(),
     };
     setTitle("");

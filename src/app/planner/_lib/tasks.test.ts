@@ -6,7 +6,7 @@ import { applyTaskAction, neighboursAfterMove, onTodaysList } from "./tasks.ts";
 function t(id: string, extra: Partial<Task> = {}): Task {
   return {
     id, title: id, classId: null, dueDate: null, estMinutes: null, done: false, doneAt: null,
-    rank: "V", source: "manual", canvasUid: null, canvasUrl: null, handEdited: false, onToday: false,
+    rank: "V", source: "manual", canvasUid: null, canvasUrl: null, handEdited: false, onToday: true,
     createdAt: new Date(0), ...extra,
   };
 }
@@ -73,4 +73,33 @@ test("neighbours skip unsaved (temp) rows", () => {
   assert.deepEqual(neighboursAfterMove(["a", "b", "c"], 2, 0), { beforeId: null, afterId: "a" });
   assert.deepEqual(neighboursAfterMove(["a", "b", "c"], 0, 2), { beforeId: "c", afterId: null });
   assert.deepEqual(neighboursAfterMove(["a", "temp-1", "b"], 2, 1), { beforeId: "a", afterId: null });
+});
+
+test("onTodaysList requires onToday", () => {
+  const today = "2026-10-13";
+  assert.ok(!onTodaysList(t("a", { onToday: false }), today));
+  assert.ok(!onTodaysList(t("a", { onToday: false, done: true, doneAt: new Date("2026-10-13T03:00:00Z") }), today));
+});
+
+test("today-add moves a task to the bottom of the Today tasks and sets onToday", () => {
+  const list = [t("a"), t("x", { onToday: false }), t("b"), t("y", { onToday: false }), t("c", { onToday: false })];
+  const out = applyTaskAction(list, { type: "today-add", id: "x" });
+  assert.equal(ids(out), "abxyc");
+  assert.ok(out[2].onToday);
+  assert.equal(list[1].onToday, false); // no mutation
+});
+
+test("today-add on a task already on Today leaves the list alone; with none on Today goes last", () => {
+  const list = [t("a"), t("b")];
+  assert.equal(applyTaskAction(list, { type: "today-add", id: "a" }), list);
+  const off = [t("a", { onToday: false }), t("b", { onToday: false })];
+  assert.equal(ids(applyTaskAction(off, { type: "today-add", id: "a" })), "ba");
+});
+
+test("today-remove clears onToday in place", () => {
+  const list = [t("a"), t("b")];
+  const out = applyTaskAction(list, { type: "today-remove", id: "a" });
+  assert.equal(ids(out), "ab");
+  assert.equal(out[0].onToday, false);
+  assert.equal(out[1], list[1]);
 });

@@ -13,7 +13,9 @@ export type TaskAction =
   | { type: "toggle"; id: string; done: boolean; at: Date }
   | { type: "move"; id: string; beforeId: string | null; afterId: string | null }
   | { type: "edit"; id: string; patch: TaskPatch }
-  | { type: "delete"; id: string };
+  | { type: "delete"; id: string }
+  | { type: "today-add"; id: string }
+  | { type: "today-remove"; id: string };
 
 export const TEMP_PREFIX = "temp-";
 export const isTemp = (id: string) => id.startsWith(TEMP_PREFIX);
@@ -30,6 +32,19 @@ export function applyTaskAction(tasks: Task[], a: TaskAction): Task[] {
       return tasks.map((t) => (t.id === a.id ? { ...t, ...a.patch } : t));
     case "delete":
       return tasks.filter((t) => t.id !== a.id);
+    case "today-remove":
+      return tasks.map((t) => (t.id === a.id && t.onToday ? { ...t, onToday: false } : t));
+    case "today-add": {
+      const task = tasks.find((t) => t.id === a.id);
+      if (!task || task.onToday) return tasks; // already on Today: not moved
+      const rest = tasks.filter((t) => t.id !== a.id);
+      let last = -1;
+      rest.forEach((t, i) => {
+        if (t.onToday) last = i;
+      });
+      const at = last === -1 ? rest.length : last + 1;
+      return [...rest.slice(0, at), { ...task, onToday: true }, ...rest.slice(at)];
+    }
     case "move": {
       const moved = tasks.find((t) => t.id === a.id);
       if (!moved) return tasks;
@@ -46,8 +61,9 @@ export function applyTaskAction(tasks: Task[], a: TaskAction): Task[] {
   }
 }
 
-/** Same rule as the server's onTodaysList: open, or done today (PLANNER_TZ). */
+/** Same rule as the server's onTodaysList: on Today, and open or done today (PLANNER_TZ). */
 export function onTodaysList(t: Task, today: string): boolean {
+  if (!t.onToday) return false;
   if (!t.done) return true;
   return t.doneAt !== null && plannerToday(new Date(t.doneAt)) === today;
 }

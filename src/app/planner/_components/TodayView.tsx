@@ -56,7 +56,7 @@ export function TodayView({ panelId, tabId, dueSoon }: Props) {
             </div>
           </>
         ) : (
-          <Message icon="box">Nothing on the list. Add a task, or connect Canvas in Settings.</Message>
+          <Message icon="box">Nothing on Today. Add a task above, or open the Calendar and pick what you want to work on.</Message>
         )}
       </div>
 

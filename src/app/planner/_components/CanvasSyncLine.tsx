@@ -3,7 +3,7 @@
 // database straight away; once mounted, the provider calls the syncCanvas
 // Server Action (owner-checked, 2-minute skip enforced on the server). The
 // header line shows "Syncing Canvas…" then "Canvas synced just now · N
-// assignments"; a failure shows the designed error Message inside <Planner>
+// upcoming"; a failure shows the designed error Message inside <Planner>
 // (useCanvasSync) with "Try again". The action revalidates /planner, so
 // imported tasks appear without a reload.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useTransition } from "react";
@@ -17,7 +17,7 @@ import styles from "../planner.module.css";
 
 type SyncState = {
   phase: SyncPhase;
-  /** Assignments in the feed, after the last successful sync this visit. */
+  /** Upcoming assignments in the feed, after the last successful sync this visit. */
   count?: number;
   failure?: SyncFail;
   /** What started the last sync: opening the planner, or a button. */

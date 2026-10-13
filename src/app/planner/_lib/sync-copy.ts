@@ -15,7 +15,7 @@ export function syncLineText(s: { phase: SyncPhase; count?: number }): string {
     case "syncing":
       return "Syncing Canvas…";
     case "synced":
-      return `Canvas synced just now · ${s.count ?? 0} ${s.count === 1 ? "assignment" : "assignments"}`;
+      return `Canvas synced just now · ${s.count ?? 0} upcoming`;
     case "fresh":
       // Synced < 2 min ago (or another tab is syncing): no count is known.
       return "Canvas synced just now";

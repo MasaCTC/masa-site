@@ -89,8 +89,8 @@ export function SettingsView({ panelId, tabId, settings }: Props) {
         <h2 className="mn-heading-sm">Canvas import</h2>
         <p className={cx("mn-body-sm", styles.calNote)}>
           Paste your Canvas calendar feed (Canvas → Calendar → Calendar Feed). It syncs every time you open the
-          planner, so new assignments are already there. You can still edit or reorder them here. The link is stored
-          encrypted and never shown in full.
+          planner, so new assignments are already there. You can still edit or reorder them here. The link is
+          stored encrypted and never shown in full.
         </p>
 
         {saved.has && !saved.readable ? (
@@ -195,14 +195,17 @@ export function SettingsView({ panelId, tabId, settings }: Props) {
             <span className="mn-mono">
               synced on open ·{" "}
               {sync.phase === "synced"
-                ? `${sync.count} ${sync.count === 1 ? "assignment" : "assignments"}`
+                ? `${sync.count} upcoming`
                 : syncedText(settings.lastSyncedAt)}
             </span>
           </div>
         ) : (
           <span className="mn-mono">No feed connected.</span>
         )}
-        <Message>Imported items land at the bottom of the checklist. Drag them up when they matter.</Message>
+        <Message>
+          Only assignments due today or later come in. They go on the Calendar, not on Today: open one and pick
+          &quot;Add to Today&quot; when you want to work on it.
+        </Message>
       </div>
     </section>
   );

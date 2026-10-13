@@ -32,8 +32,6 @@ export function CalendarView({ panelId, tabId }: { panelId: string; tabId: strin
     if (list) list.push(t);
     else byDay.set(t.dueDate, [t]);
   }
-  const undated = tasks.filter((t) => !t.dueDate && !t.done).length;
-  const undatedNote = `${undated} undated ${undated === 1 ? "task lives" : "tasks live"} only on the checklist`;
 
   const start = mode === "week" ? weekStart(anchor) : addMonths(anchor, 0);
   const title =
@@ -96,11 +94,26 @@ export function CalendarView({ panelId, tabId }: { panelId: string; tabId: strin
       )}
 
       <p className={cx("mn-mono", styles.calNote)}>
-        {mode === "week"
-          ? `bar = estimated hours due that day (8h = full) · ${undatedNote}`
-          : `Go as far ahead as you like with → · ${undatedNote}`}
+        {mode === "week" ? (
+          <>
+            bar = estimated hours due that day (8h = full) · <ListedMark /> = on Today · click anything to add it to Today
+          </>
+        ) : (
+          <>
+            <ListedMark /> = on Today · click anything to add it to Today · go as far ahead as you like with →
+          </>
+        )}
       </p>
     </section>
+  );
+}
+
+/** The check that marks a chip already on Today (prototype svg.mn-listed). */
+function ListedMark() {
+  return (
+    <svg className="mn-listed" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <path d="M3 8.5 6.5 12 13 4.5" />
+    </svg>
   );
 }
 
@@ -154,10 +167,13 @@ function Week({ start, today, byDay }: { start: string; today: string; byDay: Ma
             </div>
             {items.map((t) => {
               const cls = t.classId ? classById.get(t.classId) : undefined;
-              const meta = [t.estMinutes ? fmtMinutes(t.estMinutes) : "", t.done ? "done" : ""].filter(Boolean);
+              const meta = [t.estMinutes ? fmtMinutes(t.estMinutes) : "", t.onToday ? "on Today" : "", t.done ? "done" : ""].filter(Boolean);
               return (
-                <TaskOpener key={t.id} task={t} className="mn-due">
-                  <b>{t.title}</b>
+                <TaskOpener key={t.id} task={t} className={cx("mn-due", t.onToday && "is-listed")}>
+                  <b>
+                    {t.onToday ? <ListedMark /> : null}
+                    {t.title}
+                  </b>
                   <span>
                     {cls ? (
                       <>
@@ -216,11 +232,14 @@ function Month({ first, today, byDay, title, onMore }: MonthProps) {
                 <TaskOpener
                   key={t.id}
                   task={t}
-                  className={cx("mn-cell__item", t.done && "is-done")}
-                  label={`${t.title}${cls ? `, ${cls.name}` : ""}${t.done ? ", done" : ""}. Open details`}
+                  className={cx("mn-cell__item", t.done && "is-done", t.onToday && "is-listed")}
+                  label={`${t.title}${cls ? `, ${cls.name}` : ""}${t.done ? ", done" : ""}${t.onToday ? ", on Today" : ""}. Open details`}
                 >
                   <Swatch cls={cls} />
-                  <span className="t">{t.title}</span>
+                  <span className="t">
+                    {t.onToday ? <ListedMark /> : null}
+                    {t.title}
+                  </span>
                 </TaskOpener>
               );
             })}

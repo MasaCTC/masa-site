@@ -5,9 +5,9 @@ import { needsNewLink, syncErrorCopy, syncLineText } from "./sync-copy.ts";
 test("sync line copy follows the prototype", () => {
   assert.equal(syncLineText({ phase: "idle" }), "");
   assert.equal(syncLineText({ phase: "syncing" }), "Syncing Canvas…");
-  assert.equal(syncLineText({ phase: "synced", count: 14 }), "Canvas synced just now · 14 assignments");
-  assert.equal(syncLineText({ phase: "synced", count: 1 }), "Canvas synced just now · 1 assignment");
-  assert.equal(syncLineText({ phase: "synced", count: 0 }), "Canvas synced just now · 0 assignments");
+  assert.equal(syncLineText({ phase: "synced", count: 14 }), "Canvas synced just now · 14 upcoming");
+  assert.equal(syncLineText({ phase: "synced", count: 1 }), "Canvas synced just now · 1 upcoming");
+  assert.equal(syncLineText({ phase: "synced", count: 0 }), "Canvas synced just now · 0 upcoming");
   assert.equal(syncLineText({ phase: "fresh" }), "Canvas synced just now");
   assert.equal(syncLineText({ phase: "failed" }), "Canvas sync failed");
 });

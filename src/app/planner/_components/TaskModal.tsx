@@ -42,6 +42,7 @@ export function TaskModal({ task, onClosed }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLElement | null>(null);
   const fallbacks = useRef<HTMLElement[]>([]);
+  const pressedBackdrop = useRef(false);
   const titleId = useId();
   const open = Boolean(task);
 
@@ -84,9 +85,18 @@ export function TaskModal({ task, onClosed }: Props) {
         // React also delivers a nested dialog's close here; only our own counts.
         if (e.target === e.currentTarget) onClose();
       }}
+      onPointerDown={(e) => {
+        pressedBackdrop.current = e.target === e.currentTarget;
+      }}
       onClick={(e) => {
         // A click on the dialog box itself (not its content) is the backdrop.
-        if (e.target === e.currentTarget) e.currentTarget.close();
+        // The press must start there too: a press inside the Edit form that is
+        // released over the backdrop (e.g. drag-selecting the title text) also
+        // clicks the dialog, and must not close it and throw the edit away.
+        // Keyboard "clicks" have no pointerdown and never target the dialog.
+        const backdrop = e.target === e.currentTarget && pressedBackdrop.current;
+        pressedBackdrop.current = false;
+        if (backdrop) e.currentTarget.close();
       }}
     >
       {task ? (

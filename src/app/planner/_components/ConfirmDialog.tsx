@@ -31,6 +31,7 @@ export function ConfirmDialog({ open, title, sentence, onConfirm, onClosed }: Pr
   const keepRef = useRef<HTMLButtonElement>(null);
   const opener = useRef<HTMLElement | null>(null);
   const confirmed = useRef(false);
+  const pressedBackdrop = useRef(false);
   const titleId = useId();
   const textId = useId();
 
@@ -80,10 +81,17 @@ export function ConfirmDialog({ open, title, sentence, onConfirm, onClosed }: Pr
       aria-describedby={textId}
       onClose={onClose}
       onCancel={(e) => e.stopPropagation()}
+      onPointerDown={(e) => {
+        pressedBackdrop.current = e.target === e.currentTarget;
+      }}
       onClick={(e) => {
         e.stopPropagation();
-        // A click on the dialog box itself (not its content) is the backdrop.
-        if (e.target === e.currentTarget) e.currentTarget.close();
+        // A click on the dialog box itself (not its content) is the backdrop,
+        // but only if the press started there too (a press inside released
+        // outside also clicks the dialog).
+        const backdrop = e.target === e.currentTarget && pressedBackdrop.current;
+        pressedBackdrop.current = false;
+        if (backdrop) e.currentTarget.close();
       }}
     >
       {open ? (

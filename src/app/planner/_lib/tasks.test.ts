@@ -37,6 +37,30 @@ test("toggle keeps an existing doneAt and clears it on reopen", () => {
   assert.equal(open.doneAt, null);
 });
 
+test("edit clears class, due date and estimate with nulls, in place", () => {
+  const list = [t("a"), t("b", { classId: "c1", dueDate: "2026-10-15", estMinutes: 45 }), t("c")];
+  const out = applyTaskAction(list, {
+    type: "edit",
+    id: "b",
+    patch: { title: "B2", classId: null, dueDate: null, estMinutes: null },
+  });
+  assert.equal(ids(out), "abc");
+  assert.deepEqual(
+    { title: out[1].title, classId: out[1].classId, dueDate: out[1].dueDate, estMinutes: out[1].estMinutes },
+    { title: "B2", classId: null, dueDate: null, estMinutes: null },
+  );
+  assert.equal(out[0], list[0]); // other rows untouched
+  assert.equal(list[1].classId, "c1"); // no mutation: a failed save rolls back to this
+});
+
+test("edit sets fields and leaves the ones not in the patch alone", () => {
+  const list = [t("a", { classId: "c1", dueDate: "2026-10-15", estMinutes: 45 })];
+  const [set] = applyTaskAction(list, { type: "edit", id: "a", patch: { classId: "c2", dueDate: "2026-11-01", estMinutes: 90 } });
+  assert.deepEqual([set.classId, set.dueDate, set.estMinutes, set.title], ["c2", "2026-11-01", 90, "a"]);
+  const [kept] = applyTaskAction(list, { type: "edit", id: "a", patch: { title: "New" } });
+  assert.deepEqual([kept.classId, kept.dueDate, kept.estMinutes, kept.title], ["c1", "2026-10-15", 45, "New"]);
+});
+
 test("today's list: open, or done today in Los Angeles", () => {
   const today = "2026-10-12";
   assert.ok(onTodaysList(t("a"), today));

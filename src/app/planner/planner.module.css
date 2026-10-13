@@ -135,17 +135,34 @@
 }
 
 /* Task title opens the task modal: a bare button that reads as the title.
-   Focus ring matches .mn-check__pub (bundle.css). */
+   It fills the title line (a button is inline-block, so it was only as wide
+   as its text and read as plain text), takes the row's done strike-through
+   (text-decoration does not reach into an inline-block on its own), and
+   underlines on hover like .mn-check__pub. Focus ring matches .mn-check__pub
+   (bundle.css). */
 .titleBtn {
   appearance: none;
+  display: block;
+  width: 100%;
   border: 0;
   background: transparent;
   padding: 0;
   margin: 0;
   font: inherit;
   color: inherit;
+  text-decoration: inherit;
+  text-underline-offset: 3px;
   text-align: left;
+  overflow-wrap: anywhere;
   cursor: pointer;
+}
+
+.titleBtn:hover {
+  text-decoration-line: underline;
+}
+
+:global(.mn-check.is-done) .titleBtn:hover {
+  text-decoration-line: line-through underline;
 }
 
 .titleBtn:focus-visible {

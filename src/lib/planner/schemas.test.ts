@@ -41,6 +41,26 @@ test("editTask: id required, only given fields change", () => {
   assert.equal(editTaskSchema.safeParse({ id: ID, title: "" }).success, false);
 });
 
+test("editTask: class, due date and estimate can be cleared (null or blank) or set", () => {
+  const cleared = { id: ID, classId: null, dueDate: null, estMinutes: null };
+  assert.deepEqual(editTaskSchema.parse({ ...cleared, title: "x" }), { ...cleared, title: "x" });
+  assert.deepEqual(editTaskSchema.parse({ id: ID, classId: "", dueDate: "", estMinutes: "" }), cleared);
+  assert.deepEqual(editTaskSchema.parse({ id: ID, classId: " ", dueDate: " ", estMinutes: " " }), cleared);
+  // Exactly what the task modal's Save sends, set and cleared.
+  assert.deepEqual(
+    editTaskSchema.parse({ id: ID, title: "PS4", classId: ID2, dueDate: "2026-10-15", estMinutes: 90 }),
+    { id: ID, title: "PS4", classId: ID2, dueDate: "2026-10-15", estMinutes: 90 },
+  );
+  // Absent keys stay absent and undefined stays undefined (never null), so
+  // those columns are left alone (Drizzle's .set() skips undefined values).
+  assert.deepEqual(editTaskSchema.parse({ id: ID, title: "x" }), { id: ID, title: "x" });
+  const undef = editTaskSchema.parse({ id: ID, title: "x", classId: undefined });
+  assert.equal(undef.classId, undefined);
+  assert.equal("dueDate" in undef || "estMinutes" in undef, false);
+  // A null title is not "clear": the title is required.
+  assert.equal(editTaskSchema.safeParse({ id: ID, title: null }).success, false);
+});
+
 test("reorder: neighbours optional, no self-reference", () => {
   assert.ok(reorderTaskSchema.safeParse({ id: ID, beforeId: null, afterId: ID2 }).success);
   assert.ok(reorderTaskSchema.safeParse({ id: ID, beforeId: ID2, afterId: null }).success);

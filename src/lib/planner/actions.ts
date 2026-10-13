@@ -15,6 +15,7 @@ import { invalidateFromAction } from "./invalidate";
 import { getStatus } from "./queries";
 import { isValidRank, rankBetween } from "./rank";
 import { bottomRank, rebalance } from "./ranks-db";
+import { statusPatchFor, type TaskChange } from "./status";
 import {
   addTaskSchema,
   canvasFeedSchema,
@@ -68,6 +69,19 @@ function invalid(error: z.ZodError | string, field?: string): Invalid {
 
 // Canvas tasks touched by hand stop being overwritten by sync.
 const markHandEdited = sql`${tasks.handEdited} OR ${tasks.source} = 'canvas'`;
+
+/**
+ * The status UPDATE for a task change, applied only if the status shows that
+ * task (deleted → free, renamed → text follows; see status.ts). Callers put
+ * it in the same db.batch (one transaction) as the task write.
+ */
+function updateStatusFor(db: ReturnType<typeof getDb>, change: TaskChange) {
+  const { set, resetSince } = statusPatchFor(change);
+  return db
+    .update(status)
+    .set({ ...set, ...(resetSince ? { since: sql`now()` } : {}) })
+    .where(eq(status.taskId, change.taskId));
+}
 
 async function classExists(id: string) {
   const [row] = await getDb().select({ id: classes.id }).from(classes).where(eq(classes.id, id));
@@ -135,11 +149,17 @@ export async function editTask(input: EditTaskInput): Promise<TaskResult> {
       ? sql<boolean>`${tasks.handEdited} OR (${tasks.source} = 'canvas' AND ${tasks.title} IS DISTINCT FROM ${fields.title})`
       : undefined;
 
-  const [task] = await getDb()
+  const db = getDb();
+  const update = db
     .update(tasks)
     .set({ ...fields, ...(handEdited ? { handEdited } : {}) })
     .where(eq(tasks.id, id))
     .returning();
+  // A new title also renames the /now status if it shows this task.
+  const [task] =
+    fields.title !== undefined
+      ? (await db.batch([update, updateStatusFor(db, { kind: "renamed", taskId: id, title: fields.title })]))[0]
+      : await update;
   if (!task) return { ok: false, error: "not_found" };
   invalidateFromAction({ now: true });
   return { ok: true, task };
@@ -151,10 +171,17 @@ export async function deleteTask(input: IdInput): Promise<DeleteResult> {
   const parsed = idSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
 
-  const [row] = await getDb()
-    .delete(tasks)
-    .where(eq(tasks.id, parsed.data.id))
-    .returning({ id: tasks.id });
+  const { id } = parsed.data;
+
+  // If /now shows this task, it goes back to "Free right now" in the same
+  // transaction. The status UPDATE runs first: status.task_id is ON DELETE
+  // SET NULL, so after the DELETE the row would no longer name the task.
+  const db = getDb();
+  const [, deleted] = await db.batch([
+    updateStatusFor(db, { kind: "deleted", taskId: id }),
+    db.delete(tasks).where(eq(tasks.id, id)).returning({ id: tasks.id }),
+  ]);
+  const [row] = deleted;
   if (!row) return { ok: false, error: "not_found" };
   invalidateFromAction({ now: true });
   return { ok: true, id: row.id };

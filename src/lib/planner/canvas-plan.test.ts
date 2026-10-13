@@ -10,6 +10,7 @@ import {
   orderForImport,
   planNewClasses,
   releaseSql,
+  statusTextFollowsTaskSql,
   SYNC_WINDOW_SECONDS,
   upsertTasksSql,
 } from "./canvas-plan.ts";
@@ -138,4 +139,13 @@ test("importRows: fresh bottom ranks only for new uids, in order; existing rows 
     [["n1", "V"], ["old", "X"], ["n2", "W"]],
   );
   assert.throws(() => importRows([a("n1")], new Set(), ["V"]), /one rank per new row/);
+});
+
+test("status text follows a task renamed by sync, only for the task it shows", () => {
+  const q = render(statusTextFollowsTaskSql());
+  assert.equal(
+    flat(q.sql),
+    "UPDATE status SET text = tasks.title FROM tasks WHERE status.task_id = tasks.id AND status.text IS DISTINCT FROM tasks.title",
+  );
+  assert.deepEqual(q.params, []);
 });

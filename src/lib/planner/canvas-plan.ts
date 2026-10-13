@@ -110,6 +110,15 @@ export function upsertTasksSql(rows: readonly { a: CanvasAssignment; rank: strin
 }
 
 /**
+ * Runs after the upserts in the same batch: if /now shows a task whose title
+ * the sync just changed, the status text follows it (as editTask does for a
+ * hand rename). Leaves the status alone otherwise.
+ */
+export function statusTextFollowsTaskSql(): SQL {
+  return sql`UPDATE status SET text = tasks.title FROM tasks WHERE status.task_id = tasks.id AND status.text IS DISTINCT FROM tasks.title`;
+}
+
+/**
  * Atomic claim: stamps last_synced_at only if a feed is saved and the last
  * sync/claim is older than the window, so concurrent tabs cannot both sync.
  * Timestamps come back as text: Postgres keeps microseconds, a JS Date would

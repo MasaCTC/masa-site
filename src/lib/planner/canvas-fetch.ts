@@ -21,12 +21,15 @@ const MAX_BYTES = 5 * 1024 * 1024;
 const MAX_REDIRECTS = 3;
 
 export class FeedFetchError extends Error {
-  constructor(
-    readonly reason: SyncFailReason,
-    readonly httpStatus?: number,
-  ) {
+  // Plain fields, not parameter properties: node:test's type stripping
+  // can't load those (the actions tests import this module).
+  readonly reason: SyncFailReason;
+  readonly httpStatus?: number;
+  constructor(reason: SyncFailReason, httpStatus?: number) {
     super(`Canvas feed fetch failed: ${reason}`);
     this.name = "FeedFetchError";
+    this.reason = reason;
+    this.httpStatus = httpStatus;
   }
 }
 

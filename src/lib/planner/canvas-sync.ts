@@ -11,6 +11,7 @@ import {
   orderForImport,
   planNewClasses,
   releaseSql,
+  statusTextFollowsTaskSql,
   SYNC_WINDOW_SECONDS,
   upsertTasksSql,
 } from "./canvas-plan";
@@ -26,7 +27,8 @@ import { bottomRanks } from "./ranks-db";
 // 2. Decrypt, fetch, parse the WHOLE feed. Nothing is written until the
 //    feed parsed, so a bad feed leaves every task as it was.
 // 3. One db.batch (a single transaction on neon-http): classes, tasks,
-//    settings stamp.
+//    the /now status text (if it shows a task the sync renamed), settings
+//    stamp.
 // On any failure the claim is released (last_synced_at goes back to the last
 // successful sync) so the next visit retries instead of hiding the error
 // behind the window.
@@ -92,6 +94,8 @@ export async function runCanvasSync({ manual }: { manual: boolean }): Promise<Sy
     const writes = [
       ...(newClasses.length ? [db.execute(insertClassesSql(newClasses))] : []),
       ...chunk(rows, UPSERT_CHUNK).map((c) => db.execute(upsertTasksSql(c))),
+      // A renamed task shown on /now renames the status too.
+      ...(rows.length ? [db.execute(statusTextFollowsTaskSql())] : []),
     ];
     await db.batch([stamp, ...writes]);
   } catch {

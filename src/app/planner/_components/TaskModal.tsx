@@ -1,6 +1,6 @@
 "use client";
 // Task details (prototype #taskModal): a native <dialog class="mn-modal">
-// opened from a task title anywhere in the planner. Facts, Mark done / open,
+// opened from a task title anywhere in the planner. Facts, Add to / Take off Today, Mark done / open,
 // Show on /now, plus Edit (editTask) and Delete. Delete asks first with the
 // shared ConfirmDialog, stacked on top of this dialog (showModal puts it in the
 // top layer and makes this one inert until it closes). Escape, the x, Close
@@ -10,9 +10,9 @@ import { Button } from "@/components/Button";
 import { Message } from "@/components/Feedback";
 import { cx } from "@/components/types";
 import type { Task } from "@/db/schema";
-import { deleteTask, editTask, setStatus, toggleDone } from "@/lib/planner/actions";
+import { addToToday, deleteTask, editTask, removeFromToday, setStatus, toggleDone } from "@/lib/planner/actions";
 import { dueLabel, fmtDate, fmtMinutes } from "../_lib/dates";
-import { onTodaysList } from "../_lib/tasks";
+import { todayPositionText } from "../_lib/tasks";
 import styles from "../planner.module.css";
 import { ClassOptions, EST_OPTIONS, Swatch, XIcon } from "./bits";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -125,8 +125,6 @@ function ModalBody({ task, titleId, close }: BodyProps) {
     setMode("view");
   };
   const cls = task.classId ? classById.get(task.classId) : undefined;
-  const list = tasks.filter((t) => onTodaysList(t, today));
-  const pos = list.findIndex((t) => t.id === task.id);
   const onNow = status.mode === "build" && status.taskId === task.id;
   const canvasUrl = task.canvasUrl && /^https?:\/\//i.test(task.canvasUrl) ? task.canvasUrl : null;
 
@@ -137,6 +135,22 @@ function ModalBody({ task, titleId, close }: BodyProps) {
       call: () => toggleDone({ id: task.id, done }),
       success: done ? `Marked done: ${task.title}` : `Marked open: ${task.title}`,
     });
+  };
+
+  const toggleToday = () => {
+    if (task.onToday) {
+      run({
+        optimistic: () => applyTask({ type: "today-remove", id: task.id }),
+        call: () => removeFromToday({ id: task.id }),
+        success: "Taken off Today.",
+      });
+    } else {
+      run({
+        optimistic: () => applyTask({ type: "today-add", id: task.id }),
+        call: () => addToToday({ id: task.id }),
+        success: "Added to the bottom of Today.",
+      });
+    }
   };
 
   const showOnNow = () => {
@@ -201,8 +215,8 @@ function ModalBody({ task, titleId, close }: BodyProps) {
             </dd>
             <dt>Estimate</dt>
             <dd>{task.estMinutes ? fmtMinutes(task.estMinutes) : "None"}</dd>
-            <dt>Priority</dt>
-            <dd>{pos >= 0 ? `#${pos + 1} of ${list.length} on the checklist` : "Not on the checklist"}</dd>
+            <dt>Today</dt>
+            <dd>{todayPositionText(tasks, task.id, today)}</dd>
             <dt>Source</dt>
             <dd>
               {task.source === "canvas" ? (
@@ -226,6 +240,7 @@ function ModalBody({ task, titleId, close }: BodyProps) {
           </dl>
 
           <div className="mn-row">
+            <Button size="sm" onClick={toggleToday}>{task.onToday ? "Take off Today" : "Add to Today"}</Button>
             <Button size="sm" onClick={toggle}>{task.done ? "Mark open" : "Mark done"}</Button>
             {task.done || onNow ? null : <Button size="sm" onClick={showOnNow}>Show on /now</Button>}
             <span ref={editBtn} className={styles.contents}>

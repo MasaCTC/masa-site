@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Task } from "../../../db/schema.ts";
-import { applyTaskAction, neighboursAfterMove, onTodaysList } from "./tasks.ts";
+import { applyTaskAction, neighboursAfterMove, onTodaysList, todayPositionText } from "./tasks.ts";
 
 function t(id: string, extra: Partial<Task> = {}): Task {
   return {
@@ -102,4 +102,11 @@ test("today-remove clears onToday in place", () => {
   assert.equal(ids(out), "ab");
   assert.equal(out[0].onToday, false);
   assert.equal(out[1], list[1]);
+});
+
+test("todayPositionText ranks among on_today tasks only", () => {
+  const list = [t("a"), t("x", { onToday: false }), t("b"), t("c")];
+  assert.equal(todayPositionText(list, "b", "2026-10-13"), "#2 of 3 on the list");
+  assert.equal(todayPositionText(list, "x", "2026-10-13"), "Not on the list");
+  assert.equal(todayPositionText(list, "nope", "2026-10-13"), "Not on the list");
 });

@@ -502,6 +502,14 @@
 @media(max-width:640px){.add-row{grid-template-columns:1fr 1fr;grid-template-areas:"t t" "c c" "d e" "b b"}}
 .proto-switch{justify-content:center;gap:16px;padding:10px;border-radius:var(--radius-md);outline:1px dashed var(--line)}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+/* --- v: pick from calendar --- */
+.mn-btn:active, .mn-btn.is-pressed { box-shadow: var(--neu-inset-md); background: var(--surface-sunken); transform: none; transition-duration: .08s; }
+.mn-modal .mn-btn:active, .mn-modal .mn-btn.is-pressed { box-shadow: var(--neu-inset-sm); background: var(--surface-sunken); }
+.mn-modal--confirm { width: min(420px, calc(100vw - 32px)); }
+.mn-modal--confirm .mn-modal__in { padding: 24px; gap: 14px; }
+.mn-listed { flex: none; width: 11px; height: 11px; vertical-align: -1px; margin-right: 3px; color: var(--ink); }
+.mn-cell__item.is-listed { font-weight: 600; }
+.mn-due.is-listed b { font-weight: 700; }
 body{margin:0;min-height:100vh}</style></head><body class="mn-root"><div class="mn-page" id="app">
   <nav class="mn-nav mn-nav--dock" aria-label="Main" data-nav>
     <a class="mn-nav__brand" href="#" style="padding-right:4px" aria-label="Masa Chien, home"><span class="mn-nav__mark" aria-hidden="true">MC</span></a>
@@ -592,14 +600,14 @@ body{margin:0;min-height:100vh}</style></head><body class="mn-root"><div class="
         <h2 class="mn-heading-sm">Canvas import</h2>
         <p class="mn-body-sm" style="margin:0">Paste your Canvas calendar feed (Canvas → Calendar → Calendar Feed). It syncs every time you open the planner, so new assignments are already there. You can still edit or reorder them here. The link is stored encrypted and never shown in full.</p>
         <div class="mn-field"><label class="mn-label" for="ical">Calendar feed URL</label><input class="mn-input mn-input--mono" id="ical" value="https://canvas.eee.uci.edu/feeds/calendars/user_••••••••.ics"></div>
-        <div class="mn-row"><button class="mn-btn">Sync now</button><span class="mn-mono">synced on open · 14 assignments</span></div>
-        <div class="mn-msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.5"/></svg>Imported items land at the bottom of the checklist. Drag them up when they matter.</div>
+        <div class="mn-row"><button class="mn-btn">Sync now</button><span class="mn-mono">synced on open · 14 upcoming</span></div>
+        <div class="mn-msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.5"/></svg>Only assignments due today or later come in. They go on the Calendar, not on Today: open one and pick "Add to Today" when you want to work on it.</div>
       </div>
       <div class="mn-card" style="gap:16px">
         <h2 class="mn-heading-sm">Error state</h2>
         <div class="mn-msg mn-msg--error"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M12 3 2 20h20Z"/><path d="M12 10v4M12 17v.5"/></svg><div>Canvas sync failed when you opened the planner. <span>The feed returned 401. Canvas may have reset the link; paste a fresh one. Your existing tasks are untouched.</span></div></div>
         <h2 class="mn-heading-sm" style="margin-top:8px">Empty checklist</h2>
-        <div class="mn-msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12h6"/></svg>Nothing on the list. Add a task, or connect Canvas in Settings.</div>
+        <div class="mn-msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12h6"/></svg>Nothing on Today. Add a task above, or open the Calendar and pick what you want to work on.</div>
       </div>
     </section>
   </div>
@@ -660,14 +668,14 @@ function colOf(name){var c=CLASSES.find(function(x){return x.n===name});return c
 function sw(name){return name?'<span class="mn-swatch" style="--c:'+colOf(name)+'" aria-hidden="true"></span>':''}
 var TODAY='2026-10-12';
 var tasks=[
- {id:1,t:'Project 2: AVL tree insert + tests',c:'ICS 46',due:'2026-10-13',est:120,src:'canvas'},
- {id:2,t:'Chat inbox: unread badge',c:'Cofura',due:'2026-10-14',est:90,pub:true},
- {id:3,t:'Lab 3 prelab (MIPS loops)',c:'ICS 51',due:'2026-10-12',est:60,src:'canvas'},
- {id:4,t:'Problem set 4',c:'STATS 67',due:'2026-10-15',est:90,src:'canvas'},
- {id:5,t:'Script next reel',c:'Instagram',due:'2026-10-16',est:30},
- {id:6,t:'Read ch. 6 + annotate',c:'WRITING 39C',due:'2026-10-14',est:45,src:'canvas',done:true},
- {id:7,t:'Laundry',c:'',due:'',est:0},
- {id:8,t:'Email TA about regrade',c:'',due:'',est:0},
+ {id:1,today:true,t:'Project 2: AVL tree insert + tests',c:'ICS 46',due:'2026-10-13',est:120,src:'canvas'},
+ {id:2,today:true,t:'Chat inbox: unread badge',c:'Cofura',due:'2026-10-14',est:90,pub:true},
+ {id:3,today:true,t:'Lab 3 prelab (MIPS loops)',c:'ICS 51',due:'2026-10-12',est:60,src:'canvas'},
+ {id:4,today:true,t:'Problem set 4',c:'STATS 67',due:'2026-10-15',est:90,src:'canvas'},
+ {id:5,today:true,t:'Script next reel',c:'Instagram',due:'2026-10-16',est:30},
+ {id:6,today:true,t:'Read ch. 6 + annotate',c:'WRITING 39C',due:'2026-10-14',est:45,src:'canvas',done:true},
+ {id:7,today:true,t:'Laundry',c:'',due:'',est:0},
+ {id:8,today:true,t:'Email TA about regrade',c:'',due:'',est:0},
  {id:9,t:'Midterm 1',c:'ICS 46',due:'2026-10-27',est:0,src:'canvas'},
  {id:10,t:'Project 3: hash maps',c:'ICS 46',due:'2026-11-10',est:0,src:'canvas'},
  {id:11,t:'Essay draft',c:'WRITING 39C',due:'2026-11-03',est:0,src:'canvas'},
@@ -678,25 +686,27 @@ function D(s){return new Date(s+'T12:00:00')}
 function iso(dt){return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0')}
 function dueLabel(s){if(!s)return'';var days=Math.round((D(s)-D(TODAY))/864e5);if(days===0)return'due today';if(days===1)return'due tomorrow';if(days>0&&days<7)return'due '+D(s).toLocaleDateString('en-US',{weekday:'short'});return'due '+D(s).toLocaleDateString('en-US',{month:'short',day:'numeric'})}
 var nid=14;
+function listed(){return tasks.filter(function(t){return t.today})}
 function $(s){return document.querySelector(s)}
 function fmt(m){var h=Math.floor(m/60),r=m%60;return (h?h+'h':'')+(r?(h?' ':'')+r+'m':'')||'0m'}
 var GRIP='<svg viewBox="0 0 14 20" aria-hidden="true"><g fill="currentColor"><circle cx="4" cy="4" r="1.6"/><circle cx="10" cy="4" r="1.6"/><circle cx="4" cy="10" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="4" cy="16" r="1.6"/><circle cx="10" cy="16" r="1.6"/></g></svg>';
 var X='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 function render(){
-  var ul=$('#list');ul.innerHTML='';
-  tasks.forEach(function(t,i){
+  var ul=$('#list');ul.innerHTML='';var L=listed();
+  if(!L.length)ul.innerHTML='<li class="mn-msg" style="list-style:none">Nothing on Today. Add a task above, or open the Calendar and pick what you want to work on.</li>';
+  L.forEach(function(t,i){
     var li=document.createElement('li');li.className='mn-check'+(t.done?' is-done':'');li.dataset.id=t.id;li.draggable=true;
-    li.innerHTML='<span class="mn-check__rank">'+(i+1)+'</span><button class="mn-grip" aria-label="Reorder '+t.t+'. Position '+(i+1)+' of '+tasks.length+'. Use up and down arrows.">'+GRIP+'</button>'+
+    li.innerHTML='<span class="mn-check__rank">'+(i+1)+'</span><button class="mn-grip" aria-label="Reorder '+t.t+'. Position '+(i+1)+' of '+L.length+'. Use up and down arrows.">'+GRIP+'</button>'+
     '<input type="checkbox" class="mn-box" aria-label="Done: '+t.t+'"'+(t.done?' checked':'')+'>'+
     '<div class="mn-check__body"><span class="mn-check__title">'+t.t+'</span><span class="mn-check__meta">'+[t.c?sw(t.c)+t.c:'',t.due?dueLabel(t.due):'',t.src?'Canvas':''].filter(Boolean).map(function(x){return'<span>'+x+'</span>'}).join('<span>·</span>')+(t.pub?'<span>· on /now</span>':(t.done?'':'<button class="mn-check__pub" data-pub="'+t.id+'">'+(t.c||t.due?'· ':'')+'show on /now</button>'))+'</span></div>'+
-    '<span class="mn-check__est">'+fmt(t.est)+'</span><button class="mn-check__x" aria-label="Remove '+t.t+'">'+X+'</button>';
+    '<span class="mn-check__est">'+fmt(t.est)+'</span><button class="mn-check__x" aria-label="'+(t.due?'Take '+t.t+' off Today (stays on the calendar)':'Delete '+t.t)+'" title="'+(t.due?'Take off Today':'Delete')+'">'+X+'</button>';
     ul.appendChild(li);
   });
-  var done=tasks.filter(function(t){return t.done}).length, left=tasks.filter(function(t){return!t.done&&t.est}).reduce(function(a,t){return a+t.est},0);
-  $('#doneCount').textContent=done+' of '+tasks.length+' done';
+  var done=L.filter(function(t){return t.done}).length, left=L.filter(function(t){return!t.done&&t.est}).reduce(function(a,t){return a+t.est},0);
+  $('#doneCount').textContent=done+' of '+L.length+' done';
   $('#hoursLeft').textContent=left?'~'+fmt(left)+' estimated left':'no estimates';
-  var r=tasks.length?done/tasks.length:0;$('#todayFill').style.width='calc((100% - 8px) * '+r.toFixed(3)+')';
-  $('#pubDone').textContent=done+' of '+tasks.length+' done';$('#pubFill').style.width='calc((100% - 8px) * '+r.toFixed(3)+')';
+  var r=L.length?done/L.length:0;$('#todayFill').style.width='calc((100% - 8px) * '+r.toFixed(3)+')';
+  $('#pubDone').textContent=done+' of '+L.length+' done';$('#pubFill').style.width='calc((100% - 8px) * '+r.toFixed(3)+')';
   // due bars
   var by={};tasks.filter(function(t){return!t.done&&t.due&&t.est&&t.c&&(D(t.due)-D(TODAY))/864e5<3}).forEach(function(t){by[t.c]=(by[t.c]||0)+t.est});
   var ks=Object.keys(by).sort(function(a,b){return by[b]-by[a]}),mx=ks.length?by[ks[0]]:1,b=$('#dueBars');b.innerHTML='';
@@ -713,18 +723,18 @@ function renderCal(){
     html='<div class="mn-week">';
     for(var i=0;i<7;i++){var dd=new Date(st);dd.setDate(st.getDate()+i);var s=iso(dd),ts=itemsOn(s),h=ts.reduce(function(a,t){return a+(t.est||0)},0),td=s===TODAY;
       html+='<div class="mn-day'+(td?' is-today':'')+'"><div class="mn-day__head"><b>'+dd.toLocaleDateString('en-US',{weekday:'short'})+'</b><span class="mn-day__date">'+dd.toLocaleDateString('en-US',{month:'short',day:'numeric'})+(td?' · today':'')+'</span></div><div class="mn-day__load" title="'+fmt(h)+' estimated"><span style="width:'+Math.min(100,h/480*100)+'%"></span></div>';
-      ts.forEach(function(t){html+='<button class="mn-due" data-task="'+t.id+'" style="--c:'+colOf(t.c)+'"><b>'+t.t+'</b><span>'+(t.c?sw(t.c)+t.c:'')+[t.est?fmt(t.est):'',t.done?'done':''].filter(Boolean).map(function(x){return' · '+x}).join('')+'</span></button>'});
+      ts.forEach(function(t){html+='<button class="mn-due'+(t.today?' is-listed':'')+'" data-task="'+t.id+'" style="--c:'+colOf(t.c)+'"><b>'+(t.today?'<svg class="mn-listed" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg>':'')+t.t+'</b><span>'+(t.c?sw(t.c)+t.c:'')+[t.est?fmt(t.est):'',t.today?'on Today':'',t.done?'done':''].filter(Boolean).map(function(x){return' · '+x}).join('')+'</span></button>'});
       if(!ts.length)html+='<span class="mn-mono" style="color:var(--ink-subtle)">nothing due</span>';html+='</div>'}
-    html+='</div>';$('#calNote').textContent='bar = estimated hours due that day (8h = full) · '+undated+' undated tasks live only on the checklist';
+    html+='</div>';$('#calNote').innerHTML='bar = estimated hours due that day (8h = full) · '+'<svg class="mn-listed" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg>'+'= on Today · click anything to add it to Today';
   } else {
     var y=calAnchor.getFullYear(),m=calAnchor.getMonth(),first=new Date(y,m,1,12),start=new Date(first);start.setDate(1-((first.getDay()+6)%7));
     $('#calTitle').textContent=first.toLocaleDateString('en-US',{month:'long',year:'numeric'});
     html='<div class="mn-month" role="grid" aria-label="'+$('#calTitle').textContent+'">';['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(function(n){html+='<span class="mn-month__dow">'+n+'</span>'});
     for(var k=0;k<42;k++){var dd=new Date(start);dd.setDate(start.getDate()+k);if(k>=35&&dd.getMonth()!==m)break;var s=iso(dd),ts=itemsOn(s);
       html+='<div class="mn-cell'+(dd.getMonth()!==m?' is-out':'')+(s===TODAY?' is-today':'')+'" role="gridcell" aria-label="'+dd.toDateString()+', '+ts.length+' due"><span class="mn-cell__n">'+dd.getDate()+'</span>';
-      ts.slice(0,3).forEach(function(t){html+='<button class="mn-cell__item'+(t.done?' is-done':'')+'" data-task="'+t.id+'" style="--c:'+colOf(t.c)+'" aria-label="'+t.t+(t.c?', '+t.c:'')+'. Open details">'+sw(t.c)+'<span class="t">'+t.t+'</span></button>'});
+      ts.slice(0,3).forEach(function(t){html+='<button class="mn-cell__item'+(t.done?' is-done':'')+(t.today?' is-listed':'')+'" data-task="'+t.id+'" style="--c:'+colOf(t.c)+'" aria-label="'+t.t+(t.c?', '+t.c:'')+(t.today?', on Today':'')+'. Open details">'+sw(t.c)+'<span class="t">'+(t.today?'<svg class="mn-listed" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg>':'')+t.t+'</span></button>'});
       if(ts.length>3)html+='<button class="mn-cell__more mn-link" data-day="'+s+'" style="border:0;background:none;text-align:left;cursor:pointer">+'+(ts.length-3)+' more</button>';html+='</div>'}
-    html+='</div>';$('#calNote').textContent='Go as far ahead as you like with → · '+undated+' undated tasks live only on the checklist';
+    html+='</div>';$('#calNote').innerHTML='<svg class="mn-listed" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg>'+'= on Today · click anything to add it to Today · go as far ahead as you like with →';
   }
   body.innerHTML=html;
 }
@@ -769,13 +779,13 @@ $('#classDetail').addEventListener('change',function(e){var id=+e.target.dataset
 // options
 function fill(sel,only){var s=$(sel);s.innerHTML=only?'':'<option value="">No class</option>';[['class','Classes'],['cat','Categories']].forEach(function(g){if(only&&only!==g[0])return;var og=document.createElement('optgroup');og.label=g[1];CLASSES.filter(function(c){return c.k===g[0]}).forEach(function(c){og.insertAdjacentHTML('beforeend','<option>'+c.n+'</option>')});s.appendChild(og)})}
 fill('#aC');fill('#stClass','class');
-$('#addForm').addEventListener('submit',function(e){e.preventDefault();tasks.push({id:nid++,t:$('#aT').value,c:$('#aC').value,due:$('#aD').value,est:+$('#aE').value||0});$('#aT').value='';$('#aD').value='';$('#aE').value='';$('#aC').value='';render();say('Added to the bottom of the list.')});
+$('#addForm').addEventListener('submit',function(e){e.preventDefault();tasks.push({id:nid++,today:true,t:$('#aT').value,c:$('#aC').value,due:$('#aD').value,est:+$('#aE').value||0});$('#aT').value='';$('#aD').value='';$('#aE').value='';$('#aC').value='';render();say('Added to the bottom of the list.')});
 $('#moreBtn').addEventListener('click',function(){var f=$('#moreFields'),o=f.hidden;f.hidden=!o;this.setAttribute('aria-expanded',o);this.textContent=o?'− hide details':'+ details (optional)'});
 var list=$('#list');
 list.addEventListener('change',function(e){if(e.target.classList.contains('mn-box')){var id=+e.target.closest('li').dataset.id;tasks.forEach(function(t){if(t.id===id)t.done=e.target.checked});render()}});
-list.addEventListener('click',function(e){var pb=e.target.closest('[data-pub]');if(pb){var id=+pb.dataset.pub;tasks.forEach(function(t){t.pub=t.id===id});var t=tasks.find(function(t){return t.id===id});document.querySelector('#st [data-s="build"]').click();$('#stText').value=t.t;prev();$('#stSet').click();render();say('Status set to: Building '+t.t);return}var x=e.target.closest('.mn-check__x');if(x){var id=+x.closest('li').dataset.id;tasks=tasks.filter(function(t){return t.id!==id});render()}});
+list.addEventListener('click',function(e){var pb=e.target.closest('[data-pub]');if(pb){var id=+pb.dataset.pub;tasks.forEach(function(t){t.pub=t.id===id});var t=tasks.find(function(t){return t.id===id});document.querySelector('#st [data-s="build"]').click();$('#stText').value=t.t;prev();$('#stSet').click();render();say('Status set to: Building '+t.t);return}var x=e.target.closest('.mn-check__x');if(x){var id=+x.closest('li').dataset.id,t=tasks.find(function(t){return t.id===id});if(t.due){t.today=false;render();say('Taken off Today. Still on the calendar.')}else{tasks=tasks.filter(function(t){return t.id!==id});render()}}});
 function say(m){$('#live').textContent=m}
-function move(id,dir){var i=tasks.findIndex(function(t){return t.id===id}),j=i+dir;if(j<0||j>=tasks.length)return;var t=tasks.splice(i,1)[0];tasks.splice(j,0,t);render();var g=list.querySelector('[data-id="'+id+'"] .mn-grip');g.focus();g.closest('li').classList.add('is-lifted');say(t.t+' moved to position '+(j+1)+' of '+tasks.length)}
+function move(id,dir){var L=listed(),i=L.findIndex(function(t){return t.id===id}),j=i+dir;if(j<0||j>=L.length)return;var t=L.splice(i,1)[0];L.splice(j,0,t);tasks=L.concat(tasks.filter(function(x){return!x.today}));render();var g=list.querySelector('[data-id="'+id+'"] .mn-grip');g.focus();g.closest('li').classList.add('is-lifted');say(t.t+' moved to position '+(j+1)+' of '+L.length)}
 list.addEventListener('keydown',function(e){var g=e.target.closest('.mn-grip');if(!g)return;var id=+g.closest('li').dataset.id;if(e.key==='ArrowUp'){e.preventDefault();move(id,-1)}if(e.key==='ArrowDown'){e.preventDefault();move(id,1)}});
 list.addEventListener('focusout',function(e){var li=e.target.closest('li');if(li)li.classList.remove('is-lifted')});
 // drag: move the real DOM node while dragging; commit the order once, on dragend
@@ -783,7 +793,7 @@ var dragEl=null;
 list.addEventListener('dragstart',function(e){dragEl=e.target.closest('li');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',dragEl.dataset.id);setTimeout(function(){dragEl&&dragEl.classList.add('is-placeholder')},0)});
 list.addEventListener('dragover',function(e){if(!dragEl)return;e.preventDefault();var over=e.target.closest('li');if(!over||over===dragEl)return;var r=over.getBoundingClientRect();list.insertBefore(dragEl,e.clientY>r.top+r.height/2?over.nextSibling:over)});
 list.addEventListener('drop',function(e){e.preventDefault()});
-list.addEventListener('dragend',function(){if(!dragEl)return;var ids=[].map.call(list.children,function(li){return+li.dataset.id});tasks.sort(function(a,b){return ids.indexOf(a.id)-ids.indexOf(b.id)});dragEl=null;render();say('Order saved.')});
+list.addEventListener('dragend',function(){if(!dragEl)return;var ids=[].map.call(list.children,function(li){return+li.dataset.id});function ix(t){var k=ids.indexOf(t.id);return k<0?1e9:k}tasks.sort(function(a,b){return ix(a)-ix(b)});dragEl=null;render();say('Order saved.')});
 // status
 var stMode='study';
 function statusText(){if(stMode==='free')return'Free right now';if(stMode==='build')return'Building '+($('#stText').value||'something');return'Studying for '+$('#stClass').value}
@@ -804,16 +814,16 @@ var nav=document.querySelector('[data-nav]');mnThumb(nav,function(){return null}
 render();prev();paintStatus($('#pubStatus'));
 
 // sync-on-open: the planner pulls Canvas every time it loads
-(function(){var s=document.getElementById('syncLine');s.innerHTML='<span class="mn-spinner" aria-hidden="true"></span> Syncing Canvas…';setTimeout(function(){s.textContent='Canvas synced just now · 14 assignments'},1400)})();
+(function(){var s=document.getElementById('syncLine');s.innerHTML='<span class="mn-spinner" aria-hidden="true"></span> Syncing Canvas…';setTimeout(function(){s.textContent='Canvas synced just now · 14 upcoming'},1400)})();
 
 // task details modal (calendar + week)
 var modal=document.getElementById('taskModal'),lastFocus=null;
 function openTask(id){var t=tasks.find(function(x){return x.id===id});if(!t)return;lastFocus=document.activeElement;
  modal.innerHTML='<div class="mn-modal__in" style="--c:'+colOf(t.c)+'"><div class="mn-modal__head"><div style="display:flex;flex-direction:column;gap:6px"><span class="mn-label">'+(t.c?sw(t.c)+t.c:'No class')+'</span><h2 class="mn-heading-md" id="tmTitle">'+t.t+'</h2></div><button class="mn-check__x" data-close aria-label="Close">'+X+'</button></div>'+
- '<dl class="mn-facts"><dt>Due</dt><dd>'+(t.due?D(t.due).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+' <span class="mn-mono">· '+dueLabel(t.due).replace('due ','')+'</span>':'No date')+'</dd><dt>Estimate</dt><dd>'+(t.est?fmt(t.est):'None')+'</dd><dt>Priority</dt><dd>#'+(tasks.indexOf(t)+1)+' of '+tasks.length+' on the checklist</dd><dt>Source</dt><dd>'+(t.src?'Canvas · <a class="mn-link" href="#">Open in Canvas ↗</a>':'Added by you')+'</dd><dt>Status</dt><dd>'+(t.done?'Done':'Open')+'</dd></dl>'+
- '<div class="mn-row"><button class="mn-btn" data-toggle="'+t.id+'">'+(t.done?'Mark open':'Mark done')+'</button>'+(t.done?'':'<button class="mn-btn" data-pubm="'+t.id+'">Show on /now</button>')+'<button class="mn-link" data-close style="border:0;background:none;cursor:pointer;margin-left:auto">Close</button></div></div>';
+ '<dl class="mn-facts"><dt>Due</dt><dd>'+(t.due?D(t.due).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+' <span class="mn-mono">· '+dueLabel(t.due).replace('due ','')+'</span>':'No date')+'</dd><dt>Estimate</dt><dd>'+(t.est?fmt(t.est):'None')+'</dd><dt>Today</dt><dd>'+(t.today?'#'+(listed().indexOf(t)+1)+' of '+listed().length+' on the list':'Not on the list')+'</dd><dt>Source</dt><dd>'+(t.src?'Canvas · <a class="mn-link" href="#">Open in Canvas ↗</a>':'Added by you')+'</dd><dt>Status</dt><dd>'+(t.done?'Done':'Open')+'</dd></dl>'+
+ '<div class="mn-row"><button class="mn-btn" data-today="'+t.id+'">'+(t.today?'Take off Today':'Add to Today')+'</button><button class="mn-btn" data-toggle="'+t.id+'">'+(t.done?'Mark open':'Mark done')+'</button>'+(t.done?'':'<button class="mn-btn" data-pubm="'+t.id+'">Show on /now</button>')+'<button class="mn-link" data-close style="border:0;background:none;cursor:pointer;margin-left:auto">Close</button></div></div>';
  modal.setAttribute('aria-labelledby','tmTitle');modal.showModal();}
 document.addEventListener('click',function(e){var b=e.target.closest('[data-task]');if(b){openTask(+b.dataset.task)}var day=e.target.closest('[data-day]');if(day){calMode='week';calAnchor=D(day.dataset.day);document.querySelector('#calMode [data-c="week"]').click()}});
-modal.addEventListener('click',function(e){if(e.target===modal||e.target.closest('[data-close]')){modal.close();return}var tg=e.target.closest('[data-toggle]');if(tg){var t=tasks.find(function(x){return x.id===+tg.dataset.toggle});t.done=!t.done;render();openTask(t.id)}var pm=e.target.closest('[data-pubm]');if(pm){modal.close();var pb=document.querySelector('[data-pub="'+pm.dataset.pubm+'"]');if(pb)pb.click()}});
+modal.addEventListener('click',function(e){if(e.target===modal||e.target.closest('[data-close]')){modal.close();return}var tg=e.target.closest('[data-toggle]');if(tg){var t=tasks.find(function(x){return x.id===+tg.dataset.toggle});t.done=!t.done;render();openTask(t.id)}var td=e.target.closest('[data-today]');if(td){var t=tasks.find(function(x){return x.id===+td.dataset.today});t.today=!t.today;if(t.today){tasks=tasks.filter(function(x){return x!==t});var L=listed();tasks.splice(tasks.indexOf(L[L.length-1])+1,0,t)}render();openTask(t.id);say(t.today?'Added to the bottom of Today.':'Taken off Today.')}var pm=e.target.closest('[data-pubm]');if(pm){modal.close();var pb=document.querySelector('[data-pub="'+pm.dataset.pubm+'"]');if(pb)pb.click()}});
 modal.addEventListener('close',function(){lastFocus&&lastFocus.focus&&lastFocus.focus()});
 </script></body></html>

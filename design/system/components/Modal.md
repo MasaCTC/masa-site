@@ -20,3 +20,7 @@ Destructive actions (delete task, delete class, remove Canvas feed) ask first wi
 ## Pressed buttons
 
 Pressing a button pushes it into the surface: the raised shadow turns into an inset well (`neu-inset-md`, or `neu-inset-sm` for the smaller buttons inside a modal) on `surface-sunken`. The footprint never changes: no scale, no translate. A button that only loses its shadow reads as shrinking, not pressing.
+
+## Today action
+
+The task Modal's first button toggles the running checklist: **Add to Today** (appends to the bottom of Today, live region "Added to the bottom of Today.") or **Take off Today**. The facts list has a "Today" row: "#3 of 8 on the list" or "Not on the list" (replaces the old "Priority" row).

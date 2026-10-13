@@ -425,3 +425,8 @@
 .mn-modal--confirm { width: min(420px, calc(100vw - 32px)); }
 .mn-modal--confirm .mn-modal__in { padding: 24px; gap: 14px; }
 .mn-modal--confirm .mn-modal__in > .mn-row { margin-top: 4px; }
+
+/* on-Today marker: calendar chips that are already on the running checklist */
+.mn-listed { flex: none; width: 11px; height: 11px; vertical-align: -1px; margin-right: 3px; color: var(--ink); }
+.mn-cell__item.is-listed { font-weight: 600; }
+.mn-due.is-listed b { font-weight: 700; }

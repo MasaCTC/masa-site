@@ -15,6 +15,7 @@ const STUBBED = {
   "server-only": "server-only.ts",
   "next/cache": "next-cache.ts",
   "next/navigation": "next-navigation.ts",
+  "next/server": "next-server.ts",
   "@/auth": "auth.ts",
   "@/db": "db.ts",
   "@/db/index": "db.ts",

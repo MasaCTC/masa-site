@@ -718,7 +718,7 @@ function itemsOn(s){return tasks.filter(function(t){return t.due===s})}
 function renderCal(){
   var body=$('#calBody'),html='';var undated=tasks.filter(function(t){return!t.due&&!t.done}).length;
   if(calMode==='week'){
-    var st=new Date(calAnchor);st.setDate(st.getDate()-((st.getDay()+6)%7));
+    var st=new Date(calAnchor);st.setDate(st.getDate()-st.getDay());
     $('#calTitle').textContent='Week of '+st.toLocaleDateString('en-US',{month:'short',day:'numeric'});
     html='<div class="mn-week">';
     for(var i=0;i<7;i++){var dd=new Date(st);dd.setDate(st.getDate()+i);var s=iso(dd),ts=itemsOn(s),h=ts.reduce(function(a,t){return a+(t.est||0)},0),td=s===TODAY;
@@ -727,9 +727,9 @@ function renderCal(){
       if(!ts.length)html+='<span class="mn-mono" style="color:var(--ink-subtle)">nothing due</span>';html+='</div>'}
     html+='</div>';$('#calNote').innerHTML='bar = estimated hours due that day (8h = full) · '+'<svg class="mn-listed" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg>'+'= on Today · click anything to add it to Today';
   } else {
-    var y=calAnchor.getFullYear(),m=calAnchor.getMonth(),first=new Date(y,m,1,12),start=new Date(first);start.setDate(1-((first.getDay()+6)%7));
+    var y=calAnchor.getFullYear(),m=calAnchor.getMonth(),first=new Date(y,m,1,12),start=new Date(first);start.setDate(1-first.getDay());
     $('#calTitle').textContent=first.toLocaleDateString('en-US',{month:'long',year:'numeric'});
-    html='<div class="mn-month" role="grid" aria-label="'+$('#calTitle').textContent+'">';['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(function(n){html+='<span class="mn-month__dow">'+n+'</span>'});
+    html='<div class="mn-month" role="grid" aria-label="'+$('#calTitle').textContent+'">';['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(function(n){html+='<span class="mn-month__dow">'+n+'</span>'});
     for(var k=0;k<42;k++){var dd=new Date(start);dd.setDate(start.getDate()+k);if(k>=35&&dd.getMonth()!==m)break;var s=iso(dd),ts=itemsOn(s);
       html+='<div class="mn-cell'+(dd.getMonth()!==m?' is-out':'')+(s===TODAY?' is-today':'')+'" role="gridcell" aria-label="'+dd.toDateString()+', '+ts.length+' due"><span class="mn-cell__n">'+dd.getDate()+'</span>';
       ts.slice(0,3).forEach(function(t){html+='<button class="mn-cell__item'+(t.done?' is-done':'')+(t.today?' is-listed':'')+'" data-task="'+t.id+'" style="--c:'+colOf(t.c)+'" aria-label="'+t.t+(t.c?', '+t.c:'')+(t.today?', on Today':'')+'. Open details">'+sw(t.c)+'<span class="t">'+(t.today?'<svg class="mn-listed" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg>':'')+t.t+'</span></button>'});

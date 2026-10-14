@@ -23,10 +23,9 @@ export function dayDiff(from: string, to: string): number {
   return Math.round((toUtc(to).getTime() - toUtc(from).getTime()) / DAY_MS);
 }
 
-/** Monday of the week containing `iso`. */
+/** Sunday of the week containing `iso` (weeks run Sun to Sat). */
 export function weekStart(iso: string): string {
-  const dow = (toUtc(iso).getUTCDay() + 6) % 7; // Mon = 0
-  return addDays(iso, -dow);
+  return addDays(iso, -toUtc(iso).getUTCDay()); // getUTCDay: Sun = 0
 }
 
 /** First day of the month `n` months after the month of `iso`. */
@@ -40,7 +39,7 @@ export function monthOf(iso: string): string {
 }
 
 /**
- * The month grid: Monday-first, starting on or before the 1st. 5 rows, or 6
+ * The month grid: Sunday-first, starting on or before the 1st. 5 rows, or 6
  * when the month spills into a sixth week.
  */
 export function monthGrid(iso: string): string[] {

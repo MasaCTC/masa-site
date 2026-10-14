@@ -14,7 +14,7 @@ import { Swatch } from "./bits";
 import { colorVar, usePlanner } from "./context";
 
 type Mode = "week" | "month";
-const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const FULL_DAY = 480; // 8h fills the week view's load bar
 
 export function CalendarView({ panelId, tabId }: { panelId: string; tabId: string }) {

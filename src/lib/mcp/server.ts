@@ -180,11 +180,23 @@ const mcpHandler = createMcpHandler(registerPlannerTools, {
  * requestOrigin (validated forwarded headers), not the adapter's own
  * unvalidated x-forwarded-host logic, so it is wrapped per request.
  */
-export function handleMcp(req: Request): Promise<Response> {
-  return withMcpAuth(mcpHandler, verifyAccess, {
+export async function handleMcp(req: Request): Promise<Response> {
+  const res = await withMcpAuth(mcpHandler, verifyAccess, {
     required: true,
     requiredScopes: [SCOPE],
     resourceUrl: requestOrigin(req),
     resourceMetadataPath: RESOURCE_METADATA_PATH,
   })(req);
+  // Legacy-protocol replies are an SSE stream that the tool fills after this
+  // function returns, i.e. after the route handler has finished, which is too
+  // late for revalidateTag/revalidatePath. Buffer the stream here so every
+  // tool (and its cache invalidation) has run before we return. mcp-handler
+  // hard-codes the legacy transport and exposes no enableJsonResponse, so this
+  // is the only hook. Each stateless reply is one short message, so buffering
+  // costs nothing.
+  const type = res.headers.get("content-type") ?? "";
+  if (res.status === 200 && res.body !== null && type.toLowerCase().startsWith("text/event-stream")) {
+    return new Response(await res.text(), { status: res.status, statusText: res.statusText, headers: res.headers });
+  }
+  return res;
 }

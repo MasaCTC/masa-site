@@ -273,6 +273,25 @@ test("owner token: tools/call reaches each planner function as the owner", async
   assert.ok(cacheCalls.length > 0);
 });
 
+test("write tools have invalidated the cache by the time handleMcp resolves (body not yet read)", async () => {
+  for (const [name, args] of [
+    ["add_task", { title: "Read ch. 3" }],
+    ["update_task", { id: ID, title: "Renamed" }],
+    ["complete_task", { id: ID }],
+  ] as const) {
+    resetDb(plannerDb);
+    cacheCalls.length = 0;
+    const msg: Rpc = { jsonrpc: "2.0", id: nextId++, method: "tools/call", params: { name, arguments: args } };
+    const res = await handleMcp(post(msg, access(), { "mcp-protocol-version": PROTOCOL }));
+    // Checked before touching the body: the route handler returns at this
+    // point, and revalidation after that is too late to apply.
+    assert.ok(cacheCalls.length > 0, `${name}: no cache invalidation before the response was returned`);
+    assert.equal(res.status, 200);
+    const r = (await reply(res)).result as unknown as CallResult;
+    assert.notEqual(r.isError, true, r.content[0].text);
+  }
+});
+
 test("invalid tool arguments are rejected before any write", async () => {
   resetDb(plannerDb);
   for (const [name, args] of [

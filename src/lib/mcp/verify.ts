@@ -7,14 +7,14 @@
 // throw is deliberately not caught here. withMcpAuth turns it into a 401
 // invalid_token, so a misconfigured secret can never grant tool access.
 import type { AuthInfo } from "@modelcontextprotocol/server";
-import { mcpResource, requestOrigin, SCOPE, verifyAccessToken } from "./oauth.ts";
+import { mcpResource, requestOrigin, verifyAccessToken } from "./oauth.ts";
 
 export type McpAuthExtra = { githubId: string };
 
 export async function verifyAccess(req: Request, bearer?: string): Promise<AuthInfo | undefined> {
   if (typeof bearer !== "string" || bearer === "") return undefined;
   const info = verifyAccessToken(bearer, { resource: mcpResource(requestOrigin(req)) });
-  if (!info || info.scope !== SCOPE) return undefined;
+  if (!info) return undefined; // verifyAccessToken already requires scope "planner"
   const extra: McpAuthExtra = { githubId: info.githubId };
   return {
     token: bearer,

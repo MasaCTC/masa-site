@@ -29,16 +29,45 @@ const CORS: Record<string, string> = {
   "Access-Control-Max-Age": "86400",
 };
 
+// Referrer policy for every HTML page. "same-origin", not "no-referrer": under
+// no-referrer a browser serializes the Origin of a form POST as "null", which
+// handleAuthorizePost (rightly) refuses, so Approve could never work. Cross-
+// origin navigations (GitHub, the client) still get no Referer.
+const REFERRER_POLICY = "same-origin";
+
+/**
+ * CSP for our HTML pages. No scripts at all; inline styles only. The consent
+ * form posts here, and Chrome applies form-action to every redirect hop of
+ * that submission: us -> github.com -> our callback -> the client's
+ * redirect_uri. So the consent page passes the validated redirect URI's origin
+ * as `formTarget`; other pages keep the strict list.
+ */
+function pageCsp(formTarget: string | null = null): string {
+  const formAction = ["'self'", "https://github.com"];
+  if (formTarget !== null) formAction.push(formTarget);
+  return `default-src 'none'; style-src 'unsafe-inline'; form-action ${formAction.join(" ")}; frame-ancestors 'none'; base-uri 'none'`;
+}
+
+// Only plain http(s) origins with a hostname (and optional port) may enter the
+// CSP; anything else (which the redirect allowlist already rules out) is dropped.
+const CSP_SAFE_ORIGIN = /^https?:\/\/[a-z0-9.-]+(:[0-9]{1,5})?$/;
+
+function redirectOrigin(redirectUri: string): string | null {
+  try {
+    const origin = new URL(redirectUri).origin;
+    return CSP_SAFE_ORIGIN.test(origin) ? origin : null;
+  } catch {
+    return null;
+  }
+}
+
 // Headers for every HTML page we render (consent, errors, cancelled).
 const PAGE_HEADERS: Record<string, string> = {
   "Content-Type": "text/html; charset=utf-8",
   "Cache-Control": "no-store",
   "X-Frame-Options": "DENY",
-  // No scripts at all; inline styles only; the form may post here and its
-  // response may redirect to GitHub (Chrome applies form-action to redirects).
-  "Content-Security-Policy":
-    "default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://github.com; frame-ancestors 'none'; base-uri 'none'",
-  "Referrer-Policy": "no-referrer",
+  "Content-Security-Policy": pageCsp(),
+  "Referrer-Policy": REFERRER_POLICY,
   "X-Content-Type-Options": "nosniff",
 };
 
@@ -94,13 +123,13 @@ a{color:#555}
 @media (prefers-color-scheme:dark){body{background:#111;color:#eee}main{background:#1b1b1b;border-color:#333}code{background:#262626}.note,a{color:#aaa}button{background:#eee;color:#111}}
 `;
 
-function page(title: string, body: string, status: number, extra: Headers | null = null): Response {
+function page(title: string, body: string, status: number): Response {
   const html = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="referrer" content="no-referrer">
+<meta name="referrer" content="${REFERRER_POLICY}">
 <title>${escapeHtml(title)}</title>
 <style>${STYLE}</style>
 </head>
@@ -108,9 +137,7 @@ function page(title: string, body: string, status: number, extra: Headers | null
 ${body}
 </main></body>
 </html>`;
-  const headers = new Headers(PAGE_HEADERS);
-  extra?.forEach((v, k) => headers.append(k, v));
-  return new Response(html, { status, headers });
+  return new Response(html, { status, headers: new Headers(PAGE_HEADERS) });
 }
 
 function errorPage(message: string, status: number): Response {
@@ -181,9 +208,10 @@ export function handleAuthorizeGet(req: Request): Promise<Response> {
       }
       return errorPage(r.description, r.status);
     }
-    const extra = new Headers();
-    extra.append("Set-Cookie", csrfCookie(r.csrf, requestOrigin(req)));
-    return page("Authorize access", consentPage(r.clientName, r.redirectUri, r.consent), 200, extra);
+    const res = page("Authorize access", consentPage(r.clientName, r.redirectUri, r.consent), 200);
+    res.headers.set("Content-Security-Policy", pageCsp(redirectOrigin(r.redirectUri)));
+    res.headers.append("Set-Cookie", csrfCookie(r.csrf, requestOrigin(req)));
+    return res;
   });
 }
 

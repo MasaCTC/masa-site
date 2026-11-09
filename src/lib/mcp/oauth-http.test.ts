@@ -188,7 +188,7 @@ test("consent page: escaped client name, exact redirect URI, anti-framing, no Gi
   assert.match(csp, /form-action 'self' https:\/\/github\.com/);
   assert.doesNotMatch(csp, /script-src [^;]*'unsafe-inline'/);
   assert.equal(res.headers.get("cache-control"), "no-store");
-  assert.equal(res.headers.get("referrer-policy"), "no-referrer");
+  assert.equal(res.headers.get("referrer-policy"), "same-origin");
   assert.equal(res.headers.get("x-content-type-options"), "nosniff");
 
   const html = await res.text();
@@ -196,6 +196,7 @@ test("consent page: escaped client name, exact redirect URI, anti-framing, no Gi
   assert.ok(html.includes("&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;&amp;&#39;"));
   assert.ok(html.includes(CLAUDE));
   assert.match(html, /<form method="post" action="\/oauth\/authorize">/);
+  assert.match(html, /<meta name="referrer" content="same-origin">/);
   assert.match(html, />Approve</);
   assert.match(html, /Cancel/);
   // The page itself never points the browser at GitHub.
@@ -212,6 +213,60 @@ test("consent page: escaped client name, exact redirect URI, anti-framing, no Gi
   assert.ok(consent);
   assert.equal(consent.client_name, evilName);
   assert.ok(csrf.length >= 32);
+});
+
+// Chrome checks form-action on every redirect hop of the Approve submission
+// (us -> GitHub -> our callback -> the client), so the consent page must list
+// the validated redirect URI's origin. Exact strings, so nothing else sneaks in.
+const STRICT_CSP =
+  "default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://github.com; frame-ancestors 'none'; base-uri 'none'";
+for (const [label, uri, expected] of [
+  [
+    "claude.ai",
+    CLAUDE,
+    "default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://github.com https://claude.ai; frame-ancestors 'none'; base-uri 'none'",
+  ],
+  [
+    "loopback (Inspector)",
+    "http://localhost:6274/oauth/callback",
+    "default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://github.com http://localhost:6274; frame-ancestors 'none'; base-uri 'none'",
+  ],
+  [
+    "127.0.0.1 with a query",
+    "http://127.0.0.1:33418/cb?x=1",
+    "default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://github.com http://127.0.0.1:33418; frame-ancestors 'none'; base-uri 'none'",
+  ],
+] as const) {
+  test(`consent page CSP form-action adds the ${label} redirect origin`, async () => {
+    const p = new URLSearchParams({
+      response_type: "code",
+      client_id: await registered("c", [uri]),
+      redirect_uri: uri,
+      code_challenge: CHALLENGE,
+      code_challenge_method: "S256",
+    });
+    const res = await handleAuthorizeGet(new Request(`${BASE}/oauth/authorize?${p}`));
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get("content-security-policy"), expected);
+  });
+}
+
+test("error and cancelled pages keep the strict CSP (no client origin)", async () => {
+  const p = new URLSearchParams({
+    response_type: "code",
+    client_id: "nope.nope",
+    redirect_uri: CLAUDE,
+    code_challenge: CHALLENGE,
+    code_challenge_method: "S256",
+  });
+  const err = await handleAuthorizeGet(new Request(`${BASE}/oauth/authorize?${p}`));
+  assert.equal(err.status, 400);
+  assert.equal(err.headers.get("content-security-policy"), STRICT_CSP);
+  const cancelled = await handleAuthorizeGet(new Request(`${BASE}/oauth/authorize?cancelled=1`));
+  assert.equal(cancelled.headers.get("content-security-policy"), STRICT_CSP);
+  const refused = await handleAuthorizePost(post("consent=x", { origin: "https://evil.test" }));
+  assert.equal(refused.status, 403);
+  assert.equal(refused.headers.get("content-security-policy"), STRICT_CSP);
 });
 
 test("consent page escapes a hostile redirect-URI query", async () => {
@@ -302,6 +357,49 @@ test("POST approve: 302 to GitHub with the nonce cookie bound to the state", asy
   assert.match(nonceCookie, /Secure/);
   assert.match(nonceCookie, /SameSite=Lax/);
   assert.match(nonceCookie, /Max-Age=600/);
+});
+
+/**
+ * The Origin a browser puts on a same-origin, non-CORS form POST from a page
+ * with this referrer policy (Fetch spec, "serializing a request origin"):
+ * "no-referrer" serializes it as "null"; "same-origin" (and the other
+ * policies, for a same-origin target) send the page's own origin.
+ */
+function browserFormOrigin(referrerPolicy: string, pageOrigin: string): string {
+  return referrerPolicy === "no-referrer" ? "null" : pageOrigin;
+}
+
+test("browser contract: the consent page's own referrer policy lets its Approve POST through", async () => {
+  const page = await handleAuthorizeGet(new Request(await authorizeUrl()));
+  const html = await page.text();
+  const headerPolicy = page.headers.get("referrer-policy") ?? "";
+  const metaPolicy = /<meta name="referrer" content="([^"]+)">/.exec(html)?.[1] ?? "";
+  // The meta tag wins in a browser when present; both must agree anyway.
+  assert.equal(metaPolicy, headerPolicy);
+  const origin = browserFormOrigin(metaPolicy, BASE);
+  assert.equal(origin, BASE);
+  const res = await handleAuthorizePost(
+    post(new URLSearchParams({ consent: consentFrom(html) }).toString(), {
+      cookie: `mcp_oauth_csrf=${csrfFrom(page)}`,
+      origin,
+      "sec-fetch-site": "same-origin",
+    }),
+  );
+  assert.equal(res.status, 302);
+  assert.match(res.headers.get("location") ?? "", /^https:\/\/github\.com\/login\/oauth\/authorize\?/);
+});
+
+test("browser contract: Origin \"null\" (opaque origin) is still refused", async () => {
+  const { consent, csrf } = await consentAndCookie();
+  const res = await handleAuthorizePost(
+    post(new URLSearchParams({ consent }).toString(), {
+      cookie: `mcp_oauth_csrf=${csrf}`,
+      origin: browserFormOrigin("no-referrer", BASE),
+      "sec-fetch-site": "same-origin",
+    }),
+  );
+  assert.equal(res.status, 403);
+  assert.equal(res.headers.get("location"), null);
 });
 
 test("POST approve works without Origin/Sec-Fetch-Site headers (older browsers)", async () => {

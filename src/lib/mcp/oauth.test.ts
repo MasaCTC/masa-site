@@ -146,7 +146,6 @@ for (const [label, body] of [
   ["client_credentials grant", { grant_types: ["client_credentials"], redirect_uris: [CLAUDE] }],
   ["grant_types not array", { grant_types: "authorization_code", redirect_uris: [CLAUDE] }],
   ["token response type", { response_types: ["token"], redirect_uris: [CLAUDE] }],
-  ["unsupported scope", { scope: "admin", redirect_uris: [CLAUDE] }],
 ] as const) {
   test(`registerClient rejects ${label} as invalid_client_metadata`, () => {
     const r = register(body);
@@ -156,6 +155,14 @@ for (const [label, body] of [
 }
 
 // ---------- validateAuthorize ----------
+
+for (const scope of [undefined, "", "admin", "planner admin", "claudeai", 5]) {
+  test(`registerClient narrows requested scope ${JSON.stringify(scope)} to planner`, () => {
+    const r = register({ redirect_uris: [CLAUDE], ...(scope === undefined ? {} : { scope }) });
+    assert.equal(r.status, 201, JSON.stringify(r.json));
+    assert.equal((r.json as { scope: string }).scope, "planner");
+  });
+}
 
 function clientId(name = "Claude", uris = [CLAUDE, LOOPBACK]) {
   const r = registerClient({ client_name: name, redirect_uris: uris });
@@ -302,8 +309,33 @@ test("validateAuthorize: missing response_type redirects", () => {
   if (!r.ok) assert.ok(r.redirectTo);
 });
 
-test("validateAuthorize: unknown scope redirects invalid_scope", () =>
-  assertRedirectError(validateAuthorize(params({ scope: "planner admin" })), "invalid_scope"));
+test("validateAuthorize narrows any requested scope (empty, unknown, mixed) to planner", () => {
+  for (const scope of ["", "admin", "planner admin", "claudeai"]) {
+    const r = validateAuthorize(params({ scope }));
+    assert.equal(r.ok, true, `${scope}: ${JSON.stringify(r)}`);
+  }
+});
+
+test("an unknown requested scope still ends in a planner-scope code and token", async () => {
+  const cid = clientId();
+  const v = validateAuthorize(params({ client_id: cid, scope: "admin" }));
+  assert.equal(v.ok, true);
+  if (!v.ok) return;
+  const approved = approveAuthorize(v.consent, ORIGIN, v.csrf);
+  assert.ok("redirectTo" in approved);
+  const state = new URL(approved.redirectTo).searchParams.get("state") as string;
+  const done = await completeAuthorize(
+    { state, githubCode: "gh-code", nonceCookie: approved.nonce, origin: ORIGIN },
+    fakeGh({ id: OWNER }).gh,
+  );
+  assert.ok("redirectTo" in done);
+  const code = new URL(done.redirectTo).searchParams.get("code") as string;
+  assert.equal(verifyToken("code", code)?.scope, "planner");
+  const t = okTokens(exchangeToken(codeForm(code, cid, { scope: "admin" }), ORIGIN));
+  assert.equal(t.scope, "planner");
+  assert.equal(verifyToken("access", t.access_token)?.scope, "planner");
+  assert.equal(verifyAccessToken(t.access_token, { resource: RESOURCE })?.scope, "planner");
+});
 
 test("validateAuthorize: error redirect keeps the redirect URI's own query", () => {
   const uri = "http://127.0.0.1:9/cb?keep=1";
@@ -974,12 +1006,17 @@ test("exchangeToken: refresh by another client → invalid_grant; for another su
   assertTokenError(exchangeToken(refreshForm(forged, cid), ORIGIN), "invalid_grant");
 });
 
-test("exchangeToken: expired refresh token → invalid_grant; unsupported scope → invalid_scope", async () => {
+test("exchangeToken: expired refresh token → invalid_grant; a requested scope is narrowed to planner", async () => {
   const cid = clientId();
   const t = okTokens(exchangeToken(codeForm(await freshCode(cid), cid), ORIGIN));
   const later = Math.floor(Date.now() / 1000) + 30 * 86400 + 1;
   assertTokenError(exchangeToken(refreshForm(t.refresh_token, cid), ORIGIN, { now: later }), "invalid_grant");
-  assertTokenError(exchangeToken(refreshForm(t.refresh_token, cid, { scope: "admin" }), ORIGIN), "invalid_scope");
+  for (const scope of ["admin", "", "planner admin"]) {
+    const r = okTokens(exchangeToken(refreshForm(t.refresh_token, cid, { scope }), ORIGIN));
+    assert.equal(r.scope, "planner");
+    assert.equal(verifyToken("access", r.access_token)?.scope, "planner");
+    assert.equal(verifyToken("refresh", r.refresh_token)?.scope, "planner");
+  }
 });
 
 test("exchangeToken throws (→ 500) when MCP_OAUTH_SECRET is missing, never issues tokens", () => {

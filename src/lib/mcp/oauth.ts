@@ -98,11 +98,6 @@ function isStringArray(v: unknown): v is string[] {
   return Array.isArray(v) && v.every((x) => typeof x === "string");
 }
 
-function scopeIsSupported(scope: string): boolean {
-  const parts = scope.split(" ").filter(Boolean);
-  return parts.every((s) => s === SCOPE);
-}
-
 /** RFC 7591 registration for public clients (PKCE, no secret). */
 export function registerClient(body: unknown): RegisterResult {
   if (typeof body !== "object" || body === null || Array.isArray(body)) return invalidMetadata;
@@ -129,9 +124,8 @@ export function registerClient(body: unknown): RegisterResult {
     if (!b.response_types.every((r) => r === "code")) return invalidMetadata;
   }
 
-  if (b.scope !== undefined) {
-    if (typeof b.scope !== "string" || !scopeIsSupported(b.scope)) return invalidMetadata;
-  }
+  // scope: whatever is requested (absent, empty, unknown) is narrowed to
+  // "planner", the only scope we have; the response says so (RFC 7591 3.2.1).
 
   // token_endpoint_auth_method: we only issue public clients and always answer
   // "none" (RFC 7591 lets the server replace requested values).
@@ -257,10 +251,8 @@ export function validateAuthorize(params: URLSearchParams): AuthorizeResult {
     return redirectFail("invalid_request", "Malformed code_challenge");
   }
 
-  const scope = params.get("scope");
-  if (scope !== null && !scopeIsSupported(scope)) {
-    return redirectFail("invalid_scope", `Only the "${SCOPE}" scope is supported`);
-  }
+  // scope: any requested value is narrowed to "planner" (RFC 6749 3.3 lets the
+  // server issue a different scope). The code and tokens always carry SCOPE.
 
   const resource = params.get("resource");
   if (resource !== null) {
@@ -514,7 +506,6 @@ export type TokenErrorCode =
   | "invalid_client"
   | "invalid_grant"
   | "unsupported_grant_type"
-  | "invalid_scope"
   | "invalid_target";
 
 export type TokenResult =
@@ -613,8 +604,7 @@ export function exchangeToken(form: URLSearchParams, origin: string, opts?: Time
 
   const refreshToken = form.get("refresh_token");
   if (!refreshToken) return tokenError("invalid_request");
-  const scope = form.get("scope");
-  if (scope !== null && !scopeIsSupported(scope)) return tokenError("invalid_scope");
+  // A requested scope is narrowed to "planner", as on /authorize.
   const r = verifyToken("refresh", refreshToken, opts);
   if (!r) return tokenError("invalid_grant");
   if (

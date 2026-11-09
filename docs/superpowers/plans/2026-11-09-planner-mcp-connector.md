@@ -29,7 +29,8 @@
 2. A redirect URI off the allowlist must be rejected at `/register` and at `/authorize`; a different `redirect_uri` at `/token` than at `/authorize` must fail.
 3. Missing `code_challenge`, plain method, or a wrong `code_verifier` must fail (`invalid_grant` / `invalid_request`).
 4. Unknown task id, unknown or ambiguous class name, blank title, malformed date: tool returns an `isError` result with a clear message and writes nothing; it never throws.
-5. Callback with a GitHub id that is not the owner (or a GitHub error, or missing/mismatched nonce cookie) issues no code.
+5. A malicious client name (`<script>`, quotes) must render escaped on the consent page; the consent page must not be frameable; no GitHub redirect happens before Approve.
+6. Callback with a GitHub id that is not the owner (or a GitHub error, or missing/mismatched nonce cookie) issues no code.
 
 ---
 
@@ -120,7 +121,7 @@
 
 **Interfaces:**
 - Produces:
-  - `type TokenType = "client" | "state" | "code" | "access" | "refresh"`
+  - `type TokenType = "client" | "consent" | "state" | "code" | "access" | "refresh"`
   - `signToken(type: TokenType, claims: Record<string, unknown>, ttlSeconds: number | null, opts?: { secret?: string; now?: number }): string` — `base64url(payload).base64url(hmac)`, payload includes `typ`, `exp` (omitted when ttl null; `client` ids don't expire). Key = HMAC-SHA256(secret, `"mcp:" + type`) so a token of one type can never verify as another.
   - `verifyToken(type: TokenType, token: string, opts?: { secret?: string; now?: number }): Record<string, unknown> | null` — null on bad format, bad signature (`timingSafeEqual`), wrong type, or expired.
   - Secret read from `process.env.MCP_OAUTH_SECRET`; throws if unset or < 32 chars (at call time, not import time).
@@ -130,10 +131,10 @@
 - [ ] **Step 2:** Run; expect FAIL. **Step 3:** Implement. **Step 4:** Run `npm test`; PASS.
 - [ ] **Step 5:** Commit `feat(mcp): signed stateless token primitives`.
 
-### Task 5: OAuth metadata, registration, authorize
+### Task 5: OAuth metadata, registration, consent and authorize
 
 **Files:**
-- Create: `src/lib/mcp/oauth.ts` (pure logic over `Request`/plain values), `src/app/.well-known/oauth-authorization-server/route.ts`, `src/app/.well-known/oauth-protected-resource/route.ts` (and the path-suffixed `/.well-known/oauth-protected-resource/api/mcp` variant if the adapter docs require it), `src/app/oauth/register/route.ts`, `src/app/oauth/authorize/route.ts`
+- Create: `src/lib/mcp/oauth.ts` (pure logic over `Request`/plain values), `src/app/.well-known/oauth-authorization-server/route.ts`, `src/app/.well-known/oauth-protected-resource/route.ts` (and the path-suffixed `/.well-known/oauth-protected-resource/api/mcp` variant if the adapter docs require it), `src/app/oauth/register/route.ts`, `src/app/oauth/authorize/route.ts` (GET shows consent, POST approves)
 - Test: `src/lib/mcp/oauth.test.ts`
 
 **Interfaces:**
@@ -141,11 +142,13 @@
 - Produces in `oauth.ts`:
   - `isAllowedRedirect(uri: string): boolean` (allowlist in Global Constraints; exact match for claude hosts, any port for loopback, no fragments)
   - `registerClient(body: unknown): { status: 201; json: {...RFC 7591 response, client_id: signToken("client", {name, redirect_uris}, null), token_endpoint_auth_method: "none"} } | { status: 400; json: { error: "invalid_redirect_uri" | "invalid_client_metadata" } }`
-  - `beginAuthorize(params: URLSearchParams, origin: string): { redirectTo: string; nonce: string } | { error: string; status: 400 }` — requires `response_type=code`, valid `client_id` (type client), `redirect_uri` ∈ the client's registered URIs and allowlist, `code_challenge` with `code_challenge_method=S256`; returns the GitHub authorize URL (`https://github.com/login/oauth/authorize`, `client_id=AUTH_GITHUB_ID`, `redirect_uri=${origin}/api/auth/callback/github/mcp`, `scope=read:user`, `state=signToken("state", {client_id, redirect_uri, code_challenge, client_state, resource, nonce}, 600)`).
+  - `validateAuthorize(params: URLSearchParams): { ok: true; clientName: string; redirectUri: string; consent: string } | { ok: false; error: string; status: 400 }` — requires `response_type=code`, valid `client_id` (type client), `redirect_uri` ∈ the client's registered URIs and allowlist, `code_challenge` with `code_challenge_method=S256`; `consent = signToken("consent", {client_id, redirect_uri, code_challenge, client_state, resource, client_name}, 600)`.
+  - `approveAuthorize(consent: string, origin: string): { redirectTo: string; nonce: string } | { error: string; status: 400 }` — verifies the `consent` token (type `consent`), then returns the GitHub authorize URL (`https://github.com/login/oauth/authorize`, `client_id=AUTH_GITHUB_ID`, `redirect_uri=${origin}/api/auth/callback/github/mcp`, `scope=read:user`, `state=signToken("state", {client_id, redirect_uri, code_challenge, client_state, resource, nonce}, 600)`).
   - Metadata documents: issuer = origin; `authorization_endpoint=/oauth/authorize`, `token_endpoint=/oauth/token`, `registration_endpoint=/oauth/register`, `code_challenge_methods_supported:["S256"]`, `grant_types_supported:["authorization_code","refresh_token"]`, `token_endpoint_auth_methods_supported:["none"]`; protected resource: `resource=${origin}/api/mcp`, `authorization_servers:[origin]`.
-- `/oauth/authorize` GET sets an httpOnly, Secure (not on localhost), SameSite=Lax, 10-min cookie `mcp_oauth_nonce` = `nonce`, then 302s to GitHub. Origin comes from the request (honor `x-forwarded-*` like the adapter does).
+- **Consent screen** *(user-requested)*: `GET /oauth/authorize` runs `validateAuthorize`; on success renders a minimal HTML page showing the client name (HTML-escaped; it is attacker-supplied via DCR) and the exact redirect URI, with one **Approve** button (a `<form method="post">` carrying the signed `consent` token in a hidden field) and a **Cancel** link back to nothing destructive (plain text "Cancelled" page). Nothing is sent to GitHub until Approve. The page sets `X-Frame-Options: DENY` and `Content-Security-Policy: frame-ancestors 'none'` (clickjacking), `Cache-Control: no-store`, and uses inline styles only. `POST /oauth/authorize` reads the `consent` field, calls `approveAuthorize`, sets the nonce cookie, and 302s to GitHub. Reject a POST with a missing or bad token (400).
+- `approveAuthorize` is what sets up the cookie: it sets an httpOnly, Secure (not on localhost), SameSite=Lax, 10-min cookie `mcp_oauth_nonce` = `nonce`, then 302s to GitHub (on POST only). Origin comes from the request (honor `x-forwarded-*` like the adapter does).
 
-- [ ] **Step 1:** Failing tests: `isAllowedRedirect` accepts the 2 claude URIs and `http://localhost:6274/oauth/callback`/`http://127.0.0.1:1/x`, rejects `https://evil.test/cb`, `http://claude.ai/...`, `https://claude.ai/other`, `javascript:` and URIs with fragments; `registerClient` happy path and rejection of a bad URI; `beginAuthorize` rejects missing/plain PKCE, unregistered `redirect_uri`, tampered `client_id`; happy path output URL carries a verifiable state and the nonce.
+- [ ] **Step 1:** Failing tests: `isAllowedRedirect` accepts the 2 claude URIs and `http://localhost:6274/oauth/callback`/`http://127.0.0.1:1/x`, rejects `https://evil.test/cb`, `http://claude.ai/...`, `https://claude.ai/other`, `javascript:` and URIs with fragments; `registerClient` happy path and rejection of a bad URI; `beginAuthorize` rejects missing/plain PKCE, unregistered `redirect_uri`, tampered `client_id`; happy path of `validateAuthorize` returns the client name, redirect URI and a verifiable consent token; `approveAuthorize` rejects a tampered, expired or wrong-type consent token (a `state`/`access` token must not work) and its happy-path URL carries a verifiable state and the nonce; the GET page HTML contains the escaped client name (test with `<script>` in the name) and the redirect URI, and the anti-framing headers; GET never redirects to GitHub.
 - [ ] **Step 2:** Run; FAIL. **Step 3:** Implement logic then the thin route files (each route: `await connection()` if Next requires dynamic opt-in under cacheComponents — check docs). **Step 4:** `npm test` PASS; `npm run build` PASS.
 - [ ] **Step 5:** Commit `feat(mcp): OAuth metadata, dynamic registration and authorize`.
 

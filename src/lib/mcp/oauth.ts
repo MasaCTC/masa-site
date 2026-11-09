@@ -376,6 +376,8 @@ export function makeGithubFetch(fetchImpl: typeof fetch = (...a) => fetch(...a))
       }).toString(),
       signal: AbortSignal.timeout(GITHUB_TIMEOUT_MS),
       cache: "no-store",
+      // Never re-send the client secret / bearer token to a redirect target.
+      redirect: "error",
     });
     if (!tokenRes.ok) throw new Error(`GitHub token exchange failed: HTTP ${tokenRes.status}`);
     let tokenBody: unknown;
@@ -397,6 +399,8 @@ export function makeGithubFetch(fetchImpl: typeof fetch = (...a) => fetch(...a))
       },
       signal: AbortSignal.timeout(GITHUB_TIMEOUT_MS),
       cache: "no-store",
+      // Never re-send the client secret / bearer token to a redirect target.
+      redirect: "error",
     });
     if (userRes.status === 401 || userRes.status === 403) return null;
     if (!userRes.ok) throw new Error(`GitHub user lookup failed: HTTP ${userRes.status}`);
@@ -636,21 +640,21 @@ export type AccessTokenInfo = {
 
 /**
  * Verifies a bearer access token: signature, type `access`, not expired,
- * subject is the owner, scope is planner, and (when `opts.resource` is given)
- * the audience matches. Returns null for any invalid token. Like verifyToken,
+ * subject is the owner, scope is planner, and the audience equals the
+ * required `opts.resource` (this deployment's `${origin}/api/mcp`). Returns null for any invalid token. Like verifyToken,
  * it THROWS when MCP_OAUTH_SECRET is unusable; callers must fail closed.
  */
 export function verifyAccessToken(
   token: string,
-  opts?: TimeOpts & { resource?: string },
+  opts: TimeOpts & { resource: string },
 ): AccessTokenInfo | null {
-  const c = verifyToken("access", token, opts?.now === undefined ? undefined : { now: opts.now });
+  const c = verifyToken("access", token, opts.now === undefined ? undefined : { now: opts.now });
   if (!c) return null;
   if (c.sub !== OWNER_GITHUB_ID) return null;
   if (c.scope !== SCOPE) return null;
   if (typeof c.client_id !== "string" || c.client_id === "") return null;
   if (typeof c.resource !== "string") return null;
-  if (opts?.resource !== undefined && c.resource !== opts.resource) return null;
+  if (typeof opts.resource !== "string" || c.resource !== opts.resource) return null;
   if (typeof c.exp !== "number") return null;
   return { githubId: c.sub, clientId: c.client_id, scope: c.scope, resource: c.resource, expiresAt: c.exp };
 }

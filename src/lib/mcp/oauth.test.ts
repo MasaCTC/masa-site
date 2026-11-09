@@ -946,7 +946,14 @@ test("exchangeToken: refresh_token rotates to a new access + refresh pair", asyn
   const a = verifyToken("access", second.access_token);
   assert.equal(a?.sub, OWNER);
   assert.equal(a?.client_id, cid);
-  assert.ok(verifyToken("refresh", second.refresh_token));
+  const rf = verifyToken("refresh", second.refresh_token);
+  assert.ok(rf);
+  assert.equal(rf.sub, OWNER);
+  assert.equal(rf.client_id, cid);
+  assert.equal(rf.resource, RESOURCE);
+  assert.equal(rf.scope, "planner");
+  assert.equal(a?.resource, RESOURCE);
+  assert.equal(a?.scope, "planner");
   // the new refresh token works too
   okTokens(exchangeToken(refreshForm(second.refresh_token, cid, { scope: "planner" }), ORIGIN));
 });
@@ -992,14 +999,13 @@ test("exchangeToken throws (→ 500) when MCP_OAUTH_SECRET is missing, never iss
 test("verifyAccessToken accepts an issued access token", async () => {
   const cid = clientId();
   const t = okTokens(exchangeToken(codeForm(await freshCode(cid), cid), ORIGIN));
-  const v = verifyAccessToken(t.access_token);
+  const v = verifyAccessToken(t.access_token, { resource: RESOURCE });
   assert.ok(v);
   assert.equal(v.githubId, OWNER);
   assert.equal(v.clientId, cid);
   assert.equal(v.scope, "planner");
   assert.equal(v.resource, RESOURCE);
   assert.equal(v.expiresAt, verifyToken("access", t.access_token)?.exp);
-  assert.ok(verifyAccessToken(t.access_token, { resource: RESOURCE }));
   assert.equal(verifyAccessToken(t.access_token, { resource: "https://preview.example/api/mcp" }), null);
 });
 
@@ -1007,13 +1013,47 @@ test("verifyAccessToken rejects wrong type, wrong sub, wrong scope, expired and 
   const cid = clientId();
   const t = okTokens(exchangeToken(codeForm(await freshCode(cid), cid), ORIGIN));
   const claims = { sub: OWNER, client_id: cid, scope: "planner", resource: RESOURCE };
-  assert.equal(verifyAccessToken(t.refresh_token), null);
-  assert.equal(verifyAccessToken(signToken("code", claims, 60)), null);
-  assert.equal(verifyAccessToken(signToken("access", { ...claims, sub: "999" }, 3600)), null);
-  assert.equal(verifyAccessToken(signToken("access", { ...claims, sub: 152247398 }, 3600)), null);
-  assert.equal(verifyAccessToken(signToken("access", { ...claims, scope: "admin" }, 3600)), null);
-  assert.equal(verifyAccessToken(signToken("access", { ...claims, client_id: undefined }, 3600)), null);
-  assert.equal(verifyAccessToken(t.access_token, { now: Math.floor(Date.now() / 1000) + 3601 }), null);
-  assert.equal(verifyAccessToken("garbage"), null);
-  assert.equal(verifyAccessToken(""), null);
+  assert.equal(verifyAccessToken(t.refresh_token, { resource: RESOURCE }), null);
+  assert.equal(verifyAccessToken(signToken("code", claims, 60), { resource: RESOURCE }), null);
+  assert.equal(verifyAccessToken(signToken("access", { ...claims, sub: "999" }, 3600), { resource: RESOURCE }), null);
+  assert.equal(verifyAccessToken(signToken("access", { ...claims, sub: 152247398 }, 3600), { resource: RESOURCE }), null);
+  assert.equal(verifyAccessToken(signToken("access", { ...claims, scope: "admin" }, 3600), { resource: RESOURCE }), null);
+  assert.equal(verifyAccessToken(signToken("access", { ...claims, client_id: undefined }, 3600), { resource: RESOURCE }), null);
+  assert.equal(verifyAccessToken(t.access_token, { resource: RESOURCE, now: Math.floor(Date.now() / 1000) + 3601 }), null);
+  assert.equal(verifyAccessToken("garbage", { resource: RESOURCE }), null);
+  assert.equal(verifyAccessToken("", { resource: RESOURCE }), null);
+});
+
+test("verifyAccessToken: resource is required; a missing/other audience is rejected", async () => {
+  const cid = clientId();
+  const t = okTokens(exchangeToken(codeForm(await freshCode(cid), cid), ORIGIN));
+  // @ts-expect-error resource is a required option
+  assert.throws(() => verifyAccessToken(t.access_token));
+  // @ts-expect-error resource is a required option
+  assert.equal(verifyAccessToken(t.access_token, {}), null);
+  assert.equal(verifyAccessToken(t.access_token, { resource: "" }), null);
+  assert.equal(verifyAccessToken(t.access_token, { resource: `${RESOURCE}/` }), null);
+  assert.ok(verifyAccessToken(t.access_token, { resource: RESOURCE }));
+});
+
+test("makeGithubFetch: both GitHub requests refuse redirects (redirect: \"error\")", async () => {
+  process.env.AUTH_GITHUB_SECRET = "gh-secret";
+  const { impl, calls } = fakeFetch([jsonRes({ access_token: "gho_TOKEN" }), jsonRes({ id: 152247398 })]);
+  assert.deepEqual(await makeGithubFetch(impl)("c", "r"), { id: "152247398" });
+  assert.equal(calls.length, 2);
+  for (const c of calls) assert.equal(c.init.redirect, "error", c.url);
+});
+
+test("completeAuthorize: a redirect refused by fetch (TypeError) still yields server_error, no code", async () => {
+  process.env.AUTH_GITHUB_SECRET = "gh-secret";
+  for (const responses of [
+    [new TypeError("fetch failed: unexpected redirect")],
+    [jsonRes({ access_token: "gho_SECRET" }), new TypeError("fetch failed: unexpected redirect")],
+  ] as Array<Array<Response | Error>>) {
+    const { impl } = fakeFetch(responses);
+    const r = await completeAuthorize(callbackArgs(), makeGithubFetch(impl));
+    assert.ok("redirectTo" in r);
+    assert.equal(new URL(r.redirectTo).searchParams.get("error"), "server_error");
+    assert.doesNotMatch(r.redirectTo, /code=|gho_SECRET/);
+  }
 });

@@ -52,13 +52,17 @@ export function signToken(
   if (!TYPES.has(type)) throw new Error("unknown token type");
   const payload: Record<string, unknown> = { ...claims, typ: type };
   delete payload.exp;
-  if (ttlSeconds !== null) {
+  if (ttlSeconds === null) {
+    if (type !== "client") throw new Error("only client tokens may be non-expiring");
+  } else {
     if (!Number.isFinite(ttlSeconds) || ttlSeconds <= 0) throw new Error("ttlSeconds must be positive");
     payload.exp = nowSeconds(opts) + Math.floor(ttlSeconds);
   }
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const sig = sign(derivedKey(secret, type), body).toString("base64url");
-  return `${body}.${sig}`;
+  const token = `${body}.${sig}`;
+  if (token.length > MAX_TOKEN_LENGTH) throw new Error("token too large");
+  return token;
 }
 
 export function verifyToken(
@@ -88,7 +92,7 @@ export function verifyToken(
   if (typeof payload !== "object" || payload === null || Array.isArray(payload)) return null;
   const claims = payload as Record<string, unknown>;
   if (claims.typ !== type) return null;
-  if ("exp" in claims) {
+  if ("exp" in claims || type !== "client") {
     if (typeof claims.exp !== "number" || !Number.isFinite(claims.exp)) return null;
     if (nowSeconds(opts) >= claims.exp) return null;
   }

@@ -1,5 +1,6 @@
 // Signed stateless OAuth token primitives.
 import { test } from "node:test";
+import { createHmac } from "node:crypto";
 import assert from "node:assert/strict";
 import {
   pkceS256,
@@ -125,4 +126,45 @@ test("PKCE S256 matches RFC 7636 appendix B", () => {
   assert.equal(verifyPkce("", challenge), false);
   assert.equal(verifyPkce(verifier, ""), false);
   assert.equal(verifyPkce(undefined as unknown as string, challenge), false);
+});
+
+test("only client tokens may be non-expiring", () => {
+  for (const type of TYPES) {
+    if (type === "client") continue;
+    assert.throws(() => signToken(type, {}, null, { secret: SECRET, now: NOW }), type);
+  }
+});
+
+test("verify rejects non-client tokens without numeric exp", () => {
+  for (const type of TYPES) {
+    if (type === "client") continue;
+    const key = createHmac("sha256", SECRET).update(`mcp:${type}`).digest();
+    for (const payload of [{ typ: type }, { typ: type, exp: "9999999999" }]) {
+      const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+      const sig = createHmac("sha256", key).update(body).digest("base64url");
+      assert.equal(verifyToken(type, `${body}.${sig}`, { secret: SECRET, now: NOW }), null, type);
+    }
+  }
+});
+
+test("key separation holds independent of the typ check", () => {
+  const accessKey = createHmac("sha256", SECRET).update("mcp:access").digest();
+  const body = Buffer.from(JSON.stringify({ typ: "refresh", exp: NOW + 60 })).toString("base64url");
+  const sig = createHmac("sha256", accessKey).update(body).digest("base64url");
+  assert.equal(verifyToken("refresh", `${body}.${sig}`, { secret: SECRET, now: NOW }), null);
+});
+
+test("non-canonical signature encoding is rejected", () => {
+  const t = signToken("access", {}, 60, { secret: SECRET, now: NOW });
+  const [p, sig] = t.split(".");
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  const alt = alphabet[alphabet.indexOf(sig.at(-1)!) ^ 1];
+  const forged = `${p}.${sig.slice(0, -1)}${alt}`;
+  assert.ok(Buffer.from(sig, "base64url").equals(Buffer.from(forged.split(".")[1], "base64url")));
+  assert.notEqual(forged, t);
+  assert.equal(verifyToken("access", forged, { secret: SECRET, now: NOW }), null);
+});
+
+test("signToken rejects tokens over the verify size limit", () => {
+  assert.throws(() => signToken("access", { big: "x".repeat(9000) }, 60, { secret: SECRET, now: NOW }));
 });

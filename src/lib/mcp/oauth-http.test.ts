@@ -1,12 +1,16 @@
 // HTTP handlers for the MCP OAuth endpoints (thin route files call these).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { verifyToken } from "./tokens.ts";
+import { signToken, verifyToken } from "./tokens.ts";
+import type { GithubFetch } from "./oauth.ts";
 import {
   handleAuthorizationServerMetadata,
   handleAuthorizeGet,
   handleAuthorizePost,
   handleCorsPreflight,
+  handleGithubCallback,
+  handleToken,
+  handleTokenPreflight,
   handleProtectedResourceMetadata,
   handleRegister,
 } from "./oauth-http.ts";
@@ -356,4 +360,222 @@ test("POST from another origin is rejected even with the right cookie", async ()
     assert.equal(res.status, 403, JSON.stringify(headers));
     assert.equal(res.headers.get("location"), null);
   }
+});
+
+// ---------- GET /api/auth/callback/github/mcp ----------
+
+const OWNER = "152247398";
+const VERIFIER = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
+const CALLBACK = `${BASE}/api/auth/callback/github/mcp`;
+
+/** Runs register → consent → Approve and returns the GitHub state + nonce cookie. */
+async function approved() {
+  const { consent, csrf } = await consentAndCookie();
+  const res = await handleAuthorizePost(
+    post(new URLSearchParams({ consent }).toString(), { cookie: `mcp_oauth_csrf=${csrf}`, origin: BASE }),
+  );
+  assert.equal(res.status, 302);
+  const state = new URL(res.headers.get("location") ?? "").searchParams.get("state") ?? "";
+  const nonce = /mcp_oauth_nonce=([^;]+)/.exec(res.headers.get("set-cookie") ?? "")?.[1] ?? "";
+  assert.ok(state && nonce);
+  return { state, nonce };
+}
+
+const ghAs =
+  (id: string | null): GithubFetch =>
+  async () =>
+    id === null ? null : { id };
+
+function callbackReq(q: Record<string, string>, cookie?: string) {
+  return new Request(`${CALLBACK}?${new URLSearchParams(q)}`, {
+    headers: cookie ? { cookie } : {},
+  });
+}
+
+function assertNonceCleared(res: Response) {
+  const sc = res.headers.get("set-cookie") ?? "";
+  assert.match(sc, /mcp_oauth_nonce=;/);
+  assert.match(sc, /Max-Age=0/);
+  assert.match(sc, /Path=\/api\/auth\/callback\/github\/mcp/);
+}
+
+test("callback: owner → 302 to the client with code + state, nonce cookie cleared", async () => {
+  const { state, nonce } = await approved();
+  const res = await handleGithubCallback(
+    callbackReq({ code: "gh", state }, `mcp_oauth_nonce=${nonce}`),
+    ghAs(OWNER),
+  );
+  assert.equal(res.status, 302);
+  assert.equal(res.headers.get("cache-control"), "no-store");
+  assertNonceCleared(res);
+  const loc = new URL(res.headers.get("location") ?? "");
+  assert.equal(`${loc.origin}${loc.pathname}`, CLAUDE);
+  assert.equal(loc.searchParams.get("state"), "st");
+  assert.equal(verifyToken("code", loc.searchParams.get("code") ?? "")?.sub, OWNER);
+});
+
+test("callback: non-owner → 302 access_denied, no code, cookie cleared", async () => {
+  const { state, nonce } = await approved();
+  const res = await handleGithubCallback(
+    callbackReq({ code: "gh", state }, `mcp_oauth_nonce=${nonce}`),
+    ghAs("999"),
+  );
+  assert.equal(res.status, 302);
+  assertNonceCleared(res);
+  const loc = res.headers.get("location") ?? "";
+  assert.doesNotMatch(loc, /code=/);
+  assert.equal(new URL(loc).searchParams.get("error"), "access_denied");
+});
+
+test("callback: GitHub error param (user cancelled at GitHub) → access_denied redirect", async () => {
+  const { state, nonce } = await approved();
+  const res = await handleGithubCallback(
+    callbackReq({ error: "access_denied", state }, `mcp_oauth_nonce=${nonce}`),
+    ghAs(OWNER),
+  );
+  assert.equal(res.status, 302);
+  assert.equal(new URL(res.headers.get("location") ?? "").searchParams.get("error"), "access_denied");
+  assertNonceCleared(res);
+});
+
+test("callback: missing/mismatched nonce or bad state → 400 page, no Location, cookie cleared", async () => {
+  const { state, nonce } = await approved();
+  const cases = [
+    callbackReq({ code: "gh", state }),
+    callbackReq({ code: "gh", state }, "mcp_oauth_nonce=other"),
+    callbackReq({ code: "gh", state: state.slice(0, -3) }, `mcp_oauth_nonce=${nonce}`),
+    callbackReq({ code: "gh" }, `mcp_oauth_nonce=${nonce}`),
+    new Request(`${CALLBACK}?code=gh&state=${state}&state=${state}`, { headers: { cookie: `mcp_oauth_nonce=${nonce}` } }),
+  ];
+  for (const req of cases) {
+    const res = await handleGithubCallback(req, ghAs(OWNER));
+    assert.equal(res.status, 400, req.url);
+    assert.equal(res.headers.get("location"), null);
+    assert.equal(res.headers.get("cache-control"), "no-store");
+    assertNonceCleared(res);
+    assert.doesNotMatch(await res.text(), /code=/);
+  }
+});
+
+test("callback: missing MCP_OAUTH_SECRET → bare 500 that still clears the cookie", async () => {
+  const { state, nonce } = await approved();
+  const saved = process.env.MCP_OAUTH_SECRET;
+  delete process.env.MCP_OAUTH_SECRET;
+  try {
+    const res = await handleGithubCallback(
+      callbackReq({ code: "gh", state }, `mcp_oauth_nonce=${nonce}`),
+      ghAs(OWNER),
+    );
+    assert.equal(res.status, 500);
+    assert.equal(res.headers.get("location"), null);
+    assert.equal(await res.text(), "Server error");
+    assertNonceCleared(res);
+  } finally {
+    process.env.MCP_OAUTH_SECRET = saved;
+  }
+});
+
+// ---------- POST /oauth/token ----------
+
+async function codeAndClient() {
+  const { state, nonce } = await approved();
+  const res = await handleGithubCallback(
+    callbackReq({ code: "gh", state }, `mcp_oauth_nonce=${nonce}`),
+    ghAs(OWNER),
+  );
+  const code = new URL(res.headers.get("location") ?? "").searchParams.get("code") ?? "";
+  const clientId = verifyToken("code", code)?.client_id as string;
+  return { code, clientId };
+}
+
+function tokenReq(body: string, contentType = "application/x-www-form-urlencoded") {
+  return new Request(`${BASE}/oauth/token`, {
+    method: "POST",
+    headers: { "content-type": contentType },
+    body,
+  });
+}
+
+test("POST /oauth/token: full flow issues tokens with no-store and CORS", async () => {
+  const { code, clientId } = await codeAndClient();
+  const res = await handleToken(
+    tokenReq(
+      new URLSearchParams({
+        grant_type: "authorization_code",
+        code,
+        client_id: clientId,
+        redirect_uri: CLAUDE,
+        code_verifier: VERIFIER,
+        resource: `${BASE}/api/mcp`,
+      }).toString(),
+    ),
+  );
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get("cache-control"), "no-store");
+  assert.equal(res.headers.get("pragma"), "no-cache");
+  assert.equal(res.headers.get("access-control-allow-origin"), "*");
+  assert.match(res.headers.get("content-type") ?? "", /application\/json/);
+  const body = (await res.json()) as Record<string, unknown>;
+  assert.equal(body.token_type, "Bearer");
+  assert.equal(body.expires_in, 3600);
+  assert.equal(body.scope, "planner");
+  assert.equal(verifyToken("access", body.access_token as string)?.sub, OWNER);
+  assert.ok(verifyToken("refresh", body.refresh_token as string));
+});
+
+test("POST /oauth/token: errors are 400 JSON with no-store", async () => {
+  const { code, clientId } = await codeAndClient();
+  const bad = await handleToken(
+    tokenReq(
+      new URLSearchParams({
+        grant_type: "authorization_code",
+        code,
+        client_id: clientId,
+        redirect_uri: CLAUDE,
+        code_verifier: "y".repeat(43),
+      }).toString(),
+    ),
+  );
+  assert.equal(bad.status, 400);
+  assert.equal(bad.headers.get("cache-control"), "no-store");
+  assert.deepEqual(await bad.json(), { error: "invalid_grant" });
+
+  const json = await handleToken(tokenReq(JSON.stringify({ grant_type: "authorization_code" }), "application/json"));
+  assert.equal(json.status, 400);
+  assert.deepEqual(await json.json(), { error: "invalid_request" });
+
+  const big = await handleToken(tokenReq("a=" + "x".repeat(20000)));
+  assert.equal(big.status, 400);
+  assert.deepEqual(await big.json(), { error: "invalid_request" });
+});
+
+test("POST /oauth/token: missing secret → bare 500 with no tokens", async () => {
+  const saved = process.env.MCP_OAUTH_SECRET;
+  delete process.env.MCP_OAUTH_SECRET;
+  try {
+    const res = await handleToken(
+      tokenReq(new URLSearchParams({ grant_type: "refresh_token", refresh_token: "x", client_id: "y" }).toString()),
+    );
+    assert.equal(res.status, 500);
+    assert.equal(await res.text(), "Server error");
+  } finally {
+    process.env.MCP_OAUTH_SECRET = saved;
+  }
+});
+
+test("OPTIONS /oauth/token answers CORS preflight", () => {
+  const res = handleTokenPreflight();
+  assert.equal(res.status, 204);
+  assert.equal(res.headers.get("access-control-allow-origin"), "*");
+  assert.match(res.headers.get("access-control-allow-methods") ?? "", /POST/);
+});
+
+test("the forged-sub refresh token is refused over HTTP too", async () => {
+  const { clientId } = await codeAndClient();
+  const forged = signToken("refresh", { sub: "999", client_id: clientId, scope: "planner", resource: `${BASE}/api/mcp` }, 3600);
+  const res = await handleToken(
+    tokenReq(new URLSearchParams({ grant_type: "refresh_token", refresh_token: forged, client_id: clientId }).toString()),
+  );
+  assert.equal(res.status, 400);
+  assert.deepEqual(await res.json(), { error: "invalid_grant" });
 });

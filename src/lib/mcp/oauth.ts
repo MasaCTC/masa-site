@@ -1,15 +1,16 @@
 // Stateless OAuth 2.1 authorization server for the MCP connector: metadata,
 // dynamic client registration (RFC 7591) and the /authorize consent step.
 // Every client id, consent, state, code and token is an HMAC-signed blob from
-// ./tokens.ts, so there is no table. GitHub is only used (Task 6) to prove the
-// signed-in user is the owner.
+// ./tokens.ts, so there is no table. GitHub is only used to prove the
+// signed-in user is the owner; its token is discarded at once.
 //
 // Pure functions over plain values; the HTTP wrapping lives in ./oauth-http.ts.
 // signToken/verifyToken THROW when MCP_OAUTH_SECRET is missing or short, and
 // approveAuthorize throws when AUTH_GITHUB_ID is unset: callers must turn a
 // throw into a bare 500, never a pass.
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
-import { signToken, verifyToken } from "./tokens.ts";
+import { OWNER_GITHUB_ID } from "@/auth";
+import { signToken, verifyPkce, verifyToken } from "./tokens.ts";
 
 export const SCOPE = "planner";
 export const MCP_RESOURCE_PATH = "/api/mcp";
@@ -19,6 +20,10 @@ export const CSRF_COOKIE = "mcp_oauth_csrf";
 export const AUTHORIZE_PATH = "/oauth/authorize";
 /** Lifetime of the consent and state tokens and their cookies (10 min). */
 export const PENDING_TTL_SECONDS = 600;
+export const CODE_TTL_SECONDS = 60;
+export const ACCESS_TTL_SECONDS = 3600;
+export const REFRESH_TTL_SECONDS = 30 * 24 * 3600;
+const GITHUB_TIMEOUT_MS = 10_000;
 
 const CLAUDE_REDIRECTS: ReadonlySet<string> = new Set([
   "https://claude.ai/api/mcp/auth_callback",
@@ -32,8 +37,10 @@ const MAX_STATE_LENGTH = 1024;
 const MAX_RESOURCE_LENGTH = 512;
 const DEFAULT_CLIENT_NAME = "Unnamed MCP client";
 const GRANT_TYPES: ReadonlySet<string> = new Set(["authorization_code", "refresh_token"]);
-// RFC 7636: base64url, 43-128 chars (an S256 challenge is exactly 43).
-const CODE_CHALLENGE = /^[A-Za-z0-9_-]{43,128}$/;
+// Only S256 is accepted, and base64url(SHA-256) is exactly 43 chars.
+const CODE_CHALLENGE = /^[A-Za-z0-9_-]{43}$/;
+// RFC 7636 section 4.1: 43-128 unreserved characters.
+const CODE_VERIFIER = /^[A-Za-z0-9._~-]{43,128}$/;
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
 const WHITESPACE_OR_CONTROL = /[\s\u0000-\u001f\u007f]/;
 
@@ -340,6 +347,312 @@ export function approveAuthorize(
   url.searchParams.set("scope", "read:user");
   url.searchParams.set("state", state);
   return { redirectTo: url.toString(), nonce };
+}
+
+// ---------- GitHub callback ----------
+
+/**
+ * Proves who signed in at GitHub. Resolves to the numeric GitHub user id (as a
+ * string), or null when GitHub did not confirm an identity (bad or expired
+ * code, revoked token). Rejects on network/timeout/5xx. The GitHub access
+ * token never leaves this function and is never logged.
+ */
+export type GithubFetch = (code: string, redirectUri: string) => Promise<{ id: string } | null>;
+
+export function makeGithubFetch(fetchImpl: typeof fetch = (...a) => fetch(...a)): GithubFetch {
+  return async (code, redirectUri) => {
+    const clientId = process.env.AUTH_GITHUB_ID;
+    const clientSecret = process.env.AUTH_GITHUB_SECRET;
+    if (!clientId || !clientSecret) throw new Error("AUTH_GITHUB_ID/AUTH_GITHUB_SECRET are not set");
+
+    const tokenRes = await fetchImpl("https://github.com/login/oauth/access_token", {
+      method: "POST",
+      headers: { Accept: "application/json", "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        code,
+        redirect_uri: redirectUri,
+      }).toString(),
+      signal: AbortSignal.timeout(GITHUB_TIMEOUT_MS),
+      cache: "no-store",
+    });
+    if (!tokenRes.ok) throw new Error(`GitHub token exchange failed: HTTP ${tokenRes.status}`);
+    let tokenBody: unknown;
+    try {
+      tokenBody = await tokenRes.json();
+    } catch {
+      throw new Error("GitHub token exchange returned a non-JSON body");
+    }
+    // A bad or reused code comes back as 200 with { error }.
+    const accessToken = (tokenBody as { access_token?: unknown } | null)?.access_token;
+    if (typeof accessToken !== "string" || accessToken === "") return null;
+
+    const userRes = await fetchImpl("https://api.github.com/user", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/vnd.github+json",
+        "User-Agent": "masa-site-mcp-oauth",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      signal: AbortSignal.timeout(GITHUB_TIMEOUT_MS),
+      cache: "no-store",
+    });
+    if (userRes.status === 401 || userRes.status === 403) return null;
+    if (!userRes.ok) throw new Error(`GitHub user lookup failed: HTTP ${userRes.status}`);
+    let user: unknown;
+    try {
+      user = await userRes.json();
+    } catch {
+      throw new Error("GitHub user lookup returned a non-JSON body");
+    }
+    const id = (user as { id?: unknown } | null)?.id;
+    if (typeof id !== "number" || !Number.isSafeInteger(id) || id <= 0) return null;
+    return { id: String(id) };
+  };
+}
+
+const defaultGithubFetch: GithubFetch = makeGithubFetch();
+
+type TimeOpts = { now?: number };
+
+/** The only resource tokens are issued for: this deployment's MCP endpoint. */
+export function mcpResource(origin: string): string {
+  return `${origin}${MCP_RESOURCE_PATH}`;
+}
+
+function withParams(redirectUri: string, params: Record<string, string | null>): string {
+  const url = new URL(redirectUri);
+  for (const [k, v] of Object.entries(params)) if (v !== null) url.searchParams.set(k, v);
+  return url.toString();
+}
+
+/**
+ * The GitHub callback. The signed `state` must verify and the browser must
+ * hold the matching nonce cookie; otherwise the result is a 400 with no
+ * redirect (we cannot trust where to send the user). After that, every
+ * failure is reported to the client's redirect_uri (RFC 6749 4.1.2.1), and a
+ * code is minted only when GitHub confirms the owner's numeric id.
+ */
+export async function completeAuthorize(
+  args: {
+    state: string;
+    githubCode: string | null;
+    githubError?: string | null;
+    nonceCookie: string | undefined;
+    origin: string;
+  },
+  gh: GithubFetch = defaultGithubFetch,
+  opts?: TimeOpts,
+): Promise<{ redirectTo: string } | { error: string; status: 400 }> {
+  const bad = { error: "Invalid or expired sign-in. Start again from the app.", status: 400 } as const;
+  if (typeof args.state !== "string" || args.state === "") return bad;
+  const s = verifyToken("state", args.state, opts);
+  if (!s) return bad;
+  if (
+    typeof s.client_id !== "string" ||
+    typeof s.redirect_uri !== "string" ||
+    typeof s.code_challenge !== "string" ||
+    typeof s.nonce !== "string" ||
+    s.nonce === "" ||
+    !isAllowedRedirect(s.redirect_uri)
+  ) {
+    return bad;
+  }
+  if (typeof args.nonceCookie !== "string" || args.nonceCookie === "") return bad;
+  if (!safeEqualStrings(args.nonceCookie, s.nonce)) return bad;
+
+  const redirectUri = s.redirect_uri;
+  const clientState = typeof s.client_state === "string" ? s.client_state : null;
+  const fail = (error: string, description: string) => ({
+    redirectTo: withParams(redirectUri, { error, error_description: description, state: clientState }),
+  });
+
+  const resource = mcpResource(args.origin);
+  if (s.resource !== null && s.resource !== undefined && s.resource !== resource) {
+    return fail("invalid_target", "resource must be this server's MCP endpoint");
+  }
+  if (args.githubError || !args.githubCode) {
+    return fail("access_denied", "GitHub sign-in was not completed");
+  }
+
+  let identity: { id: string } | null;
+  try {
+    identity = await gh(args.githubCode, `${args.origin}${GITHUB_CALLBACK_PATH}`);
+  } catch (err) {
+    console.error("mcp oauth: GitHub identity check failed:", err instanceof Error ? err.message : "unknown");
+    return fail("server_error", "Could not reach GitHub");
+  }
+  if (!identity || identity.id !== OWNER_GITHUB_ID) {
+    return fail("access_denied", "This GitHub account is not allowed");
+  }
+
+  const code = signToken(
+    "code",
+    {
+      sub: identity.id,
+      client_id: s.client_id,
+      redirect_uri: redirectUri,
+      code_challenge: s.code_challenge,
+      resource,
+      scope: SCOPE,
+    },
+    CODE_TTL_SECONDS,
+    opts,
+  );
+  return { redirectTo: withParams(redirectUri, { code, state: clientState }) };
+}
+
+// ---------- POST /oauth/token ----------
+
+export type TokenErrorCode =
+  | "invalid_request"
+  | "invalid_client"
+  | "invalid_grant"
+  | "unsupported_grant_type"
+  | "invalid_scope"
+  | "invalid_target";
+
+export type TokenResult =
+  | {
+      status: 200;
+      json: {
+        access_token: string;
+        token_type: "Bearer";
+        expires_in: number;
+        refresh_token: string;
+        scope: string;
+      };
+    }
+  | { status: 400; json: { error: TokenErrorCode } };
+
+const TOKEN_SINGLE_VALUED = [
+  "grant_type",
+  "code",
+  "redirect_uri",
+  "code_verifier",
+  "client_id",
+  "refresh_token",
+  "resource",
+  "scope",
+] as const;
+
+function tokenError(error: TokenErrorCode): TokenResult {
+  return { status: 400, json: { error } };
+}
+
+function issuePair(clientId: string, resource: string, opts?: TimeOpts): TokenResult {
+  const claims = { sub: OWNER_GITHUB_ID, client_id: clientId, scope: SCOPE, resource };
+  // jti keeps rotated tokens distinct even within the same second.
+  const access = signToken("access", { ...claims, jti: randomBytes(16).toString("base64url") }, ACCESS_TTL_SECONDS, opts);
+  const refresh = signToken("refresh", { ...claims, jti: randomBytes(16).toString("base64url") }, REFRESH_TTL_SECONDS, opts);
+  return {
+    status: 200,
+    json: {
+      access_token: access,
+      token_type: "Bearer",
+      expires_in: ACCESS_TTL_SECONDS,
+      refresh_token: refresh,
+      scope: SCOPE,
+    },
+  };
+}
+
+/**
+ * RFC 6749 token endpoint for public clients (PKCE, no secret). Throws when
+ * MCP_OAUTH_SECRET is unusable; the caller turns that into a bare 500.
+ *
+ * Stateless by design: a code can be replayed within its 60 s life (PKCE
+ * binds it to the client's verifier) and a rotated refresh token stays valid
+ * until it expires.
+ */
+export function exchangeToken(form: URLSearchParams, origin: string, opts?: TimeOpts): TokenResult {
+  for (const key of TOKEN_SINGLE_VALUED) {
+    if (form.getAll(key).length > 1) return tokenError("invalid_request");
+  }
+  const grantType = form.get("grant_type");
+  if (!grantType) return tokenError("invalid_request");
+  if (grantType !== "authorization_code" && grantType !== "refresh_token") {
+    return tokenError("unsupported_grant_type");
+  }
+
+  const clientId = form.get("client_id");
+  if (!clientId) return tokenError("invalid_request");
+  if (!readClient(clientId)) return tokenError("invalid_client");
+
+  const resource = mcpResource(origin);
+  const requested = form.get("resource");
+  if (requested !== null && requested !== resource) return tokenError("invalid_target");
+
+  if (grantType === "authorization_code") {
+    const code = form.get("code");
+    const redirectUri = form.get("redirect_uri");
+    const verifier = form.get("code_verifier");
+    if (!code || !redirectUri || !verifier) return tokenError("invalid_request");
+    if (!CODE_VERIFIER.test(verifier)) return tokenError("invalid_request");
+
+    const c = verifyToken("code", code, opts);
+    if (!c) return tokenError("invalid_grant");
+    if (
+      c.client_id !== clientId ||
+      c.redirect_uri !== redirectUri ||
+      typeof c.code_challenge !== "string" ||
+      !verifyPkce(verifier, c.code_challenge) ||
+      c.sub !== OWNER_GITHUB_ID ||
+      c.resource !== resource ||
+      c.scope !== SCOPE
+    ) {
+      return tokenError("invalid_grant");
+    }
+    return issuePair(clientId, resource, opts);
+  }
+
+  const refreshToken = form.get("refresh_token");
+  if (!refreshToken) return tokenError("invalid_request");
+  const scope = form.get("scope");
+  if (scope !== null && !scopeIsSupported(scope)) return tokenError("invalid_scope");
+  const r = verifyToken("refresh", refreshToken, opts);
+  if (!r) return tokenError("invalid_grant");
+  if (
+    r.client_id !== clientId ||
+    r.sub !== OWNER_GITHUB_ID ||
+    r.resource !== resource ||
+    r.scope !== SCOPE
+  ) {
+    return tokenError("invalid_grant");
+  }
+  return issuePair(clientId, resource, opts);
+}
+
+// ---------- access token check (used by the MCP route) ----------
+
+export type AccessTokenInfo = {
+  githubId: string;
+  clientId: string;
+  scope: string;
+  resource: string;
+  expiresAt: number;
+};
+
+/**
+ * Verifies a bearer access token: signature, type `access`, not expired,
+ * subject is the owner, scope is planner, and (when `opts.resource` is given)
+ * the audience matches. Returns null for any invalid token. Like verifyToken,
+ * it THROWS when MCP_OAUTH_SECRET is unusable; callers must fail closed.
+ */
+export function verifyAccessToken(
+  token: string,
+  opts?: TimeOpts & { resource?: string },
+): AccessTokenInfo | null {
+  const c = verifyToken("access", token, opts?.now === undefined ? undefined : { now: opts.now });
+  if (!c) return null;
+  if (c.sub !== OWNER_GITHUB_ID) return null;
+  if (c.scope !== SCOPE) return null;
+  if (typeof c.client_id !== "string" || c.client_id === "") return null;
+  if (typeof c.resource !== "string") return null;
+  if (opts?.resource !== undefined && c.resource !== opts.resource) return null;
+  if (typeof c.exp !== "number") return null;
+  return { githubId: c.sub, clientId: c.client_id, scope: c.scope, resource: c.resource, expiresAt: c.exp };
 }
 
 // ---------- metadata ----------

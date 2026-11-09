@@ -5,8 +5,13 @@
 import {
   approveAuthorize,
   authorizationServerMetadata,
+  clearNonceCookie,
+  completeAuthorize,
   CSRF_COOKIE,
   csrfCookie,
+  exchangeToken,
+  type GithubFetch,
+  NONCE_COOKIE,
   nonceCookie,
   protectedResourceMetadata,
   readCookie,
@@ -37,15 +42,19 @@ const PAGE_HEADERS: Record<string, string> = {
   "X-Content-Type-Options": "nosniff",
 };
 
+function serverError(err: unknown): Response {
+  console.error("mcp oauth: internal error:", err instanceof Error ? err.message : "unknown");
+  return new Response("Server error", {
+    status: 500,
+    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+  });
+}
+
 async function guarded(fn: () => Promise<Response> | Response): Promise<Response> {
   try {
     return await fn();
   } catch (err) {
-    console.error("mcp oauth: internal error:", err instanceof Error ? err.message : "unknown");
-    return new Response("Server error", {
-      status: 500,
-      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
-    });
+    return serverError(err);
   }
 }
 
@@ -204,4 +213,74 @@ export function handleAuthorizePost(req: Request): Promise<Response> {
     headers.append("Set-Cookie", nonceCookie(result.nonce, origin));
     return new Response(null, { status: 302, headers });
   });
+}
+
+// ---------- GET /api/auth/callback/github/mcp ----------
+
+const CALLBACK_SINGLE_VALUED = ["state", "code", "error"] as const;
+
+/**
+ * GitHub sends the owner back here after Approve. Every response, including
+ * the 500, deletes the nonce cookie. `gh` is injectable for tests only.
+ */
+export async function handleGithubCallback(req: Request, gh?: GithubFetch): Promise<Response> {
+  let origin: string;
+  try {
+    origin = requestOrigin(req);
+  } catch (err) {
+    return serverError(err);
+  }
+  const clear = clearNonceCookie(origin);
+  try {
+    const params = new URL(req.url).searchParams;
+    let res: Response;
+    if (CALLBACK_SINGLE_VALUED.some((k) => params.getAll(k).length > 1)) {
+      res = errorPage("Invalid sign-in response. Start again from the app.", 400);
+    } else {
+      const result = await completeAuthorize(
+        {
+          state: params.get("state") ?? "",
+          githubCode: params.get("code"),
+          githubError: params.get("error"),
+          nonceCookie: readCookie(req, NONCE_COOKIE),
+          origin,
+        },
+        gh,
+      );
+      res =
+        "redirectTo" in result
+          ? new Response(null, {
+              status: 302,
+              headers: { Location: result.redirectTo, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" },
+            })
+          : errorPage(result.error, result.status);
+    }
+    res.headers.append("Set-Cookie", clear);
+    return res;
+  } catch (err) {
+    const res = serverError(err);
+    res.headers.append("Set-Cookie", clear);
+    return res;
+  }
+}
+
+// ---------- POST /oauth/token ----------
+
+const TOKEN_HEADERS: Record<string, string> = { ...CORS, Pragma: "no-cache" };
+
+export function handleToken(req: Request): Promise<Response> {
+  return guarded(async () => {
+    const type = (req.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
+    if (type !== "application/x-www-form-urlencoded") {
+      return json({ error: "invalid_request" }, 400, TOKEN_HEADERS);
+    }
+    const text = await boundedText(req);
+    if (text === null) return json({ error: "invalid_request" }, 400, TOKEN_HEADERS);
+    const result = exchangeToken(new URLSearchParams(text), requestOrigin(req));
+    return json(result.json, result.status, TOKEN_HEADERS);
+  });
+}
+
+export function handleTokenPreflight(): Response {
+  return handleCorsPreflight();
 }

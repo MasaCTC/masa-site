@@ -2,9 +2,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { signToken, verifyToken } from "./tokens.ts";
+import { pkceS256, signToken, verifyToken } from "./tokens.ts";
+import { OWNER_GITHUB_ID } from "../../test/stubs/auth.ts";
 import {
   approveAuthorize,
+  completeAuthorize,
+  exchangeToken,
+  type GithubFetch,
+  makeGithubFetch,
+  verifyAccessToken,
   authorizationServerMetadata,
   clearNonceCookie,
   isAllowedRedirect,
@@ -488,4 +494,526 @@ test("nonce cookie: httpOnly, Lax, 10 min, scoped to the callback, Secure only o
   assert.match(cleared, /^mcp_oauth_nonce=;/);
   assert.match(cleared, /Max-Age=0/);
   assert.match(cleared, /Path=\/api\/auth\/callback\/github\/mcp/);
+});
+
+test("validateAuthorize: code_challenge must be exactly 43 chars (S256 output)", () => {
+  for (const bad of [CHALLENGE.slice(0, 42), CHALLENGE + "A", "A".repeat(128)]) {
+    assertRedirectError(validateAuthorize(params({ code_challenge: bad })), "invalid_request");
+  }
+  assert.equal(validateAuthorize(params({ code_challenge: CHALLENGE })).ok, true);
+});
+
+// ---------- Task 6: GitHub callback (completeAuthorize) ----------
+
+const OWNER = "152247398";
+const RESOURCE = `${ORIGIN}/api/mcp`;
+const VERIFIER = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
+const NONCE = "n".repeat(43);
+
+test("test fixture: VERIFIER hashes to CHALLENGE and OWNER matches the auth stub", () => {
+  assert.equal(pkceS256(VERIFIER), CHALLENGE);
+  assert.equal(OWNER, OWNER_GITHUB_ID);
+});
+
+function stateToken(over: Record<string, unknown> = {}, ttl = 600, opts?: { now?: number }) {
+  return signToken(
+    "state",
+    {
+      client_id: clientId(),
+      redirect_uri: CLAUDE,
+      code_challenge: CHALLENGE,
+      client_state: "cs-1",
+      resource: RESOURCE,
+      nonce: NONCE,
+      ...over,
+    },
+    ttl,
+    opts,
+  );
+}
+
+type GhCall = { code: string; redirectUri: string };
+function fakeGh(result: { id: string } | null | Error) {
+  const calls: GhCall[] = [];
+  const gh: GithubFetch = async (code, redirectUri) => {
+    calls.push({ code, redirectUri });
+    if (result instanceof Error) throw result;
+    return result;
+  };
+  return { gh, calls };
+}
+
+function callbackArgs(over: Partial<Parameters<typeof completeAuthorize>[0]> = {}) {
+  return { state: stateToken(), githubCode: "gh-code", nonceCookie: NONCE, origin: ORIGIN, ...over };
+}
+
+test("completeAuthorize: owner → redirect to the client with a verifiable 60 s code and state", async () => {
+  const { gh, calls } = fakeGh({ id: OWNER });
+  const cid = clientId();
+  const r = await completeAuthorize(callbackArgs({ state: stateToken({ client_id: cid }) }), gh);
+  assert.ok("redirectTo" in r);
+  assert.deepEqual(calls, [{ code: "gh-code", redirectUri: `${ORIGIN}/api/auth/callback/github/mcp` }]);
+  const url = new URL(r.redirectTo);
+  assert.equal(`${url.origin}${url.pathname}`, CLAUDE);
+  assert.equal(url.searchParams.get("state"), "cs-1");
+  assert.equal(url.searchParams.get("error"), null);
+  const code = verifyToken("code", url.searchParams.get("code") ?? "");
+  assert.ok(code);
+  assert.equal(code.sub, OWNER);
+  assert.equal(code.client_id, cid);
+  assert.equal(code.redirect_uri, CLAUDE);
+  assert.equal(code.code_challenge, CHALLENGE);
+  assert.equal(code.resource, RESOURCE);
+  assert.equal(code.scope, "planner");
+  const ttl = (code.exp as number) - Math.floor(Date.now() / 1000);
+  assert.ok(ttl <= 60 && ttl >= 55, `ttl ${ttl}`);
+});
+
+test("completeAuthorize: null client_state omits state; null resource becomes the canonical one", async () => {
+  const { gh } = fakeGh({ id: OWNER });
+  const r = await completeAuthorize(
+    callbackArgs({ state: stateToken({ client_state: null, resource: null }) }),
+    gh,
+  );
+  assert.ok("redirectTo" in r);
+  const url = new URL(r.redirectTo);
+  assert.equal(url.searchParams.has("state"), false);
+  assert.equal(verifyToken("code", url.searchParams.get("code") ?? "")?.resource, RESOURCE);
+});
+
+test("completeAuthorize keeps an existing query string on a loopback redirect", async () => {
+  const uri = "http://127.0.0.1:33418/callback?x=1";
+  const { gh } = fakeGh({ id: OWNER });
+  const r = await completeAuthorize(
+    callbackArgs({ state: stateToken({ client_id: clientId("c", [uri]), redirect_uri: uri }) }),
+    gh,
+  );
+  assert.ok("redirectTo" in r);
+  const url = new URL(r.redirectTo);
+  assert.equal(url.searchParams.get("x"), "1");
+  assert.ok(url.searchParams.get("code"));
+});
+
+test("completeAuthorize: another GitHub id → access_denied redirect and no code anywhere", async () => {
+  const { gh } = fakeGh({ id: "999" });
+  const r = await completeAuthorize(callbackArgs(), gh);
+  assert.ok("redirectTo" in r);
+  assert.doesNotMatch(r.redirectTo, /code=/);
+  const url = new URL(r.redirectTo);
+  assert.equal(url.searchParams.get("error"), "access_denied");
+  assert.equal(url.searchParams.get("state"), "cs-1");
+});
+
+test("completeAuthorize: an id that merely contains the owner id is refused", async () => {
+  for (const id of [` ${OWNER}`, `${OWNER}0`, `0${OWNER}`]) {
+    const r = await completeAuthorize(callbackArgs(), fakeGh({ id }).gh);
+    assert.ok("redirectTo" in r);
+    assert.doesNotMatch(r.redirectTo, /code=/);
+  }
+});
+
+test("completeAuthorize: GitHub says no (null) → access_denied, no code", async () => {
+  const r = await completeAuthorize(callbackArgs(), fakeGh(null).gh);
+  assert.ok("redirectTo" in r);
+  assert.doesNotMatch(r.redirectTo, /code=/);
+  assert.equal(new URL(r.redirectTo).searchParams.get("error"), "access_denied");
+});
+
+test("completeAuthorize: GitHub unreachable (throws) → server_error, no code", async () => {
+  const r = await completeAuthorize(callbackArgs(), fakeGh(new Error("timeout")).gh);
+  assert.ok("redirectTo" in r);
+  assert.doesNotMatch(r.redirectTo, /code=/);
+  assert.equal(new URL(r.redirectTo).searchParams.get("error"), "server_error");
+});
+
+test("completeAuthorize: GitHub returned an error / no code → access_denied without calling GitHub", async () => {
+  for (const over of [{ githubCode: null, githubError: "access_denied" }, { githubCode: null }, { githubCode: "" }]) {
+    const { gh, calls } = fakeGh({ id: OWNER });
+    const r = await completeAuthorize(callbackArgs(over), gh);
+    assert.ok("redirectTo" in r, JSON.stringify(over));
+    assert.equal(new URL(r.redirectTo).searchParams.get("error"), "access_denied");
+    assert.doesNotMatch(r.redirectTo, /code=/);
+    assert.equal(calls.length, 0);
+  }
+});
+
+test("completeAuthorize: missing or different nonce cookie → 400, no redirect, GitHub not called", async () => {
+  for (const nonceCookie of [undefined, "", "m".repeat(43), NONCE + "x", NONCE.slice(1)]) {
+    const { gh, calls } = fakeGh({ id: OWNER });
+    const r = await completeAuthorize(callbackArgs({ nonceCookie }), gh);
+    assert.ok("error" in r, String(nonceCookie));
+    assert.equal(r.status, 400);
+    assert.equal("redirectTo" in r, false);
+    assert.equal(calls.length, 0);
+  }
+});
+
+test("completeAuthorize: expired, tampered, wrong-type or missing state → 400, GitHub not called", async () => {
+  const past = Math.floor(Date.now() / 1000) - 601;
+  const good = stateToken();
+  const [body, sig] = good.split(".");
+  const tamperedBody = Buffer.from(
+    JSON.stringify({ ...JSON.parse(Buffer.from(body, "base64url").toString()), redirect_uri: "http://localhost:1/x" }),
+  ).toString("base64url");
+  const bad = [
+    stateToken({}, 600, { now: past }),
+    `${tamperedBody}.${sig}`,
+    good.slice(0, -2),
+    signToken("consent", { client_id: "x", redirect_uri: CLAUDE, code_challenge: CHALLENGE, nonce: NONCE }, 600),
+    signToken("code", { client_id: "x", redirect_uri: CLAUDE, code_challenge: CHALLENGE, nonce: NONCE }, 600),
+    "",
+    "garbage",
+  ];
+  for (const state of bad) {
+    const { gh, calls } = fakeGh({ id: OWNER });
+    const r = await completeAuthorize(callbackArgs({ state }), gh);
+    assert.ok("error" in r, state);
+    assert.equal(r.status, 400);
+    assert.equal(calls.length, 0);
+  }
+});
+
+test("completeAuthorize: a signed state whose redirect_uri is off the allowlist → 400", async () => {
+  const r = await completeAuthorize(
+    callbackArgs({ state: stateToken({ redirect_uri: "https://evil.test/cb" }) }),
+    fakeGh({ id: OWNER }).gh,
+  );
+  assert.ok("error" in r);
+  assert.equal(r.status, 400);
+});
+
+test("completeAuthorize: a resource other than this server's MCP endpoint → invalid_target, no code", async () => {
+  const { gh, calls } = fakeGh({ id: OWNER });
+  const r = await completeAuthorize(
+    callbackArgs({ state: stateToken({ resource: "https://other.example/api/mcp" }) }),
+    gh,
+  );
+  assert.ok("redirectTo" in r);
+  assert.equal(new URL(r.redirectTo).searchParams.get("error"), "invalid_target");
+  assert.doesNotMatch(r.redirectTo, /code=/);
+  assert.equal(calls.length, 0);
+});
+
+// ---------- Task 6: default GitHub identity fetch ----------
+
+type FetchCall = { url: string; init: RequestInit };
+function fakeFetch(responses: Array<Response | Error>) {
+  const calls: FetchCall[] = [];
+  const impl = (async (input: string | URL | Request, init?: RequestInit) => {
+    calls.push({ url: String(input), init: init ?? {} });
+    const next = responses.shift();
+    if (!next) throw new Error("unexpected fetch");
+    if (next instanceof Error) throw next;
+    return next;
+  }) as typeof fetch;
+  return { impl, calls };
+}
+const jsonRes = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+
+test("makeGithubFetch: exchanges the code, reads /user and returns the numeric id as a string", async () => {
+  process.env.AUTH_GITHUB_SECRET = "gh-secret";
+  const { impl, calls } = fakeFetch([jsonRes({ access_token: "gho_TOKEN", token_type: "bearer" }), jsonRes({ id: 152247398, login: "MasaCTC" })]);
+  const gh = makeGithubFetch(impl);
+  const r = await gh("the-code", `${ORIGIN}/api/auth/callback/github/mcp`);
+  assert.deepEqual(r, { id: "152247398" });
+
+  assert.equal(calls[0].url, "https://github.com/login/oauth/access_token");
+  assert.equal(calls[0].init.method, "POST");
+  const h0 = new Headers(calls[0].init.headers);
+  assert.equal(h0.get("accept"), "application/json");
+  const body = new URLSearchParams(String(calls[0].init.body));
+  assert.equal(body.get("client_id"), "gh-client-id");
+  assert.equal(body.get("client_secret"), "gh-secret");
+  assert.equal(body.get("code"), "the-code");
+  assert.equal(body.get("redirect_uri"), `${ORIGIN}/api/auth/callback/github/mcp`);
+  assert.ok(calls[0].init.signal, "token call has a timeout signal");
+
+  assert.equal(calls[1].url, "https://api.github.com/user");
+  const h1 = new Headers(calls[1].init.headers);
+  assert.equal(h1.get("authorization"), "Bearer gho_TOKEN");
+  assert.ok(h1.get("user-agent"));
+  assert.equal(h1.get("accept"), "application/vnd.github+json");
+  assert.ok(calls[1].init.signal, "user call has a timeout signal");
+});
+
+test("makeGithubFetch: a bad code (200 with error body) → null, /user not called", async () => {
+  const { impl, calls } = fakeFetch([jsonRes({ error: "bad_verification_code" })]);
+  assert.equal(await makeGithubFetch(impl)("c", "r"), null);
+  assert.equal(calls.length, 1);
+});
+
+test("makeGithubFetch: /user 401 → null; non-integer id → null", async () => {
+  for (const user of [jsonRes({ message: "Bad credentials" }, 401), jsonRes({ id: "152247398" }), jsonRes({ id: 1.5 }), jsonRes({})]) {
+    const { impl } = fakeFetch([jsonRes({ access_token: "t" }), user]);
+    assert.equal(await makeGithubFetch(impl)("c", "r"), null);
+  }
+});
+
+test("makeGithubFetch: network failure or GitHub 5xx throws without leaking the token", async () => {
+  const cases: Array<Array<Response | Error>> = [
+    [new Error("network down")],
+    [jsonRes({}, 502)],
+    [jsonRes({ access_token: "gho_SECRET" }), jsonRes({}, 500)],
+    [jsonRes({ access_token: "gho_SECRET" }), new Error("timeout")],
+  ];
+  for (const responses of cases) {
+    const { impl } = fakeFetch(responses);
+    await assert.rejects(makeGithubFetch(impl)("c", "r"), (err: Error) => {
+      assert.doesNotMatch(err.message, /gho_SECRET/);
+      return true;
+    });
+  }
+});
+
+test("makeGithubFetch: missing GitHub client secret throws before any request", async () => {
+  const saved = process.env.AUTH_GITHUB_SECRET;
+  delete process.env.AUTH_GITHUB_SECRET;
+  try {
+    const { impl, calls } = fakeFetch([]);
+    await assert.rejects(makeGithubFetch(impl)("c", "r"));
+    assert.equal(calls.length, 0);
+  } finally {
+    process.env.AUTH_GITHUB_SECRET = saved;
+  }
+});
+
+// ---------- Task 6: token endpoint (exchangeToken) ----------
+
+async function freshCode(cid = clientId(), redirect = CLAUDE) {
+  const r = await completeAuthorize(
+    callbackArgs({ state: stateToken({ client_id: cid, redirect_uri: redirect }) }),
+    fakeGh({ id: OWNER }).gh,
+  );
+  assert.ok("redirectTo" in r);
+  return new URL(r.redirectTo).searchParams.get("code") as string;
+}
+
+function codeForm(code: string, cid: string, over: Record<string, string | null> = {}) {
+  const base: Record<string, string | null> = {
+    grant_type: "authorization_code",
+    code,
+    client_id: cid,
+    redirect_uri: CLAUDE,
+    code_verifier: VERIFIER,
+    ...over,
+  };
+  const p = new URLSearchParams();
+  for (const [k, v] of Object.entries(base)) if (v !== null) p.set(k, v);
+  return p;
+}
+
+function assertTokenError(r: ReturnType<typeof exchangeToken>, error: string) {
+  assert.equal(r.status, 400, JSON.stringify(r.json));
+  assert.deepEqual(r.json, { error });
+}
+
+function okTokens(r: ReturnType<typeof exchangeToken>) {
+  assert.equal(r.status, 200, JSON.stringify(r.json));
+  return r.json as { access_token: string; refresh_token: string; token_type: string; expires_in: number; scope: string };
+}
+
+test("exchangeToken: authorization_code happy path issues a Bearer access + refresh pair", async () => {
+  const cid = clientId();
+  const t = okTokens(exchangeToken(codeForm(await freshCode(cid), cid, { resource: RESOURCE }), ORIGIN));
+  assert.equal(t.token_type, "Bearer");
+  assert.equal(t.expires_in, 3600);
+  assert.equal(t.scope, "planner");
+  const a = verifyToken("access", t.access_token);
+  const rf = verifyToken("refresh", t.refresh_token);
+  assert.ok(a && rf);
+  for (const c of [a, rf]) {
+    assert.equal(c.sub, OWNER);
+    assert.equal(c.client_id, cid);
+    assert.equal(c.scope, "planner");
+    assert.equal(c.resource, RESOURCE);
+  }
+  const now = Math.floor(Date.now() / 1000);
+  assert.ok((a.exp as number) - now <= 3600 && (a.exp as number) - now >= 3595);
+  assert.ok((rf.exp as number) - now <= 30 * 86400 && (rf.exp as number) - now >= 30 * 86400 - 5);
+});
+
+test("exchangeToken: resource is optional at the token endpoint", async () => {
+  const cid = clientId();
+  okTokens(exchangeToken(codeForm(await freshCode(cid), cid), ORIGIN));
+});
+
+test("exchangeToken: wrong PKCE verifier → invalid_grant", async () => {
+  const cid = clientId();
+  const code = await freshCode(cid);
+  assertTokenError(exchangeToken(codeForm(code, cid, { code_verifier: "x".repeat(43) }), ORIGIN), "invalid_grant");
+});
+
+test("exchangeToken: missing or malformed verifier → invalid_request (PKCE always required)", async () => {
+  const cid = clientId();
+  const code = await freshCode(cid);
+  assertTokenError(exchangeToken(codeForm(code, cid, { code_verifier: null }), ORIGIN), "invalid_request");
+  assertTokenError(exchangeToken(codeForm(code, cid, { code_verifier: "short" }), ORIGIN), "invalid_request");
+});
+
+test("exchangeToken: code redeemed with a different redirect_uri → invalid_grant", async () => {
+  const cid = clientId();
+  const code = await freshCode(cid);
+  assertTokenError(exchangeToken(codeForm(code, cid, { redirect_uri: LOOPBACK }), ORIGIN), "invalid_grant");
+  assertTokenError(exchangeToken(codeForm(code, cid, { redirect_uri: CLAUDE + "/" }), ORIGIN), "invalid_grant");
+});
+
+test("exchangeToken: missing redirect_uri → invalid_request", async () => {
+  const cid = clientId();
+  assertTokenError(exchangeToken(codeForm(await freshCode(cid), cid, { redirect_uri: null }), ORIGIN), "invalid_request");
+});
+
+test("exchangeToken: code redeemed by another (valid) client → invalid_grant", async () => {
+  const code = await freshCode(clientId("A"));
+  assertTokenError(exchangeToken(codeForm(code, clientId("B")), ORIGIN), "invalid_grant");
+});
+
+test("exchangeToken: missing or forged client_id → invalid_request / invalid_client", async () => {
+  const cid = clientId();
+  const code = await freshCode(cid);
+  assertTokenError(exchangeToken(codeForm(code, cid, { client_id: null }), ORIGIN), "invalid_request");
+  assertTokenError(exchangeToken(codeForm(code, cid, { client_id: cid.slice(0, -2) }), ORIGIN), "invalid_client");
+});
+
+test("exchangeToken: a code presented after 60 s → invalid_grant", async () => {
+  const cid = clientId();
+  const code = await freshCode(cid);
+  const later = Math.floor(Date.now() / 1000) + 61;
+  assertTokenError(exchangeToken(codeForm(code, cid), ORIGIN, { now: later }), "invalid_grant");
+});
+
+test("exchangeToken: a code signed for another subject (sub 999) → invalid_grant", () => {
+  const cid = clientId();
+  const forged = signToken(
+    "code",
+    { sub: "999", client_id: cid, redirect_uri: CLAUDE, code_challenge: CHALLENGE, resource: RESOURCE, scope: "planner" },
+    60,
+  );
+  assertTokenError(exchangeToken(codeForm(forged, cid), ORIGIN), "invalid_grant");
+});
+
+test("exchangeToken: access or refresh token presented as a code → invalid_grant", async () => {
+  const cid = clientId();
+  const t = okTokens(exchangeToken(codeForm(await freshCode(cid), cid), ORIGIN));
+  assertTokenError(exchangeToken(codeForm(t.access_token, cid), ORIGIN), "invalid_grant");
+  assertTokenError(exchangeToken(codeForm(t.refresh_token, cid), ORIGIN), "invalid_grant");
+});
+
+test("exchangeToken: a resource that is not this server's MCP endpoint → invalid_target", async () => {
+  const cid = clientId();
+  const code = await freshCode(cid);
+  assertTokenError(
+    exchangeToken(codeForm(code, cid, { resource: "https://other.example/api/mcp" }), ORIGIN),
+    "invalid_target",
+  );
+});
+
+test("exchangeToken: a code minted on another origin cannot be redeemed here", async () => {
+  const cid = clientId();
+  const code = await freshCode(cid);
+  assertTokenError(exchangeToken(codeForm(code, cid), "https://preview.example"), "invalid_grant");
+});
+
+test("exchangeToken: unknown or missing grant_type", () => {
+  const cid = clientId();
+  assertTokenError(
+    exchangeToken(new URLSearchParams({ grant_type: "password", client_id: cid }), ORIGIN),
+    "unsupported_grant_type",
+  );
+  assertTokenError(exchangeToken(new URLSearchParams({ client_id: cid }), ORIGIN), "invalid_request");
+});
+
+test("exchangeToken: repeated parameters → invalid_request", async () => {
+  const cid = clientId();
+  const f = codeForm(await freshCode(cid), cid);
+  f.append("code_verifier", VERIFIER);
+  assertTokenError(exchangeToken(f, ORIGIN), "invalid_request");
+});
+
+function refreshForm(token: string, cid: string, over: Record<string, string> = {}) {
+  return new URLSearchParams({ grant_type: "refresh_token", refresh_token: token, client_id: cid, ...over });
+}
+
+test("exchangeToken: refresh_token rotates to a new access + refresh pair", async () => {
+  const cid = clientId();
+  const first = okTokens(exchangeToken(codeForm(await freshCode(cid), cid), ORIGIN));
+  const second = okTokens(exchangeToken(refreshForm(first.refresh_token, cid), ORIGIN));
+  assert.notEqual(second.access_token, first.access_token);
+  assert.notEqual(second.refresh_token, first.refresh_token);
+  assert.equal(second.token_type, "Bearer");
+  assert.equal(second.expires_in, 3600);
+  assert.equal(second.scope, "planner");
+  const a = verifyToken("access", second.access_token);
+  assert.equal(a?.sub, OWNER);
+  assert.equal(a?.client_id, cid);
+  assert.ok(verifyToken("refresh", second.refresh_token));
+  // the new refresh token works too
+  okTokens(exchangeToken(refreshForm(second.refresh_token, cid, { scope: "planner" }), ORIGIN));
+});
+
+test("exchangeToken: access token or code presented as refresh_token → invalid_grant", async () => {
+  const cid = clientId();
+  const code = await freshCode(cid);
+  const t = okTokens(exchangeToken(codeForm(await freshCode(cid), cid), ORIGIN));
+  assertTokenError(exchangeToken(refreshForm(t.access_token, cid), ORIGIN), "invalid_grant");
+  assertTokenError(exchangeToken(refreshForm(code, cid), ORIGIN), "invalid_grant");
+});
+
+test("exchangeToken: refresh by another client → invalid_grant; for another subject → invalid_grant", async () => {
+  const cid = clientId();
+  const t = okTokens(exchangeToken(codeForm(await freshCode(cid), cid), ORIGIN));
+  assertTokenError(exchangeToken(refreshForm(t.refresh_token, clientId("Other")), ORIGIN), "invalid_grant");
+  const forged = signToken("refresh", { sub: "999", client_id: cid, scope: "planner", resource: RESOURCE }, 3600);
+  assertTokenError(exchangeToken(refreshForm(forged, cid), ORIGIN), "invalid_grant");
+});
+
+test("exchangeToken: expired refresh token → invalid_grant; unsupported scope → invalid_scope", async () => {
+  const cid = clientId();
+  const t = okTokens(exchangeToken(codeForm(await freshCode(cid), cid), ORIGIN));
+  const later = Math.floor(Date.now() / 1000) + 30 * 86400 + 1;
+  assertTokenError(exchangeToken(refreshForm(t.refresh_token, cid), ORIGIN, { now: later }), "invalid_grant");
+  assertTokenError(exchangeToken(refreshForm(t.refresh_token, cid, { scope: "admin" }), ORIGIN), "invalid_scope");
+});
+
+test("exchangeToken throws (→ 500) when MCP_OAUTH_SECRET is missing, never issues tokens", () => {
+  const saved = process.env.MCP_OAUTH_SECRET;
+  delete process.env.MCP_OAUTH_SECRET;
+  try {
+    assert.throws(() =>
+      exchangeToken(new URLSearchParams({ grant_type: "refresh_token", refresh_token: "x", client_id: "y" }), ORIGIN),
+    );
+  } finally {
+    process.env.MCP_OAUTH_SECRET = saved;
+  }
+});
+
+// ---------- Task 6: verifyAccessToken ----------
+
+test("verifyAccessToken accepts an issued access token", async () => {
+  const cid = clientId();
+  const t = okTokens(exchangeToken(codeForm(await freshCode(cid), cid), ORIGIN));
+  const v = verifyAccessToken(t.access_token);
+  assert.ok(v);
+  assert.equal(v.githubId, OWNER);
+  assert.equal(v.clientId, cid);
+  assert.equal(v.scope, "planner");
+  assert.equal(v.resource, RESOURCE);
+  assert.equal(v.expiresAt, verifyToken("access", t.access_token)?.exp);
+  assert.ok(verifyAccessToken(t.access_token, { resource: RESOURCE }));
+  assert.equal(verifyAccessToken(t.access_token, { resource: "https://preview.example/api/mcp" }), null);
+});
+
+test("verifyAccessToken rejects wrong type, wrong sub, wrong scope, expired and garbage", async () => {
+  const cid = clientId();
+  const t = okTokens(exchangeToken(codeForm(await freshCode(cid), cid), ORIGIN));
+  const claims = { sub: OWNER, client_id: cid, scope: "planner", resource: RESOURCE };
+  assert.equal(verifyAccessToken(t.refresh_token), null);
+  assert.equal(verifyAccessToken(signToken("code", claims, 60)), null);
+  assert.equal(verifyAccessToken(signToken("access", { ...claims, sub: "999" }, 3600)), null);
+  assert.equal(verifyAccessToken(signToken("access", { ...claims, sub: 152247398 }, 3600)), null);
+  assert.equal(verifyAccessToken(signToken("access", { ...claims, scope: "admin" }, 3600)), null);
+  assert.equal(verifyAccessToken(signToken("access", { ...claims, client_id: undefined }, 3600)), null);
+  assert.equal(verifyAccessToken(t.access_token, { now: Math.floor(Date.now() / 1000) + 3601 }), null);
+  assert.equal(verifyAccessToken("garbage"), null);
+  assert.equal(verifyAccessToken(""), null);
 });

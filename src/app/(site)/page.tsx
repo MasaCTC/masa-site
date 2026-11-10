@@ -16,7 +16,7 @@ import { ProgressTrack } from "@/components/ProgressTrack";
 import { StatTile } from "@/components/StatTile";
 import { HOME_PROJECT_CARDS, COFURA, ONE_BASKET, PULLPILOT } from "@/content/projects";
 import { EDUCATION } from "@/content/resume";
-import { CONTACT, HOME, PDF_URL, STATS_COPY, TAGLINE } from "@/content/site";
+import { CONTACT, chartEmptyText, HOME, PDF_URL, STATS_COPY, TAGLINE } from "@/content/site";
 import { getInstagramStats } from "@/lib/instagram";
 import {
   chartState,
@@ -86,6 +86,7 @@ async function HomeStats() {
         <Chart
           state={state}
           interactive={false}
+          emptyText={chartEmptyText(stats.source)}
           points={series?.points}
           linePath={series?.linePath}
           areaPath={series?.areaPath}

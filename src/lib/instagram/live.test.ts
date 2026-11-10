@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { fetchLiveStats, mapLiveStats } from "./live.ts";
+import { fetchLiveResult, fetchLiveStats, mapLiveStats } from "./live.ts";
 import { InstagramApiError, type FetchLike } from "./graph.ts";
 import { NOW, profile, media, reelInsights, accountChunks } from "./fixtures/live-fixtures.ts";
 
@@ -202,11 +202,11 @@ test("requests: no follows, Bearer header, token never in URL, 3 chunks", async 
   }
 });
 
-test("a failing request rejects with a scrubbed error", async () => {
+test("a failing account-level request rejects with a scrubbed error", async () => {
   await assert.rejects(
     live({
       fail: (u) =>
-        u.pathname.endsWith("/m2/insights")
+        u.pathname.endsWith(`/${cfg.userId}`)
           ? json({ error: { message: `bad ${TOKEN}`, code: 100 } }, 400)
           : undefined,
     }),
@@ -215,5 +215,79 @@ test("a failing request rejects with a scrubbed error", async () => {
       assert.ok(!e.message.includes(TOKEN));
       return true;
     },
+  );
+});
+
+async function captureErrors<T>(fn: () => Promise<T>): Promise<{ result: T; logs: string }> {
+  const orig = console.error;
+  const lines: string[] = [];
+  console.error = (...args: unknown[]) => void lines.push(args.map(String).join(" "));
+  try {
+    return { result: await fn(), logs: lines.join("\n") };
+  } finally {
+    console.error = orig;
+  }
+}
+
+test("one reel insights failure: stays live, that reel's metrics are placeholders, others intact", async () => {
+  const fail = (u: URL) =>
+    u.pathname.endsWith("/m2/insights")
+      ? json({ error: { message: `boom ${TOKEN}` } }, 500)
+      : undefined;
+  const { result, logs } = await captureErrors(() =>
+    fetchLiveResult({
+      fetchImpl: makeFetch([], { fail, media: { data: [media.data[0], media.data[1], media.data[2]] } }),
+      now: NOW,
+      cfg,
+    }),
+  );
+  const s = result.stats;
+  assert.equal(result.failedReels, 1);
+  assert.equal(s.status, "live");
+  assert.equal(s.source, "instagram-api");
+  assert.deepEqual(s.totals.views, { kind: "value", value: 60000 });
+  assert.equal(s.topReels.length, 3);
+  const bad = s.topReels.find((r) => r.url?.includes("BBB222"))!;
+  for (const k of ["views", "likes", "comments", "shares", "saves"] as const) {
+    assert.equal(bad[k].kind, "placeholder");
+  }
+  assert.equal(bad.caption.kind, "placeholder"); // m2 has no caption in the fixture; link stays
+  assert.equal(bad.url, "https://www.instagram.com/reel/BBB222/");
+  const ok = s.topReels.find((r) => r.url?.includes("CCC333"))!;
+  assert.deepEqual(ok.views, { kind: "value", value: 7000 });
+  assert.equal(s.topReels.at(-1), bad); // unknown views rank last
+  assert.equal(logs.split("\n").length, 1);
+  assert.ok(!logs.includes(TOKEN));
+  assert.ok(!logs.includes("m2"));
+});
+
+test("account-level failure still throws (full manual fallback)", async () => {
+  const fail = (u: URL) =>
+    u.pathname.endsWith("/media") ? json({ error: { message: "down" } }, 500) : undefined;
+  await assert.rejects(() => live({ fail }), InstagramApiError);
+  const failChunk = (u: URL) =>
+    u.pathname.endsWith(`/${cfg.userId}/insights`) && u.searchParams.get("since") === sinceFor(1)
+      ? json({ error: { message: "down" } }, 500)
+      : undefined;
+  await assert.rejects(() => live({ fail: failChunk }), InstagramApiError);
+});
+
+test("no reel failures: failedReels is 0 and nothing is logged", async () => {
+  const { result, logs } = await captureErrors(() =>
+    fetchLiveResult({ fetchImpl: makeFetch(), now: NOW, cfg }),
+  );
+  assert.equal(result.failedReels, 0);
+  assert.equal(logs, "");
+});
+
+test("a reel whose insights failed ranks after known reels (may fall out of the top 3)", async () => {
+  const fail = (u: URL) => (u.pathname.endsWith("/m2/insights") ? json({}, 500) : undefined);
+  const { result } = await captureErrors(() =>
+    fetchLiveResult({ fetchImpl: makeFetch([], { fail }), now: NOW, cfg }),
+  );
+  assert.equal(result.failedReels, 1);
+  assert.deepEqual(
+    result.stats.topReels.map((r) => r.url?.split("/").at(-2)),
+    ["CCC333", "AAA111", "DDD444"],
   );
 });

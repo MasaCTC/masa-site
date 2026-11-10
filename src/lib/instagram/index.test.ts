@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { resolveStats } from "./index.ts";
+import { resolveStats, lifetimeFor, RETRY_LIFE } from "./index.ts";
 import { MANUAL_STATS } from "./manual-data.ts";
 import { InstagramApiError } from "./graph.ts";
 import type { InstagramStats } from "./types.ts";
@@ -21,7 +21,7 @@ async function captureErrors<T>(fn: () => Promise<T>): Promise<{ result: T; logs
 }
 
 test("success returns live stats with ok=true", async () => {
-  const r = await resolveStats(async () => liveStats, cfg);
+  const r = await resolveStats(async () => ({ stats: liveStats, failedReels: 0 }), cfg);
   assert.equal(r.ok, true);
   assert.equal(r.stats, liveStats);
 });
@@ -43,7 +43,7 @@ test("missing config returns MANUAL_STATS without calling the fetcher or logging
   const { result, logs } = await captureErrors(() =>
     resolveStats(async () => {
       called++;
-      return liveStats;
+      return { stats: liveStats, failedReels: 0 };
     }, null),
   );
   assert.equal(called, 0);
@@ -60,4 +60,18 @@ test("logged message never contains the token, even when the error echoes it", a
   );
   assert.ok(logs.length > 0);
   assert.ok(!logs.includes(TOKEN));
+});
+
+test("partial reel failure is ok but degraded", async () => {
+  const r = await resolveStats(async () => ({ stats: liveStats, failedReels: 2 }), cfg);
+  assert.equal(r.ok, true);
+  assert.equal(r.degraded, true);
+});
+
+test("lifetime: complete live = hours; partial and full failure = 30-minute", () => {
+  assert.equal(lifetimeFor({ ok: true, degraded: false }), "hours");
+  assert.equal(lifetimeFor({ ok: true, degraded: true }), RETRY_LIFE);
+  assert.equal(lifetimeFor({ ok: false, degraded: false }), RETRY_LIFE);
+  assert.equal(RETRY_LIFE.revalidate, 1800);
+  assert.ok(RETRY_LIFE.stale >= 30 && RETRY_LIFE.expire >= 300 && RETRY_LIFE.expire > RETRY_LIFE.revalidate);
 });

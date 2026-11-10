@@ -157,13 +157,16 @@ export function mapLiveStats(
   };
 }
 
-export async function fetchLiveStats(
+/** Live stats plus how many reels' insights calls failed (their metrics are placeholders). */
+export type LiveResult = { stats: InstagramStats; failedReels: number };
+
+export async function fetchLiveResult(
   opts: {
     fetchImpl?: FetchLike;
     now?: Date;
     cfg?: { token: string; userId: string };
   } = {},
-): Promise<InstagramStats> {
+): Promise<LiveResult> {
   const cfg = opts.cfg ?? instagramConfig();
   if (!cfg) throw new InstagramApiError("Instagram is not configured", 0);
   const now = opts.now ?? new Date();
@@ -206,13 +209,30 @@ export async function fetchLiveStats(
     (m): m is MediaItem & { id: string } =>
       isObj(m) && m.media_product_type === "REELS" && typeof m.id === "string",
   );
-  const results = await Promise.all(
+  // Per-reel insights are best-effort: a failed call leaves that reel's metrics as
+  // placeholders (existing designed empty state); account-level calls above still throw.
+  const results = await Promise.allSettled(
     reels.map((m) =>
       graphGet(`${m.id}/insights`, { metric: "views,likes,comments,shares,saved" }, cfg, f),
     ),
   );
   const reelInsights: Record<string, unknown> = {};
-  reels.forEach((m, i) => (reelInsights[m.id] = results[i]));
+  let failedReels = 0;
+  reels.forEach((m, i) => {
+    const r = results[i];
+    if (r.status === "fulfilled") reelInsights[m.id] = r.value;
+    else failedReels++;
+  });
+  // One count-only line: no reel ids, no error text, never the token.
+  if (failedReels > 0) {
+    console.error(`[instagram] reel insights unavailable for ${failedReels} of ${reels.length} reels`);
+  }
 
-  return mapLiveStats({ profile, media, reelInsights, account90d }, now);
+  return { stats: mapLiveStats({ profile, media, reelInsights, account90d }, now), failedReels };
+}
+
+export async function fetchLiveStats(
+  opts: Parameters<typeof fetchLiveResult>[0] = {},
+): Promise<InstagramStats> {
+  return (await fetchLiveResult(opts)).stats;
 }

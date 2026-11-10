@@ -231,7 +231,7 @@ export function reelViews(stats: InstagramStats): { reels: ReelView[]; anyEngage
       });
     return {
       rank: r.rank,
-      viewsText: metricCompact(r.views),
+      viewsText: isKnown(r.views) ? metricCompact(r.views) : "—",
       viewsTitle: isKnown(r.views) && !r.viewsRounded ? `${exact(r.views.value)} views` : undefined,
       href: r.url,
       thumbPlaceholder: textFieldText(r.thumbnail),

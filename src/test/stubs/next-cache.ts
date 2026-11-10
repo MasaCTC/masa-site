@@ -11,3 +11,6 @@ export function revalidateTag(tag: string) {
 export function revalidatePath(path: string) {
   cacheCalls.push({ fn: "revalidatePath", arg: path });
 }
+export function cacheLife(profile: unknown) {
+  cacheCalls.push({ fn: "cacheLife", arg: JSON.stringify(profile) });
+}

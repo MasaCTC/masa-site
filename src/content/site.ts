@@ -89,6 +89,8 @@ export type InstagramCopy = {
   updatedPrefix: string;
   /** Footer source note on /stats. */
   sourceNote: string;
+  /** Growth chart empty text override; absent = STATS_COPY.chartEmpty (see chartEmptyText). */
+  chartEmpty?: string;
   /** NavBar chip aria-label, given the exact follower string ("14,136"). */
   navAria: (followersExact: string) => string;
 };
@@ -115,6 +117,7 @@ export const INSTAGRAM_COPY: Record<SourceKind, InstagramCopy> = {
     updatedPrefix: "updated",
     sourceNote:
       "Source: Instagram Graph API (creator account). Views = reel plays. Follower history is not tracked yet.",
+    chartEmpty: "Follower history isn't tracked yet",
     navAria: (followersExact) => `${followersExact} followers, live. Open stats`,
   },
 };
@@ -172,3 +175,8 @@ export const STATS_COPY = {
   noReelEngagementYet: "No per-reel numbers yet.",
   meterUnknownReason: "Not entered yet.",
 } as const;
+
+/** Growth chart empty text for a source: its own override, else the shared STATS_COPY.chartEmpty. */
+export function chartEmptyText(source: SourceKind): string {
+  return INSTAGRAM_COPY[source].chartEmpty ?? STATS_COPY.chartEmpty;
+}

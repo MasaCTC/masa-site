@@ -17,11 +17,13 @@ export type GrowthSectionProps = {
   state: DataState;
   /** Retry slot for the error state. */
   errorAction?: ReactNode;
+  /** Empty-state text (source-specific); defaults to STATS_COPY.chartEmpty. */
+  emptyText?: string;
 };
 
 const g = STATS_COPY.growth;
 
-export function GrowthSection({ views, state, errorAction }: GrowthSectionProps) {
+export function GrowthSection({ views, state, errorAction, emptyText = STATS_COPY.chartEmpty }: GrowthSectionProps) {
   const [range, setRange] = useState<FollowerRange>("90D");
   const view = views?.[range];
   const chartState: DataState = state === "ready" && !view ? "empty" : state;
@@ -53,7 +55,7 @@ export function GrowthSection({ views, state, errorAction }: GrowthSectionProps)
         ariaLabel={ready ? view.ariaLabel : undefined}
         focusLabel={g.chartAria}
         loadingText={STATS_COPY.loadingChart}
-        emptyText={STATS_COPY.chartEmpty}
+        emptyText={emptyText}
         errorText={STATS_COPY.chartErrorTitle}
         errorDetail={STATS_COPY.chartErrorDetail}
         errorAction={errorAction}

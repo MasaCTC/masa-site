@@ -11,7 +11,7 @@ import { Meter } from "@/components/Meter";
 import { StatusLabel } from "@/components/StatusLabel";
 import { ReelCard } from "@/components/ReelCard";
 import { StatTile } from "@/components/StatTile";
-import { CONTACT, INSTAGRAM_COPY, STATS_COPY } from "@/content/site";
+import { CONTACT, chartEmptyText, INSTAGRAM_COPY, STATS_COPY } from "@/content/site";
 import { getInstagramStats, INSTAGRAM_SOURCE_KIND } from "@/lib/instagram";
 import type { InstagramStats } from "@/lib/instagram/types";
 import {
@@ -131,6 +131,7 @@ function StatsBody({ stats }: { stats: InstagramStats | null }) {
         views={views}
         state={stats ? chartState(stats, views) : "loading"}
         errorAction={isError ? <RetryButton /> : undefined}
+        emptyText={chartEmptyText(stats?.source ?? INSTAGRAM_SOURCE_KIND)}
       />
 
       {hasData && stats && topShare && rate ? (

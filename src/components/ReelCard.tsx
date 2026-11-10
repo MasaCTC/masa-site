@@ -20,6 +20,8 @@ export type ReelCardProps = {
   href?: string;
   /** Thumbnail placeholder text ("[REEL 1 THUMBNAIL]"). */
   thumbPlaceholder?: string;
+  /** Live CDN thumbnail URL; the placeholder underneath degrades to "Preview unavailable" if it fails to load. */
+  thumbUrl?: string;
   /** Thumbnail failed to load: "Preview unavailable" in the thumb. */
   thumbError?: boolean;
   /** Engagement bars (Likes / Shares / Saves). */
@@ -39,6 +41,7 @@ export function ReelCard({
   viewsTitle,
   href,
   thumbPlaceholder,
+  thumbUrl,
   thumbError = false,
   engagement = [],
   engagementState = "ready",
@@ -71,7 +74,11 @@ export function ReelCard({
     <>
       <div className="mn-reel__thumb">
         {rank != null ? <span className="mn-reel__rank">{rank}</span> : null}
-        <span className="mn-placeholder">{thumbError || isError ? "Preview unavailable" : thumbPlaceholder}</span>
+        <span className="mn-placeholder">{thumbError || isError || thumbUrl ? "Preview unavailable" : thumbPlaceholder}</span>
+        {thumbUrl && !isError ? (
+          // eslint-disable-next-line @next/next/no-img-element -- plain <img>: no optimizer, proxy, or stored copy of the CDN image
+          <img className={styles.thumbImg} src={thumbUrl} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
+        ) : null}
         <div className="mn-reel__views" title={viewsTitle}>
           <span className="mn-label">Views</span>
           <b>{isError ? "—" : viewsText}</b>

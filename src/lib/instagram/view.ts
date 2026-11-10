@@ -201,6 +201,8 @@ export type ReelView = {
   viewsTitle?: string;
   href?: string;
   thumbPlaceholder: string;
+  /** Live CDN thumbnail (live source only; never set for manual data). */
+  thumbUrl?: string;
   caption: string;
   engagement: BarItem[];
 };
@@ -233,6 +235,7 @@ export function reelViews(stats: InstagramStats): { reels: ReelView[]; anyEngage
       viewsTitle: isKnown(r.views) && !r.viewsRounded ? `${exact(r.views.value)} views` : undefined,
       href: r.url,
       thumbPlaceholder: textFieldText(r.thumbnail),
+      thumbUrl: r.thumbnailUrl,
       caption: textFieldText(r.caption),
       engagement,
     };

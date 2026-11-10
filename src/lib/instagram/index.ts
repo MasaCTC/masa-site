@@ -1,3 +1,4 @@
+import "server-only";
 import { cacheLife } from "next/cache";
 import { instagramConfig, scrubSecrets } from "./graph";
 import { fetchLiveStats } from "./live";

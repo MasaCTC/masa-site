@@ -114,7 +114,7 @@ export const INSTAGRAM_COPY: Record<SourceKind, InstagramCopy> = {
     statusDetail: "",
     updatedPrefix: "updated",
     sourceNote:
-      "Source: Instagram Graph API (creator account). Views = reel plays. Followers are snapshotted daily for the growth chart.",
+      "Source: Instagram Graph API (creator account). Views = reel plays. Follower history is not tracked yet.",
     navAria: (followersExact) => `${followersExact} followers, live. Open stats`,
   },
 };

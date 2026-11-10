@@ -27,6 +27,8 @@ export type Reel = {
   follows: Metric;
   caption: TextField;
   thumbnail: TextField;
+  /** live CDN thumbnail; absent in manual data */
+  thumbnailUrl?: string;
 };
 
 export type FollowerRange = "30D" | "90D" | "All";

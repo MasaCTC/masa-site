@@ -11,7 +11,7 @@
 }
 
 /* Design-documented <img> in .mn-reel__thumb (ReelCard.md). The thumb is position:relative with
-   overflow:hidden; rank/views are positioned and later in the DOM, so they paint above this. */
+   overflow:hidden; the <img> is the first child, so the positioned rank/views that follow paint above it. */
 .thumbImg {
   position: absolute;
   inset: 0;

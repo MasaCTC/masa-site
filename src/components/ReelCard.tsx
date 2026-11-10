@@ -73,12 +73,13 @@ export function ReelCard({
   const body = (
     <>
       <div className="mn-reel__thumb">
-        {rank != null ? <span className="mn-reel__rank">{rank}</span> : null}
-        <span className="mn-placeholder">{thumbError || isError || thumbUrl ? "Preview unavailable" : thumbPlaceholder}</span>
+        {/* First child: positioned siblings (rank, views) come later in the DOM and paint above it. */}
         {thumbUrl && !isError ? (
           // eslint-disable-next-line @next/next/no-img-element -- plain <img>: no optimizer, proxy, or stored copy of the CDN image
           <img className={styles.thumbImg} src={thumbUrl} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" />
         ) : null}
+        {rank != null ? <span className="mn-reel__rank">{rank}</span> : null}
+        <span className="mn-placeholder">{thumbError || isError || thumbUrl ? "Preview unavailable" : thumbPlaceholder}</span>
         <div className="mn-reel__views" title={viewsTitle}>
           <span className="mn-label">Views</span>
           <b>{isError ? "—" : viewsText}</b>

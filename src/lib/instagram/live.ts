@@ -1,5 +1,6 @@
 import "server-only";
 
+import { ACCOUNT_START_DATE } from "./config";
 import { graphGet, instagramConfig, InstagramApiError, type FetchLike } from "./graph";
 import type { InstagramStats, Metric, Reel, TextField } from "./types";
 
@@ -72,11 +73,6 @@ export function mapLiveStats(
   const pulledAt = utcDate(now);
   const items: MediaItem[] = isObj(raw.media) ? arr(raw.media.data).filter(isObj) : [];
 
-  const stamps = items
-    .map((m) => (typeof m.timestamp === "string" ? Date.parse(m.timestamp) : NaN))
-    .filter((t) => Number.isFinite(t));
-  const startDate = stamps.length ? utcDate(new Date(Math.min(...stamps))) : pulledAt;
-
   const followersRaw = isObj(raw.profile) ? num(raw.profile.followers_count) : null;
 
   const totals = {
@@ -146,7 +142,7 @@ export function mapLiveStats(
     status: "live",
     pulledAt,
     followers: metric(followersRaw, "[FOLLOWERS]"),
-    startDate,
+    startDate: ACCOUNT_START_DATE,
     totals,
     topReels,
     othersViews: unknown("[ALL OTHERS VIEWS]"),

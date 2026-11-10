@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { fetchLiveResult, fetchLiveStats, mapLiveStats } from "./live.ts";
+import { ACCOUNT_START_DATE } from "./config.ts";
 import { InstagramApiError, type FetchLike } from "./graph.ts";
 import { NOW, profile, media, reelInsights, accountChunks } from "./fixtures/live-fixtures.ts";
 
@@ -167,12 +168,26 @@ test("topReelShare placeholder when top reel is older than 90 days", () => {
   assert.deepEqual(s.topReelShare, { kind: "placeholder", label: "[TOP REEL SHARE]" });
 });
 
-test("startDate falls back to pulledAt with no media", () => {
+test("startDate is the fixed account start date regardless of media timestamps", () => {
+  const withStamps = (ts: string[]) => ({
+    data: ts.map((timestamp, i) => ({ id: `m${i}`, media_product_type: "REELS", timestamp })),
+  });
+  for (const m of [
+    { data: [] },
+    withStamps(["2026-10-30T00:00:00+0000"]), // all later
+    withStamps(["2026-01-01T00:00:00+0000"]), // earlier
+  ]) {
+    const s = mapLiveStats({ profile, media: m, reelInsights: {}, account90d: accountChunks }, NOW);
+    assert.equal(s.startDate, ACCOUNT_START_DATE);
+    assert.equal(s.startDate, "2026-09-07");
+  }
+});
+
+test("no media yields no top reels", () => {
   const s = mapLiveStats(
     { profile, media: { data: [] }, reelInsights: {}, account90d: accountChunks },
     NOW,
   );
-  assert.equal(s.startDate, "2026-11-10");
   assert.deepEqual(s.topReels, []);
 });
 

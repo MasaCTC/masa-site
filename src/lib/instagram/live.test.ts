@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { fetchLiveResult, fetchLiveStats, mapLiveStats } from "./live.ts";
 import { ACCOUNT_START_DATE } from "./config.ts";
 import { InstagramApiError, type FetchLike } from "./graph.ts";
+import { reelViews } from "./view.ts";
 import { NOW, profile, media, reelInsights, accountChunks } from "./fixtures/live-fixtures.ts";
 
 const TOKEN = "EAAFAKE_TOKEN_123";
@@ -340,3 +341,51 @@ test("reel postedOn is the Pacific date; unparseable timestamp falls back to pul
   assert.equal(bad.topReels[0].postedOn, bad.pulledAt);
   assert.equal(bad.pulledAt, "2026-11-10");
 });
+
+// A 200 insights reply whose data lacks a usable `views` metric must read as "—" (never "[REEL N VIEWS]").
+const insightsWithout = (viewsValue: "absent" | null | string) => ({
+  data: [
+    ...(viewsValue === "absent" ? [] : [{ name: "views", period: "lifetime", values: [{ value: viewsValue }] }]),
+    { name: "likes", period: "lifetime", values: [{ value: 10 }] },
+    { name: "comments", period: "lifetime", values: [{ value: 1 }] },
+    { name: "shares", period: "lifetime", values: [{ value: 2 }] },
+    { name: "saved", period: "lifetime", values: [{ value: 3 }] },
+  ],
+});
+
+for (const [name, kind] of [
+  ["no views metric", "absent"],
+  ["views is null", null],
+  ["views is a string", "9000"],
+] as const) {
+  test(`200 reply with ${name}: that reel shows an em dash, others intact, status live`, async () => {
+    // Three reels only (m4 would otherwise outrank an unknown-views reel out of the top 3);
+    // m2 gets the 200-without-views reply.
+    const s = await live({
+      media: { data: media.data.slice(0, 3) },
+      fail: (u) =>
+        u.pathname.endsWith("/m2/insights") ? json(insightsWithout(kind)) : undefined,
+    });
+    assert.equal(s.status, "live");
+    const { reels } = reelViews(s);
+    assert.equal(reels.length, 3);
+    const bad = reels.find((r) => r.href?.includes("BBB222"))!;
+    assert.equal(bad.viewsText, "—");
+    assert.equal(bad.viewsTitle, undefined);
+    assert.ok(!bad.viewsText.includes("["));
+    const badReel = s.topReels.find((r) => r.url?.includes("BBB222"))!;
+    assert.equal(badReel.views.kind, "placeholder");
+    // Ranked last (unknown views sort below known ones); its other metrics still map.
+    assert.equal(badReel.rank, 3);
+    assert.deepEqual(badReel.likes, { kind: "value", value: 10 });
+    // Other reels intact and ranked by their real views.
+    assert.deepEqual(
+      reels.filter((r) => r !== bad).map((r) => [r.href, r.viewsText, r.viewsTitle]),
+      [
+        ["https://www.instagram.com/reel/CCC333/", "7.0K", "7,000 views"],
+        ["https://www.instagram.com/reel/AAA111/", "5.0K", "5,000 views"],
+      ],
+    );
+    assert.ok(reels.filter((r) => r !== bad).every((r) => !r.viewsText.includes("[") && r.viewsText !== "—"));
+  });
+}

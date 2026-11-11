@@ -14,7 +14,7 @@ import { Meter } from "@/components/Meter";
 import { StatusLabel } from "@/components/StatusLabel";
 import { ProgressTrack } from "@/components/ProgressTrack";
 import { StatTile } from "@/components/StatTile";
-import { HOME_PROJECT_CARDS, COFURA, ONE_BASKET, PULLPILOT } from "@/content/projects";
+import { COFURA, ONE_BASKET, PROJECTS, PULLPILOT, rightNow, type RightNowRow } from "@/content/projects";
 import { EDUCATION } from "@/content/resume";
 import { CONTACT, chartEmptyText, HOME, PDF_URL, STATS_COPY, TAGLINE } from "@/content/site";
 import { getInstagramStats } from "@/lib/instagram";
@@ -39,6 +39,22 @@ export const metadata: Metadata = {
 
 const dots = (phases: readonly { status: "done" | "current" | "upcoming" }[]) =>
   phases.map((p) => ({ status: p.status }));
+
+/** One "Right now" row: status word, link ("Join", no arrow, per the design) or mono value. */
+function RightNowValue({ row }: { row: RightNowRow }) {
+  switch (row.kind) {
+    case "status":
+      return <StatusLabel variant={row.status}>{row.statusLabel}</StatusLabel>;
+    case "link":
+      return (
+        <Link href={row.href} arrow="none">
+          {row.linkText}
+        </Link>
+      );
+    case "mono":
+      return <span className="mn-mono">{row.mono}</span>;
+  }
+}
 
 function Tile({ t }: { t: TileView }) {
   return (
@@ -153,7 +169,6 @@ function HomeStatsFrame({
 }
 
 export default function Home() {
-  const [oneBasket, cofura, pullpilot] = HOME_PROJECT_CARDS;
   return (
     <main className={main.main}>
       <Card as="section" size="lg" className={styles.hero}>
@@ -173,14 +188,10 @@ export default function Home() {
         <Card as="div" variant="inset" className={styles.rightNow}>
           <span className="mn-label">{HOME.rightNow.label}</span>
           <div className={styles.rows}>
-            {HOME.rightNow.rows.map((row) => (
+            {rightNow(PROJECTS).map((row) => (
               <div key={row.text} className="mn-card__row">
                 <span>{row.text}</span>
-                {"status" in row ? (
-                  <StatusLabel variant={row.status}>{row.statusLabel}</StatusLabel>
-                ) : (
-                  <span className="mn-mono">{row.mono}</span>
-                )}
+                <RightNowValue row={row} />
               </div>
             ))}
           </div>
@@ -199,28 +210,29 @@ export default function Home() {
           </Link>
         </div>
         <div className="mn-grid">
+          {/* Order per Launch.dc.html section 6 (HOME_PROJECT_CARDS): active, paused, dead. */}
           <Card href="/projects">
             <div className="mn-card__row">
-              <h3 className="mn-heading-sm">{oneBasket.name}</h3>
-              <StatusLabel variant={oneBasket.status}>{oneBasket.statusLabel}</StatusLabel>
+              <h3 className="mn-heading-sm">{COFURA.name}</h3>
+              <StatusLabel variant={COFURA.status}>{COFURA.statusLabel}</StatusLabel>
             </div>
-            <p className="mn-body-sm">{oneBasket.summary}</p>
-            <ProgressTrack phases={dots(ONE_BASKET.phases)} ariaLabel={ONE_BASKET.homeMapAriaLabel} note={ONE_BASKET.homeCaption} />
-          </Card>
-          <Card href="/projects">
-            <div className="mn-card__row">
-              <h3 className="mn-heading-sm">{cofura.name}</h3>
-              <StatusLabel variant={cofura.status}>{cofura.statusLabel}</StatusLabel>
-            </div>
-            <p className="mn-body-sm">{cofura.homeSummary}</p>
+            <p className="mn-body-sm">{COFURA.homeSummary}</p>
             <ProgressTrack phases={dots(COFURA.phases)} ariaLabel={COFURA.homeMapAriaLabel} note={COFURA.homeCaption} />
+          </Card>
+          <Card href="/projects" variant="paused">
+            <div className="mn-card__row">
+              <h3 className="mn-heading-sm">{ONE_BASKET.name}</h3>
+              <StatusLabel variant={ONE_BASKET.status}>{ONE_BASKET.statusLabel}</StatusLabel>
+            </div>
+            <p className="mn-body-sm">{ONE_BASKET.summary}</p>
+            <ProgressTrack phases={dots(ONE_BASKET.phases)} ariaLabel={ONE_BASKET.homeMapAriaLabel} note={ONE_BASKET.homeCaption} />
           </Card>
           <Card variant="dead">
             <div className="mn-card__row">
-              <h3 className="mn-heading-sm">{pullpilot.name}</h3>
-              <StatusLabel variant={pullpilot.status}>{pullpilot.statusLabel}</StatusLabel>
+              <h3 className="mn-heading-sm">{PULLPILOT.name}</h3>
+              <StatusLabel variant={PULLPILOT.status}>{PULLPILOT.statusLabel}</StatusLabel>
             </div>
-            <p className="mn-body-sm">{pullpilot.summary}</p>
+            <p className="mn-body-sm">{PULLPILOT.summary}</p>
             <p className={styles.deadBody}>{PULLPILOT.homeBody}</p>
             <Link href="/projects" arrow="none">
               {PULLPILOT.homeLink}

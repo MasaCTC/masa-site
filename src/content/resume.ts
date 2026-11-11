@@ -53,7 +53,7 @@ export type ResumeEntry = {
 export const ENTRIES: ResumeEntry[] = [
   { id: "cofura", now: true, title: "Cofura · Cofounder", sub: "Cofounder-matching mobile app for UCI students", when: "Sep 2026 – now", stack: "Supabase · GitHub Actions · Claude Code", tags: ["Supabase", "Claude Code"],
     bullets: ["Lead a three-person student team; wrote the product spec and roadmap, and split the build into three owned slices so we build in parallel.", "Own the conversation and safety slice: messaging with rate limits and content moderation, plus unmatch, block and report flows enforced at the database level.", "Set up CI that runs the full database and server-function test suite on every pull request; cross-team decisions go in a numbered rulings log."] },
-  { id: "onebasket", now: true, title: "One Basket", sub: "Recipe-to-grocery-list app, built end to end", when: "Aug 2026 – now", stack: "Claude Code · Claude Design · Gemini API", tags: ["Claude Code"],
+  { id: "onebasket", now: false, title: "One Basket", sub: "Recipe-to-grocery-list app, built end to end", when: "Aug 2026 · paused", stack: "Claude Code · Claude Design · Gemini API", tags: ["Claude Code"],
     bullets: ["Building with Claude Code as the implementer: scoping each task, constraining it with written system invariants, and verifying changes before they land.", "Run AI work in parallel on isolated branches with declared file ownership, so concurrent changes can’t collide.", "Settle visual direction in Claude Design before production art is drawn."] },
   { id: "retrolink", now: true, title: "RetroLink", sub: "Automotive embedded sensor node", when: "Jul 2026 – now", stack: "C · STM32 · CAN bus · LTspice", tags: ["C", "Hardware", "Claude Code"],
     bullets: ["Designed an analog front end in LTspice scaling 0–5 V automotive sensor signals into the STM32F446RE’s 3.3 V ADC range; bench-tested with potentiometers.", "Streamed ADC readings as CAN frames at 500 kbps through a TJA1050 transceiver, with live readout on an I2C OLED.", "Root-caused a CAN init timeout to a floating RX pin reading dominant; fixed with an internal pull-up."] },
@@ -78,8 +78,8 @@ export const ENTRIES: ResumeEntry[] = [
 export const DEFAULT_OPEN: string[] = ["cofura"];
 
 export const ENTRY_GROUPS = [
-  { title: "Right now", count: "4 ongoing", ids: ["cofura", "onebasket", "retrolink", "ig"] },
-  { title: "Before", count: "2020 – 2026", ids: ["lavner", "dungeon", "kav", "hockey"] },
+  { title: "Right now", count: "3 ongoing", ids: ["cofura", "retrolink", "ig"] },
+  { title: "Before", count: "2020 – 2026", ids: ["onebasket", "lavner", "dungeon", "kav", "hockey"] },
 ] as const;
 
 export type SkillTag = { label: string; key: SkillKey };
@@ -123,13 +123,13 @@ export const LANE_TICKS = [
 ] as const;
 
 export const LANES_ARIA =
-  "Timeline: hockey coaching Aug 2020 to Jun 2024; KAV Helmets Oct to Dec 2023; UC Irvine Sep 2025 to Mar 2028; Dungeon Dilemma Jan to Mar 2026; Lavner Jun to Aug 2026; RetroLink, One Basket and Cofura ongoing since Jul, Aug and Sep 2026.";
+  "Timeline: hockey coaching Aug 2020 to Jun 2024; KAV Helmets Oct to Dec 2023; UC Irvine Sep 2025 to Mar 2028; Dungeon Dilemma Jan to Mar 2026; Lavner Jun to Aug 2026; One Basket Aug 2026, paused; RetroLink and Cofura ongoing since Jul and Sep 2026.";
 
 type Span = { entryId: string; label: string; when: string; tags: SkillKey[]; start: [number, number]; end: [number, number] | null; current: boolean };
 
 const SPANS: Span[] = [
   { entryId: "cofura", label: "Cofura", when: "Sep 2026 – now", tags: ["Supabase", "Claude Code"], start: [2026, 9], end: null, current: true },
-  { entryId: "onebasket", label: "One Basket", when: "Aug 2026 – now", tags: ["Claude Code"], start: [2026, 8], end: null, current: true },
+  { entryId: "onebasket", label: "One Basket", when: "Aug 2026 · paused", tags: ["Claude Code"], start: [2026, 8], end: null, current: false },
   { entryId: "retrolink", label: "RetroLink", when: "Jul 2026 – now", tags: ["C", "Hardware", "Claude Code"], start: [2026, 7], end: null, current: true },
   { entryId: "lavner", label: "Lavner Education", when: "Jun – Aug 2026", tags: [], start: [2026, 6], end: [2026, 8], current: false },
   { entryId: "dungeon", label: "Dungeon Dilemma", when: "Jan – Mar 2026", tags: ["C#", "Unity"], start: [2026, 1], end: [2026, 3], current: false },
@@ -171,7 +171,7 @@ export const TERMINAL_RESPONSES: Record<string, TermLine[]> = {
   // NEW copy: the design says "download the pdf", but PDF_URL is null so nothing can be downloaded yet.
   help: [M("commands:"), L("  whoami       who I am"), L("  projects     what I’m building"), L("  experience   jobs"), L("  skills       languages, tools, hardware"), L("  education    school + coursework"), L("  contact      email, github, linkedin"), L("  resume.pdf   not available yet"), L("  clear        clear the screen")],
   whoami: [L('masaki "masa" chien · cs @ uc irvine · graduating mar 2028 (early)'), M("builds apps in public as @masamcodes")],
-  projects: [L("cofura           sep 2026–now   cofounder · messaging + safety slice · supabase, ci"), L("one basket       aug 2026–now   recipes → buyable grocery quantities · claude code"), L("retrolink        jul 2026–now   stm32 sensor node · can bus @ 500 kbps · ltspice"), L("dungeon dilemma  jan–mar 2026   unity multiplayer · 15+ person team · c#"), M("pullpilot        dead           no design planned → every screen differed → rewrite")],
+  projects: [L("cofura           sep 2026–now   cofounder · messaging + safety slice · supabase, ci"), L("one basket       paused         recipes → buyable grocery quantities · claude code"), L("retrolink        jul 2026–now   stm32 sensor node · can bus @ 500 kbps · ltspice"), L("dungeon dilemma  jan–mar 2026   unity multiplayer · 15+ person team · c#"), M("pullpilot        dead           no design planned → every screen differed → rewrite")],
   experience: [L("stem instructor intern         lavner education      jun–aug 2026"), L("3d printing production intern  kav helmets           oct–dec 2023"), L("youth hockey assistant coach   ice center cupertino  aug 2020–jun 2024")],
   skills: [L("proficient   python, c++"), L("working      c, c#, java"), L("tools        git, github, supabase, linear, unity, vs code, cursor"), L("ai           claude code, claude cowork, claude design, gemini api"), L("hardware     ltspice, fusion 360, 3d printing, automotive diagnostics")],
   education: [L("uc irvine · b.s. computer science · sep 2025 – mar 2028 (expected)"), M("python · c/c++ · data structures & algorithms (in progress) · intro to software engineering · computer organization · probability & statistics")],

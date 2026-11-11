@@ -1,5 +1,6 @@
 // Card (Card.md): raised container. Variants: link (whole card navigates), inset (well),
-// lg (more padding), dead (retired project, flat + dashed). `disabled` = "coming soon" slot.
+// lg (more padding), paused (stopped for now: quieter shadow, faded build map),
+// dead (retired project, flat + dashed). `disabled` = "coming soon" slot.
 // Loading / empty / error: pass `state` and the card renders skeleton bars or a Feedback
 // message in place of children; `action` is the retry slot (a Button) for errors.
 import NextLink from "next/link";
@@ -10,7 +11,7 @@ import { cx, isExternalHref, type DataState } from "./types";
 
 export type CardProps = {
   children?: ReactNode;
-  variant?: "default" | "inset" | "dead";
+  variant?: "default" | "inset" | "paused" | "dead";
   size?: "md" | "lg";
   /** Whole card is a link (lifts on hover, focus ring). */
   href?: string;
@@ -46,6 +47,7 @@ export function Card({
     "mn-card",
     size === "lg" && "mn-card--lg",
     variant === "inset" && "mn-card--inset",
+    variant === "paused" && "mn-card--paused",
     variant === "dead" && "mn-card--dead",
     href && state === "ready" && "mn-card--link",
     disabled && "is-disabled",

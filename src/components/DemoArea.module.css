@@ -32,3 +32,14 @@
 :global(.mn-msg).errorMsg {
   padding: 8px;
 }
+
+/* Real screenshots fill the 9:16 shot frame (next/image fill needs a positioned parent). */
+:global(.mn-demo__shot).shot {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+}
+
+.shotImg {
+  object-fit: cover;
+}

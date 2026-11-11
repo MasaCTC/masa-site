@@ -8,7 +8,7 @@ export type StatusLabelProps = {
   children: ReactNode;
   /** Extra detail on the same line, rendered in <small>. */
   detail?: ReactNode;
-  variant?: "neutral" | "building" | "scoping" | "dead" | "live";
+  variant?: "neutral" | "building" | "scoping" | "paused" | "dead" | "live";
   className?: string;
 };
 

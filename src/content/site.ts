@@ -36,24 +36,16 @@ export const TAGLINE = "CS at UC Irvine. I build apps in public and post the rea
 /**
  * TODO slots (decision 4). null = the control renders disabled.
  * TODO: set PDF_URL when the resume PDF exists (Download PDF on Home + Resume).
- * TODO: set ONE_BASKET_DEMO_URL when a live One Basket demo is deployed ("Try the live demo").
  */
 export const PDF_URL: string | null = null;
-export const ONE_BASKET_DEMO_URL: string | null = null;
 
 /** Dock follower chip: "14.2K followers". */
 export const NAV_FOLLOWERS_LABEL = "followers";
 
 export const HOME = {
   eyebrow: "@masamcodes · UC Irvine CS",
-  rightNow: {
-    label: "Right now",
-    rows: [
-      { text: "Building One Basket", status: "building", statusLabel: "Building" },
-      { text: "Building Cofura on a team of three", status: "building", statusLabel: "Building" },
-      { text: "CS at UCI, graduating early", mono: "Mar 2028" },
-    ],
-  },
+  /** Rows are derived from project data: rightNow() in src/content/projects.ts. */
+  rightNow: { label: "Right now" },
   statsHeading: "Instagram, in numbers",
   statsLink: "See all stats",
   buildingHeading: "What I'm building",

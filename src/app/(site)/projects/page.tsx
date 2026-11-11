@@ -1,19 +1,16 @@
-// Projects (design/screens/Projects.dc.html). Static server component: all copy from
-// src/content/projects.ts. One Basket's demo well follows ONE_BASKET_DEMO_MODE (clip).
+// Projects (design/screens/Projects.dc.html + Launch.dc.html section 5). Static server component:
+// all copy from src/content/projects.ts. A card is two columns only when it has something real on
+// the right (the TestFlight beta block or real screenshots); otherwise it is one column with no
+// screenshot area. The header count is derived from the project statuses.
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { Button } from "@/components/Button";
-import { Card } from "@/components/Card";
+import { Card, type CardProps } from "@/components/Card";
 import { DemoArea } from "@/components/DemoArea";
+import { ArrowUpRightIcon, PhoneIcon } from "@/components/icons";
 import { StatusLabel } from "@/components/StatusLabel";
 import { ProgressTrack } from "@/components/ProgressTrack";
-import {
-  COFURA,
-  ONE_BASKET,
-  ONE_BASKET_DEMO,
-  ONE_BASKET_DEMO_MODE,
-  PROJECTS_PAGE,
-  PULLPILOT,
-} from "@/content/projects";
+import { COFURA, ONE_BASKET, PROJECTS_PAGE, PULLPILOT, hasSidePanel, type Shot } from "@/content/projects";
 import { CONTACT } from "@/content/site";
 import main from "../main.module.css";
 import styles from "./page.module.css";
@@ -22,22 +19,67 @@ export const metadata: Metadata = {
   title: "Projects",
 };
 
-function OneBasketDemo() {
-  switch (ONE_BASKET_DEMO_MODE) {
-    case "live": {
-      const d = ONE_BASKET_DEMO.live;
-      // href null = disabled "Try the live demo" link (decision 4, item 11).
-      return <DemoArea mode="live" placeholder={d.placeholder} linkText={d.linkText} href={d.href ?? undefined} deployed={d.deployed} />;
-    }
-    case "none": {
-      const d = ONE_BASKET_DEMO.none;
-      return <DemoArea mode="none" shots={[...d.shots]} caption={d.caption} />;
-    }
-    default: {
-      const d = ONE_BASKET_DEMO.clip;
-      return <DemoArea mode="clip" poster={d.poster} playLabel={d.playLabel} caption={d.caption} duration={d.duration} />;
-    }
+/** Project card: two columns with a right-hand panel, or a single 22px-gap column. */
+function ProjectCard({
+  variant,
+  side,
+  children,
+}: {
+  variant?: CardProps["variant"];
+  side: ReactNode;
+  children: ReactNode;
+}) {
+  if (side) {
+    return (
+      <Card size="lg" variant={variant} className={styles.article}>
+        <div className={styles.col}>{children}</div>
+        {side}
+      </Card>
+    );
   }
+  return (
+    <Card size="lg" variant={variant} className={styles.single}>
+      {children}
+    </Card>
+  );
+}
+
+type Beta = typeof COFURA.beta;
+
+/** Right-hand panel: the beta block and/or real screenshots; null = one-column card. */
+function sidePanel(p: { shots: readonly Shot[]; beta?: Beta }): ReactNode {
+  if (!hasSidePanel(p)) return null;
+  const beta = p.beta ? <BetaBlock beta={p.beta} /> : null;
+  const shots = p.shots.length > 0 ? <DemoArea mode="none" shots={[...p.shots]} /> : null;
+  return beta && shots ? (
+    <div className={styles.col}>
+      {beta}
+      {shots}
+    </div>
+  ) : (
+    (beta ?? shots)
+  );
+}
+
+/** Launch.dc.html TestFlight block (.lb-beta) in the demo well. */
+function BetaBlock({ beta }: { beta: Beta }) {
+  return (
+    <div className="mn-demo">
+      <div className={styles.beta}>
+        <div className={styles.betaIcon} aria-hidden="true">
+          <PhoneIcon />
+        </div>
+        <span className="mn-label">{beta.label}</span>
+        <h3 className="mn-heading-sm">{beta.heading}</h3>
+        <p className={`mn-body-sm ${styles.betaBody}`}>{beta.body}</p>
+        <a className="mn-btn" href={beta.href} target="_blank" rel="noopener">
+          {beta.linkText}
+          <ArrowUpRightIcon />
+        </a>
+        <span className="mn-mono">{beta.note}</span>
+      </div>
+    </div>
+  );
 }
 
 export default function ProjectsPage() {
@@ -54,64 +96,56 @@ export default function ProjectsPage() {
         </Button>
       </header>
 
-      <Card size="lg" className={styles.article}>
-        <div className={styles.col}>
-          <div className="mn-card__row">
-            <h2 className="mn-heading-md">{ONE_BASKET.name}</h2>
-            <StatusLabel variant={ONE_BASKET.status}>{ONE_BASKET.statusLabel}</StatusLabel>
-          </div>
-          <p className="mn-body-lg">{ONE_BASKET.summary}</p>
-          <div className={styles.map}>
-            <span className="mn-label">{PROJECTS_PAGE.buildMapLabel}</span>
-            <ProgressTrack phases={ONE_BASKET.phases} ariaLabel={ONE_BASKET.mapAriaLabel} layout="stack-sm" />
-          </div>
+      <ProjectCard variant="paused" side={sidePanel(ONE_BASKET)}>
+        <div className="mn-card__row">
+          <h2 className="mn-heading-md">{ONE_BASKET.name}</h2>
+          <StatusLabel variant={ONE_BASKET.status}>{ONE_BASKET.statusLabel}</StatusLabel>
         </div>
-        <OneBasketDemo />
-      </Card>
+        <p className="mn-body-lg">{ONE_BASKET.summary}</p>
+        <div className={`${styles.map} ${styles.narrow}`}>
+          <span className="mn-label">{ONE_BASKET.mapLabel}</span>
+          <ProgressTrack phases={ONE_BASKET.phases} ariaLabel={ONE_BASKET.mapAriaLabel} layout="stack-sm" />
+        </div>
+        <div className={`mn-epitaph ${styles.narrow}`}>
+          <span className="mn-label">{ONE_BASKET.epitaph.label}</span>
+          <p>{ONE_BASKET.epitaph.body}</p>
+        </div>
+      </ProjectCard>
 
-      <Card size="lg" className={styles.article}>
-        <div className={styles.col}>
-          <div className="mn-card__row">
-            <h2 className="mn-heading-md">{COFURA.name}</h2>
-            <StatusLabel variant={COFURA.status}>{COFURA.statusLabel}</StatusLabel>
-          </div>
-          <p className="mn-body-lg">{COFURA.summary}</p>
-          <div className={`mn-meter ${styles.myPart}`}>
-            <div className="mn-meter__head">
-              <span className="mn-label">{COFURA.myPart.label}</span>
-              <span className="mn-meter__value">{COFURA.myPart.value}</span>
-            </div>
-            <span className="mn-body-sm">{COFURA.myPart.body}</span>
-          </div>
-          <div className={styles.map}>
-            <span className="mn-label">{PROJECTS_PAGE.buildMapLabel}</span>
-            <ProgressTrack
-              phases={COFURA.phases}
-              ariaLabel={COFURA.mapAriaLabel}
-              layout="stack-sm"
-              note={COFURA.stack}
-            />
-          </div>
+      <ProjectCard side={sidePanel(COFURA)}>
+        <div className="mn-card__row">
+          <h2 className="mn-heading-md">{COFURA.name}</h2>
+          <StatusLabel variant={COFURA.status} detail={COFURA.statusDetail}>
+            {COFURA.statusLabel}
+          </StatusLabel>
         </div>
-        <DemoArea mode="none" shots={[...COFURA.demo.shots]} caption={COFURA.demo.caption} />
-      </Card>
+        <p className="mn-body-lg">{COFURA.summary}</p>
+        <div className={`mn-meter ${styles.myPart}`}>
+          <div className="mn-meter__head">
+            <span className="mn-label">{COFURA.myPart.label}</span>
+            <span className="mn-meter__value">{COFURA.myPart.value}</span>
+          </div>
+          <span className="mn-body-sm">{COFURA.myPart.body}</span>
+        </div>
+        <div className={styles.map}>
+          <span className="mn-label">{COFURA.mapLabel}</span>
+          <ProgressTrack phases={COFURA.phases} ariaLabel={COFURA.mapAriaLabel} layout="stack-sm" note={COFURA.stack} />
+        </div>
+      </ProjectCard>
 
-      <Card size="lg" variant="dead" className={styles.article}>
-        <div className={styles.col}>
-          <div className="mn-card__row">
-            <h2 className={`mn-heading-sm ${styles.deadTitle}`}>{PULLPILOT.name}</h2>
-            <StatusLabel variant={PULLPILOT.status}>{PULLPILOT.statusLabel}</StatusLabel>
-          </div>
-          <p className="mn-body-lg">{PULLPILOT.summary}</p>
-          <ProgressTrack phases={PULLPILOT.phases} ariaLabel={PULLPILOT.mapAriaLabel} />
-          <div className="mn-epitaph">
-            <span className="mn-label">{PULLPILOT.epitaph.label}</span>
-            <p>{PULLPILOT.epitaph.body}</p>
-            <p className="mn-body-sm">{PULLPILOT.epitaph.aside}</p>
-          </div>
+      <ProjectCard variant="dead" side={sidePanel(PULLPILOT)}>
+        <div className="mn-card__row">
+          <h2 className={`mn-heading-sm ${styles.deadTitle}`}>{PULLPILOT.name}</h2>
+          <StatusLabel variant={PULLPILOT.status}>{PULLPILOT.statusLabel}</StatusLabel>
         </div>
-        <DemoArea mode="none" shots={[...PULLPILOT.shots]} caption={PULLPILOT.demoCaption} />
-      </Card>
+        <p className="mn-body-lg">{PULLPILOT.summary}</p>
+        <ProgressTrack phases={PULLPILOT.phases} ariaLabel={PULLPILOT.mapAriaLabel} className={styles.narrow} />
+        <div className={`mn-epitaph ${styles.narrow}`}>
+          <span className="mn-label">{PULLPILOT.epitaph.label}</span>
+          <p>{PULLPILOT.epitaph.body}</p>
+          <p className="mn-body-sm">{PULLPILOT.epitaph.aside}</p>
+        </div>
+      </ProjectCard>
     </main>
   );
 }

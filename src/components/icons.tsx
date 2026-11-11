@@ -113,3 +113,13 @@ export function PlayIcon(props: IconProps) {
     </svg>
   );
 }
+
+/** Phone outline (Launch.dc.html TestFlight beta block, 26px). */
+export function PhoneIcon(props: IconProps) {
+  return (
+    <svg {...stroke} width={26} height={26} {...props}>
+      <rect x="6" y="2.5" width="12" height="19" rx="3" />
+      <path d="M10.5 18.5h3" />
+    </svg>
+  );
+}

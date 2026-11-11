@@ -10,6 +10,8 @@ export const contentType = "image/png";
 
 const dir = join(process.cwd(), "src/assets/fonts");
 const spaceGroteskBold = readFile(join(dir, "SpaceGrotesk-Bold.ttf"));
+const spaceGroteskRegular = readFile(join(dir, "SpaceGrotesk-Regular.ttf"));
+const spaceGroteskSemiBold = readFile(join(dir, "SpaceGrotesk-SemiBold.ttf"));
 const plexMedium = readFile(join(dir, "IBMPlexMono-Medium.ttf"));
 const plexSemiBold = readFile(join(dir, "IBMPlexMono-SemiBold.ttf"));
 
@@ -45,7 +47,7 @@ export default async function OpengraphImage() {
   };
   const cellLabel = {
     fontFamily: "Space Grotesk",
-    fontWeight: 700,
+    fontWeight: 600,
     fontSize: 18,
     lineHeight: "22px",
     letterSpacing: "0.08em",
@@ -81,8 +83,8 @@ export default async function OpengraphImage() {
               display: "flex",
               fontSize: 20,
               lineHeight: "24px",
-              fontWeight: 700,
-              letterSpacing: "0.08em",
+              fontWeight: 600,
+              letterSpacing: "0.06em",
               textTransform: "uppercase",
               color: MUTED,
             }}
@@ -119,6 +121,7 @@ export default async function OpengraphImage() {
               maxWidth: 1040,
               fontSize: 34,
               lineHeight: "46px",
+              fontWeight: 400,
               color: MUTED,
             }}
           >
@@ -175,6 +178,8 @@ export default async function OpengraphImage() {
     {
       ...size,
       fonts: [
+        { name: "Space Grotesk", data: await spaceGroteskRegular, weight: 400, style: "normal" },
+        { name: "Space Grotesk", data: await spaceGroteskSemiBold, weight: 600, style: "normal" },
         { name: "Space Grotesk", data: await spaceGroteskBold, weight: 700, style: "normal" },
         { name: "IBM Plex Mono", data: await plexMedium, weight: 500, style: "normal" },
         { name: "IBM Plex Mono", data: await plexSemiBold, weight: 600, style: "normal" },

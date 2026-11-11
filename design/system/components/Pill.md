@@ -1,6 +1,6 @@
 # Status label (formerly Pill)
 
-A read-only status word set in the status color: plain uppercase mono text, with no capsule and no dot (changed Oct 2026, because the pills read as generic and "vibe-coded"). Variants: `--building` (green), `--scoping` (blue), `--dead` (grey), `--live` (green), and no modifier for muted (e.g. "Manual"). Extra detail goes in a `<small>` on the same line: `Manual · entered by hand · updated Oct 11, 2026`.
+A read-only status word set in the status color: plain uppercase mono text, with no capsule and no dot (changed Oct 2026, because the pills read as generic and "vibe-coded"). Variants: `--building` (green), `--scoping` (blue), `--dead` (grey), `--paused` (amber: stopped for now, may come back), `--live` (green), and no modifier for muted (e.g. "Manual"). Extra detail goes in a `<small>` on the same line: `Manual · entered by hand · updated Oct 11, 2026`.
 
 **Markup**: `<span class="mn-state mn-state--building">Building</span>`. The word is always present, so color is never the only signal. `.mn-pill` / `.mn-pill--*` still work as aliases and render the new look; new markup should use `.mn-state`.
 
@@ -12,3 +12,5 @@ A read-only status word set in the status color: plain uppercase mono text, with
 | Loading | N/A: the page's own loading state covers it (no pulsing dot any more) | — |
 | Empty | N/A: no status, no label | — |
 | Error | N/A: errors are Feedback messages | — |
+
+**Paused vs dead**: a paused project uses `mn-state--paused` on an `mn-card--paused` card (lower depth, build map faded to 70%), with a short "Why it's paused" epitaph. Dead keeps the dashed outline and strikethrough. A paused project leaves the home page's "Right now" list.

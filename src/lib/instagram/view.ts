@@ -85,7 +85,7 @@ export type TileView = {
   label: string;
   valueText?: string;
   title?: string;
-  meta: string;
+  meta?: string;
   metaKind: "meta" | "delta";
   state: DataState;
 };
@@ -111,10 +111,9 @@ export function followersTile(stats: InstagramStats): TileView {
     return metricTile(label, f, "followers", `${STATS_COPY.asOf} ${statusDate(stats)}`);
   }
   const gain = stats.followerGain30d;
-  const gainMeta = isKnown(gain)
-    ? `${signedExact(gain.value)} · ${STATS_COPY.followersGainMeta}`
-    : `${gain.label} · ${STATS_COPY.followersGainMeta}`;
-  if (!isKnown(f)) return { label, meta: gainMeta, metaKind: "meta", state: "empty" };
+  // Unknown gain: no meta line at all (never the bracket placeholder).
+  const gainMeta = isKnown(gain) ? `${signedExact(gain.value)} · ${STATS_COPY.followersGainMeta}` : undefined;
+  if (!isKnown(f)) return { label, meta: gainMeta, metaKind: isKnown(gain) ? "delta" : "meta", state: "empty" };
   return {
     label,
     valueText: compact(f.value),

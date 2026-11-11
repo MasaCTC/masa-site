@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { MANUAL_STATS } from "./manual-data.ts";
 import type { InstagramStats } from "./types.ts";
 import { compact } from "./format.ts";
-import { reelViews } from "./view.ts";
+import { followersTile, reelViews } from "./view.ts";
 
 test("reelViews carries thumbnailUrl through as thumbUrl", () => {
   const url = "https://scontent.cdninstagram.com/v/t51/thumb.jpg";
@@ -55,4 +55,65 @@ test("reelViews: manual data views text is unchanged (known values only)", () =>
     MANUAL_STATS.topReels.slice(0, 3).map((r) => (r.views.kind === "value" ? compact(r.views.value) : "?")),
   );
   assert.ok(reels.every((r) => r.viewsText !== "—"));
+});
+
+const noBracket = (o: object) => {
+  for (const v of Object.values(o)) if (typeof v === "string") assert.ok(!v.includes("["), v);
+};
+
+test("followersTile: live stats with unknown gain -> ready tile, no meta, no bracket anywhere", () => {
+  const stats: InstagramStats = {
+    ...MANUAL_STATS,
+    source: "instagram-api",
+    status: "live",
+    followers: { kind: "value", value: 14200 },
+    followerGain30d: { kind: "placeholder", label: "[30-DAY GAIN]" },
+  };
+  const t = followersTile(stats);
+  assert.equal(t.state, "ready");
+  assert.equal(t.valueText, compact(14200));
+  assert.equal(t.meta, undefined);
+  assert.equal(t.metaKind, "meta");
+  noBracket(t);
+});
+
+test("followersTile: manual stats with unknown gain -> ready tile, no meta, no bracket", () => {
+  const stats: InstagramStats = {
+    ...MANUAL_STATS,
+    status: "live",
+    followers: { kind: "value", value: 10214 },
+    followerGain30d: { kind: "placeholder", label: "[30-DAY GAIN]" },
+  };
+  const t = followersTile(stats);
+  assert.equal(t.state, "ready");
+  assert.ok(t.valueText);
+  assert.equal(t.meta, undefined);
+  noBracket(t);
+});
+
+test("followersTile: unknown followers and gain -> empty value-less tile, no meta, no bracket", () => {
+  const stats: InstagramStats = {
+    ...MANUAL_STATS,
+    status: "live",
+    followers: { kind: "placeholder", label: "[FOLLOWERS]" },
+    followerGain30d: { kind: "placeholder", label: "[30-DAY GAIN]" },
+  };
+  const t = followersTile(stats);
+  assert.equal(t.state, "empty");
+  assert.equal(t.valueText, undefined);
+  assert.equal(t.meta, undefined);
+  noBracket(t);
+});
+
+test("followersTile: known gain -> delta meta", () => {
+  const stats: InstagramStats = {
+    ...MANUAL_STATS,
+    status: "live",
+    followers: { kind: "value", value: 10214 },
+    followerGain30d: { kind: "value", value: 1234 },
+  };
+  const t = followersTile(stats);
+  assert.equal(t.state, "ready");
+  assert.equal(t.metaKind, "delta");
+  assert.equal(t.meta, "+1,234 · last 30 days");
 });

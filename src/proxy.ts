@@ -11,14 +11,32 @@ import { auth, OWNER_GITHUB_ID } from "@/auth";
 // So nothing is routed at /planner. The planner route lives at /owner-planner
 // and only the owner is rewritten there; everyone else falls through to the
 // normal unmatched-URL 404. scripts/404-parity.test.mjs checks this.
-const PUBLIC = "/planner";
-const INTERNAL = "/owner-planner";
+const PUBLIC = "planner";
+const INTERNAL = "owner-planner";
+
+/**
+ * Splits a raw pathname into its first segment, decoded the way Next decodes
+ * it when routing (so /owner%2Dplanner and /%6Fwner-planner count as
+ * owner-planner), and the raw rest. A segment that decodes to something with
+ * a "/" (e.g. owner-planner%2F) is not that route in Next either.
+ */
+function splitPath(pathname: string): { first: string | null; rest: string } {
+  const slash = pathname.indexOf("/", 1);
+  const raw = slash === -1 ? pathname.slice(1) : pathname.slice(1, slash);
+  const rest = slash === -1 ? "" : pathname.slice(slash);
+  try {
+    return { first: decodeURIComponent(raw), rest };
+  } catch {
+    return { first: null, rest };
+  }
+}
 
 const SESSION_COOKIES = ["__Secure-authjs.session-token", "authjs.session-token"];
 
 /**
  * Decodes the session JWT without setting any cookies; false on missing or
- * garbage. Tries both cookie names (https uses the __Secure- one) rather than
+ * garbage. (getToken also falls back to an `Authorization: Bearer <jwt>`
+ * header; that token needs the same AUTH_SECRET and owner id, so it is fine.) Tries both cookie names (https uses the __Secure- one) rather than
  * guessing the protocol behind a proxy; each needs AUTH_SECRET to forge.
  */
 async function isOwnerToken(req: NextRequest) {
@@ -41,17 +59,19 @@ async function isOwnerToken(req: NextRequest) {
 const ownerRewrite = auth((req) => {
   if (req.auth?.user?.githubId !== OWNER_GITHUB_ID) return NextResponse.next();
   const url = req.nextUrl.clone();
-  url.pathname = INTERNAL + url.pathname.slice(PUBLIC.length);
+  url.pathname = `/${INTERNAL}${splitPath(url.pathname).rest}`;
   return NextResponse.rewrite(url);
 });
 
 export async function proxy(req: NextRequest, event: NextFetchEvent) {
+  const { first } = splitPath(req.nextUrl.pathname);
+  if (first !== PUBLIC && first !== INTERNAL) return NextResponse.next();
   const isOwner = await isOwnerToken(req);
-  const { pathname } = req.nextUrl;
-  if (pathname === INTERNAL || pathname.startsWith(INTERNAL + "/")) {
+  if (first === INTERNAL) {
     // Next runs the proxy again on the owner's rewrite destination, so the
-    // owner passes here. Anyone else hitting the internal path directly gets
-    // the 404 page (this one does carry rewrite headers; it is not /planner).
+    // owner passes here. Anyone else reaching the internal route directly, in
+    // any spelling, gets the 404 page. Unlike /planner this response does
+    // carry x-middleware-rewrite (any rewrite does); it is not /planner.
     if (isOwner) return NextResponse.next();
     return NextResponse.rewrite(new URL("/__not-found", req.url), { status: 404 });
   }
@@ -62,5 +82,15 @@ export async function proxy(req: NextRequest, event: NextFetchEvent) {
 }
 
 export const config = {
-  matcher: ["/planner", "/planner/:path*", "/owner-planner", "/owner-planner/:path*"],
+  // The literal paths, plus any path with a percent-escape: Next decodes
+  // escapes when routing, so /owner%2Dplanner reaches the owner-planner route
+  // and must pass through the gate too. proxy() returns next() for anything
+  // that is not planner/owner-planner after decoding.
+  matcher: [
+    "/planner",
+    "/planner/:path*",
+    "/owner-planner",
+    "/owner-planner/:path*",
+    "/:path(.*%.*)",
+  ],
 };

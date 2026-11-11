@@ -11,12 +11,14 @@ import styles from "./planner.module.css";
 
 // The public URL is /planner, but nothing is routed there: src/proxy.ts
 // rewrites only the signed-in owner to this route (/owner-planner), so
-// everyone else gets the ordinary unmatched-URL 404. Direct requests to
-// /owner-planner are 404'd by the proxy too. requireOwner() below is only
-// defence in depth (it calls notFound() if the proxy were ever bypassed). The
-// session is read at request time and the planner data is owner-only and
-// uncached, so it is read here too, after the gate. `instant = false` is not
-// what produces the 404.
+// everyone else gets the ordinary unmatched-URL 404. Non-owner requests that
+// reach /owner-planner directly (any spelling, e.g. /owner%2Dplanner) are
+// rewritten by the proxy to the 404 page; that response matches an unknown URL
+// except for the x-middleware-rewrite header (scripts/404-parity.test.mjs).
+// requireOwner() below is only defence in depth (it calls notFound() if the
+// proxy were ever bypassed). The session is read at request time and the
+// planner data is owner-only and uncached, so it is read here too, after the
+// gate. `instant = false` is not what produces the 404.
 export const instant = false;
 
 async function signOutAction() {

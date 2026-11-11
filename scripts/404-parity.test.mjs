@@ -1,6 +1,7 @@
 // 404 parity: a signed-out request to /planner (or /planner/*) must be
 // indistinguishable from any other missing URL — same status, same headers,
-// same body. Runs against a real server, so it lives outside the src/** glob
+// same body. Direct hits on the internal /owner-planner route are checked too,
+// with only the proxy-rewrite headers allowed to differ (see INTERNAL_PAIRS). Runs against a real server, so it lives outside the src/** glob
 // that `npm test` uses. Run `npm run build` first, then `npm run test:404`.
 // Set BASE_URL to test a running deployment instead of starting `next start`.
 //
@@ -15,13 +16,46 @@ import path from "node:path";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 // Headers that legitimately differ between any two responses (per request
-// timing / socket state). Nothing else is ignored.
+// timing / socket state). Against the local `next start` nothing else is
+// ignored.
 const VOLATILE_HEADERS = new Set(["date", "connection", "keep-alive"]);
 
+// Only with BASE_URL (a deployment behind a CDN): per-request CDN/edge headers
+// that differ between ANY two requests, missing or not. Fixed list; each one
+// that is actually ignored is printed. x-matched-path and the like are NOT here
+// on purpose: they could reveal a route.
+const CDN_VOLATILE_HEADERS = new Set([
+  "x-vercel-id",
+  "x-vercel-cache",
+  "age",
+  "server-timing",
+  "x-vercel-execution-region",
+  "cf-ray",
+  "x-amz-cf-id",
+  "x-amz-cf-pop",
+  "x-cache",
+  "via",
+]);
+
+// Must be identical in every respect (status, all headers, body).
 const PAIRS = [
   ["/planner", "/nope-xyz"],
   ["/planner/a/b", "/nope-xyz/a/b"],
+  ["/%70lanner", "/%6Eope-xyz"],
 ];
+
+// The internal route the owner is rewritten to, reached directly (any spelling
+// Next routes there). A non-owner gets the same status and body as an unknown
+// URL, but the proxy has to rewrite to get it, and Next adds rewrite headers to
+// every proxy rewrite. Those headers, and only those, are the known difference;
+// anything else fails.
+const INTERNAL_PAIRS = [
+  ["/owner-planner", "/nope-xyz"],
+  ["/owner-planner/a/b", "/nope-xyz/a/b"],
+  ["/owner%2Dplanner", "/nope%2Dxyz"],
+  ["/%6Fwner-planner", "/%6Eope-xyz"],
+];
+const INTERNAL_KNOWN_DIFFS = new Set(["x-middleware-rewrite", "x-nextjs-rewritten-path"]);
 
 const VARIANTS = [
   { name: "GET", method: "GET", headers: {} },
@@ -32,7 +66,17 @@ const VARIANTS = [
     method: "GET",
     headers: { Cookie: "authjs.session-token=garbage" },
   },
+  { name: "prefetch (RSC + Next-Router-Prefetch)", method: "GET", headers: { RSC: "1", "Next-Router-Prefetch": "1" } },
+  {
+    name: "server action POST",
+    method: "POST",
+    headers: { "Next-Action": "0".repeat(40), "Content-Type": "text/plain;charset=UTF-8" },
+    body: "[]",
+  },
 ];
+
+const remote = Boolean(process.env.BASE_URL);
+const ignoredCdnHeaders = new Set();
 
 let base = process.env.BASE_URL?.replace(/\/$/, "");
 let server;
@@ -91,12 +135,17 @@ before(async () => {
 
 after(() => {
   server?.kill("SIGTERM");
+  if (remote) {
+    const list = [...ignoredCdnHeaders].sort().join(", ") || "(none seen)";
+    console.log(`BASE_URL run: ignored CDN-volatile headers: ${list}`);
+  }
 });
 
 async function snapshot(p, variant) {
   const res = await fetch(base + p, {
     method: variant.method,
     headers: variant.headers,
+    body: variant.body,
     redirect: "manual",
   });
   const body = variant.method === "HEAD" ? "" : await res.text();
@@ -104,6 +153,10 @@ async function snapshot(p, variant) {
   // getSetCookie keeps multiple Set-Cookie headers apart.
   for (const [k, v] of res.headers) {
     if (VOLATILE_HEADERS.has(k) || k === "set-cookie") continue;
+    if (remote && CDN_VOLATILE_HEADERS.has(k)) {
+      ignoredCdnHeaders.add(k);
+      continue;
+    }
     headers[k] = v.split(p).join("<PATH>");
   }
   const cookies = res.headers.getSetCookie();
@@ -118,27 +171,59 @@ function firstDiff(a, b) {
   return { at: i, planner: a.slice(Math.max(0, i - 80), i + 120), unknown: b.slice(Math.max(0, i - 80), i + 120) };
 }
 
+/** Every status/header/body difference between a and b (path-normalized). */
+function differences(a, b, labelA, labelB) {
+  const diffs = [];
+  if (a.status !== b.status) diffs.push({ kind: "status", text: `status: ${a.status} vs ${b.status}` });
+  for (const k of new Set([...Object.keys(a.headers), ...Object.keys(b.headers)])) {
+    const av = JSON.stringify(a.headers[k]);
+    const bv = JSON.stringify(b.headers[k]);
+    if (av !== bv) diffs.push({ kind: "header", name: k, text: `header ${k}: ${av ?? "(absent)"} vs ${bv ?? "(absent)"}` });
+  }
+  const d = firstDiff(a.body, b.body);
+  if (d) {
+    diffs.push({
+      kind: "body",
+      text: `body differs at ${d.at}:\n  ${labelA}: ${JSON.stringify(d.planner)}\n  ${labelB}: ${JSON.stringify(d.unknown)}`,
+    });
+  }
+  return diffs;
+}
+
+async function compare(p, unknown, variant) {
+  // Warm both once so a cold cache on either side cannot cause a difference.
+  await snapshot(unknown, variant);
+  await snapshot(p, variant);
+  const a = await snapshot(p, variant);
+  const b = await snapshot(unknown, variant);
+  return { a, b, diffs: differences(a, b, p, unknown) };
+}
+
 for (const variant of VARIANTS) {
   describe(variant.name, () => {
     for (const [planner, unknown] of PAIRS) {
       test(`${planner} looks exactly like ${unknown}`, async () => {
-        // Warm both once so a cold cache on either side cannot cause a difference.
-        await snapshot(unknown, variant);
-        await snapshot(planner, variant);
-        const a = await snapshot(planner, variant);
-        const b = await snapshot(unknown, variant);
-        assert.equal(b.status, 404, `${unknown} should be a real 404`);
+        const { b, diffs } = await compare(planner, unknown, variant);
+        if (variant.method !== "POST") assert.equal(b.status, 404, `${unknown} should be a real 404`);
         // Collect every difference first, so a header leak cannot hide a body leak.
-        const diffs = [];
-        if (a.status !== b.status) diffs.push(`status: ${a.status} vs ${b.status}`);
-        for (const k of new Set([...Object.keys(a.headers), ...Object.keys(b.headers)])) {
-          const av = JSON.stringify(a.headers[k]);
-          const bv = JSON.stringify(b.headers[k]);
-          if (av !== bv) diffs.push(`header ${k}: ${av ?? "(absent)"} vs ${bv ?? "(absent)"}`);
-        }
-        const d = firstDiff(a.body, b.body);
-        if (d) diffs.push(`body differs at ${d.at}:\n  ${planner}: ${JSON.stringify(d.planner)}\n  ${unknown}: ${JSON.stringify(d.unknown)}`);
-        assert.deepEqual(diffs, [], `${planner} vs ${unknown}:\n${diffs.join("\n")}`);
+        assert.deepEqual(
+          diffs.map((d) => d.text),
+          [],
+          `${planner} vs ${unknown}:\n${diffs.map((d) => d.text).join("\n")}`,
+        );
+      });
+    }
+    for (const [internal, unknown] of INTERNAL_PAIRS) {
+      test(`${internal} matches ${unknown} except rewrite headers`, async (t) => {
+        const { diffs } = await compare(internal, unknown, variant);
+        const known = diffs.filter((d) => d.kind === "header" && INTERNAL_KNOWN_DIFFS.has(d.name));
+        const other = diffs.filter((d) => !known.includes(d));
+        for (const d of known) t.diagnostic(`known difference: ${d.text}`);
+        assert.deepEqual(
+          other.map((d) => d.text),
+          [],
+          `${internal} vs ${unknown}:\n${other.map((d) => d.text).join("\n")}`,
+        );
       });
     }
   });

@@ -39,9 +39,9 @@ export function isKnown(m: Metric): m is { kind: "value"; value: number } {
   return m.kind === "value";
 }
 
-/** "14.1K", or the placeholder label verbatim. */
+/** "14.1K", or an em dash for a missing number (visitors never see a bracket placeholder). */
 export function metricCompact(m: Metric): string {
-  return m.kind === "value" ? compact(m.value) : m.label;
+  return m.kind === "value" ? compact(m.value) : "—";
 }
 
 export function textFieldText(t: TextField): string {

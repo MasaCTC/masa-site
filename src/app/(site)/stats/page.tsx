@@ -189,7 +189,7 @@ function StatsBody({ stats }: { stats: InstagramStats | null }) {
                 viewsText={r.viewsText}
                 viewsTitle={r.viewsTitle}
                 href={r.href}
-                thumbPlaceholder={r.thumbPlaceholder}
+                thumbError={r.thumbError}
                 thumbUrl={r.thumbUrl}
                 engagement={r.engagement}
                 engagementState={r.engagement.length === 0 ? "empty" : "ready"}

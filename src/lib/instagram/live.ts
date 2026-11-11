@@ -172,6 +172,19 @@ export async function fetchLiveResult(
   const nowSec = Math.floor(now.getTime() / 1000);
   const { userId } = cfg;
 
+  // KNOWN ISSUE (left as is on purpose; revisit): the 90-day totals are three 30-day windows
+  // summed, and they overlap at each seam. Verified against the live API on 2026-11-10:
+  //  - Insights snaps `since`/`until` to whole calendar days and BOTH ends are inclusive.
+  //  - Chunk i ends at now - 30i days and the next-newer chunk starts at (that instant + 60s),
+  //    so each seam falls on the same calendar day and that day is counted in both chunks
+  //    (2 seams => 2 days double-counted; the three windows also span 91 days, not 90).
+  //    Test on a closed 10-day window: W(a,b) = 547,138 but W(a,mid) + W(mid,b) = 590,474, i.e.
+  //    the mid day (43,336 views) was counted twice.
+  //  - Observed: dashboard 90-day views 9,519,357 vs API sum 9,535,069 (+15.7K). The overlap
+  //    explains an over-count of this kind; how much of that gap is the overlap vs the dashboard's
+  //    own window/lag is not isolated. A trial of 90 distinct days (Aug 13..Nov 10 Pacific) gave
+  //    9,213,070, which is far below the dashboard, so day alignment (zone/offset of the snap)
+  //    still needs pinning down before changing the windows.
   const chunk = (i: number) => {
     const until = nowSec - i * 30 * DAY;
     return graphGet(

@@ -20,7 +20,6 @@ import {
   isKnown,
   metricCompact,
   signedExact,
-  textFieldText,
 } from "./format";
 import { SAMPLE_FOLLOWER_HISTORY } from "./manual-data";
 import type { FollowerRange, FollowerSeries, InstagramStats, Metric, Reel } from "./types";
@@ -95,7 +94,8 @@ function metricTile(label: string, m: Metric, unit: string, meta: string): TileV
   if (isKnown(m)) {
     return { label, valueText: compact(m.value), title: `${exact(m.value)} ${unit}`, meta, metaKind: "meta", state: "ready" };
   }
-  return { label, meta: `${m.label} · ${meta}`, metaKind: "meta", state: "empty" };
+  // Missing number: the designed empty tile ("—"); the meta keeps only the window, never the bracket label.
+  return { label, meta, metaKind: "meta", state: "empty" };
 }
 
 /** Followers tile. No sparkline: there is no real history yet (item 7). */
@@ -179,13 +179,13 @@ export function percentMeter(m: Metric, approx = false): { valueText: string; ra
   return { valueText: `${approx ? STATS_COPY.approx : ""}${m.value}%`, ratio: barRatio(m.value, 100) };
 }
 
-/** Home bars header: "top reel = 68% of all views", or the placeholder label. */
+/** Home bars header: "top reel = 68% of all views", or an em dash when the share is unknown. */
 export function topShareText(stats: InstagramStats): string {
   const s = stats.topReelShare;
-  return isKnown(s) ? `top reel = ${STATS_COPY.approx}${s.value}% ${STATS_COPY.homeTopShare}` : s.label;
+  return isKnown(s) ? `top reel = ${STATS_COPY.approx}${s.value}% ${STATS_COPY.homeTopShare}` : "—";
 }
 
-/** "of [TOTAL VIEWS] total" / "of 6.0M total". */
+/** "of — total" / "of 6.0M total". */
 export function viewsTotalText(stats: InstagramStats): string {
   return `of ${metricCompact(stats.totals.views)} ${STATS_COPY.viewsCard.total}`;
 }
@@ -199,10 +199,12 @@ export type ReelView = {
   viewsText: string;
   viewsTitle?: string;
   href?: string;
-  thumbPlaceholder: string;
+  /** Designed "Preview unavailable" thumbnail when there is no image to show. */
+  thumbError: boolean;
   /** Live CDN thumbnail (live source only; never set for manual data). */
   thumbUrl?: string;
-  caption: string;
+  /** Undefined when the caption is missing (the line is hidden). */
+  caption?: string;
   engagement: BarItem[];
 };
 
@@ -233,9 +235,9 @@ export function reelViews(stats: InstagramStats): { reels: ReelView[]; anyEngage
       viewsText: isKnown(r.views) ? metricCompact(r.views) : "—",
       viewsTitle: isKnown(r.views) && !r.viewsRounded ? `${exact(r.views.value)} views` : undefined,
       href: r.url,
-      thumbPlaceholder: textFieldText(r.thumbnail),
+      thumbError: !r.thumbnailUrl,
       thumbUrl: r.thumbnailUrl,
-      caption: textFieldText(r.caption),
+      caption: r.caption.kind === "text" ? r.caption.text : undefined,
       engagement,
     };
   });

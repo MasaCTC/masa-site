@@ -146,6 +146,8 @@ export const STATS_COPY = {
   /** Prefix for numbers that mix sources / windows (top reel share). */
   approx: "≈",
   followersGainMeta: "last 30 days",
+  /** Followers subtitle when there is no 30-day gain: the count is the all-time total. */
+  followersAllTimeMeta: "all time",
   viewsCard: { title: "Where the views come from", total: "total", topShareLabel: "Top reel's share", topShareAria: "Top reel's share of all views" },
   engageCard: { title: "How people engage", meta: "last 90 days", meterLabel: "Engagement per view", meterAria: "Engagement rate: interactions per view (likes, comments, shares and saves)" },
   growth: {

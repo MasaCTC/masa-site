@@ -111,14 +111,14 @@ export function followersTile(stats: InstagramStats): TileView {
     return metricTile(label, f, "followers", `${STATS_COPY.asOf} ${statusDate(stats)}`);
   }
   const gain = stats.followerGain30d;
-  // Unknown gain: no meta line at all (never the bracket placeholder).
+  // Unknown gain: never the bracket placeholder, and never "last 30 days" (that describes the gain, not the count); the ready tile says "all time".
   const gainMeta = isKnown(gain) ? `${signedExact(gain.value)} · ${STATS_COPY.followersGainMeta}` : undefined;
   if (!isKnown(f)) return { label, meta: gainMeta, metaKind: isKnown(gain) ? "delta" : "meta", state: "empty" };
   return {
     label,
     valueText: compact(f.value),
     title: `${exact(f.value)} followers`,
-    meta: gainMeta,
+    meta: gainMeta ?? STATS_COPY.followersAllTimeMeta,
     metaKind: isKnown(gain) ? "delta" : "meta",
     state: "ready",
   };

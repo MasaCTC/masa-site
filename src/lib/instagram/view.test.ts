@@ -61,7 +61,7 @@ const noBracket = (o: object) => {
   for (const v of Object.values(o)) if (typeof v === "string") assert.ok(!v.includes("["), v);
 };
 
-test("followersTile: live stats with unknown gain -> ready tile, no meta, no bracket anywhere", () => {
+test("followersTile: live stats with unknown gain -> ready tile, "all time" meta, no bracket anywhere", () => {
   const stats: InstagramStats = {
     ...MANUAL_STATS,
     source: "instagram-api",
@@ -72,12 +72,13 @@ test("followersTile: live stats with unknown gain -> ready tile, no meta, no bra
   const t = followersTile(stats);
   assert.equal(t.state, "ready");
   assert.equal(t.valueText, compact(14200));
-  assert.equal(t.meta, undefined);
+  assert.equal(t.meta, "all time");
+  assert.ok(!t.meta?.includes("30"));
   assert.equal(t.metaKind, "meta");
   noBracket(t);
 });
 
-test("followersTile: manual stats with unknown gain -> ready tile, no meta, no bracket", () => {
+test("followersTile: manual stats with unknown gain -> ready tile, "all time" meta, no bracket", () => {
   const stats: InstagramStats = {
     ...MANUAL_STATS,
     status: "live",
@@ -87,7 +88,7 @@ test("followersTile: manual stats with unknown gain -> ready tile, no meta, no b
   const t = followersTile(stats);
   assert.equal(t.state, "ready");
   assert.ok(t.valueText);
-  assert.equal(t.meta, undefined);
+  assert.equal(t.meta, "all time");
   noBracket(t);
 });
 

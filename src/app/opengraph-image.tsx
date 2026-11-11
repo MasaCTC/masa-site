@@ -28,6 +28,7 @@ async function loadView(): Promise<OgStatsView> {
   try {
     return ogStatsView(await getInstagramStats());
   } catch {
+    console.error("[og] instagram stats unavailable, using fallback");
     return { kind: "fallback", text: OG_FALLBACK_TEXT };
   }
 }
@@ -118,7 +119,7 @@ export default async function OpengraphImage() {
             style={{
               display: "flex",
               marginTop: 22,
-              maxWidth: 1040,
+              maxWidth: 900,
               fontSize: 34,
               lineHeight: "46px",
               fontWeight: 400,

@@ -61,7 +61,7 @@ const noBracket = (o: object) => {
   for (const v of Object.values(o)) if (typeof v === "string") assert.ok(!v.includes("["), v);
 };
 
-test("followersTile: live stats with unknown gain -> ready tile, "all time" meta, no bracket anywhere", () => {
+test("followersTile: live stats with unknown gain -> ready tile, all-time meta, no bracket anywhere", () => {
   const stats: InstagramStats = {
     ...MANUAL_STATS,
     source: "instagram-api",
@@ -78,7 +78,7 @@ test("followersTile: live stats with unknown gain -> ready tile, "all time" meta
   noBracket(t);
 });
 
-test("followersTile: manual stats with unknown gain -> ready tile, "all time" meta, no bracket", () => {
+test("followersTile: manual stats with unknown gain -> ready tile, all-time meta, no bracket", () => {
   const stats: InstagramStats = {
     ...MANUAL_STATS,
     status: "live",

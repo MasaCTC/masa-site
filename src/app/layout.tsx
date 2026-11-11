@@ -3,6 +3,7 @@ import { IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
 import "../../design/system/tokens.css";
 import "../../design/system/bundle.css";
 import "./globals.css";
+import { siteUrl } from "@/lib/site-url";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -15,8 +16,19 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600"],
 });
 
+const DESCRIPTION =
+  "CS at UC Irvine. I build apps in public as @masamcodes and post the real numbers: live Instagram stats, project build maps, and my resume.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl()),
   title: { default: "Masa Chien", template: "%s · Masa Chien" },
+  description: DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: "Masa Chien",
+    description: DESCRIPTION,
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 // Runs before paint: light by default, follows the OS, updates on change.

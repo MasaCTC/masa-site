@@ -1,5 +1,6 @@
 import "server-only";
 
+import { plannerToday } from "@/lib/planner/time";
 import { ACCOUNT_START_DATE } from "./config";
 import { graphGet, instagramConfig, InstagramApiError, type FetchLike } from "./graph";
 import type { InstagramStats, Metric, Reel, TextField } from "./types";
@@ -16,7 +17,8 @@ const isObj = (v: unknown): v is Record<string, unknown> =>
 const num = (v: unknown): number | null =>
   typeof v === "number" && Number.isFinite(v) ? v : null;
 const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
-const utcDate = (d: Date) => d.toISOString().slice(0, 10);
+/** YYYY-MM-DD in Pacific time (the site's display zone), so dates match the planner. */
+const pacificDate = (d: Date) => plannerToday(d);
 
 /** Reel insights: metric values live at data[].values[0].value. */
 function reelMetric(insights: unknown, name: string): number | null {
@@ -70,7 +72,7 @@ export function mapLiveStats(
   },
   now: Date,
 ): InstagramStats {
-  const pulledAt = utcDate(now);
+  const pulledAt = pacificDate(now);
   const items: MediaItem[] = isObj(raw.media) ? arr(raw.media.data).filter(isObj) : [];
 
   const followersRaw = isObj(raw.profile) ? num(raw.profile.followers_count) : null;
@@ -104,7 +106,7 @@ export function mapLiveStats(
         : placeholderText(`[REEL ${rank} CAPTION]`);
     const reel: Reel = {
       rank,
-      postedOn: Number.isFinite(ts) ? utcDate(new Date(ts)) : pulledAt,
+      postedOn: Number.isFinite(ts) ? pacificDate(new Date(ts)) : pulledAt,
       views: metric(views, `[REEL ${rank} VIEWS]`),
       likes: metric(reelMetric(ins, "likes"), `[REEL ${rank} LIKES]`),
       comments: metric(reelMetric(ins, "comments"), `[REEL ${rank} COMMENTS]`),

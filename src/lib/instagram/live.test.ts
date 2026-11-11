@@ -306,3 +306,37 @@ test("a reel whose insights failed ranks after known reels (may fall out of the 
     ["CCC333", "AAA111", "DDD444"],
   );
 });
+
+test("pulledAt is the Pacific date, across the UTC/Pacific boundary (PST)", () => {
+  const at = (iso: string) =>
+    mapLiveStats({ profile, media, reelInsights, account90d: accountChunks }, new Date(iso)).pulledAt;
+  assert.equal(at("2026-11-11T00:30:00Z"), "2026-11-10"); // 4:30 PM PST Nov 10
+  assert.equal(at("2026-11-11T07:59:00Z"), "2026-11-10"); // 23:59 PST Nov 10
+  assert.equal(at("2026-11-11T08:00:00Z"), "2026-11-11"); // midnight PST Nov 11
+});
+
+test("pulledAt is the Pacific date across the PDT boundary", () => {
+  const at = (iso: string) =>
+    mapLiveStats({ profile, media, reelInsights, account90d: accountChunks }, new Date(iso)).pulledAt;
+  assert.equal(at("2026-07-01T06:59:00Z"), "2026-06-30"); // 23:59 PDT Jun 30
+  assert.equal(at("2026-07-01T07:00:00Z"), "2026-07-01"); // midnight PDT Jul 1
+});
+
+test("reel postedOn is the Pacific date; unparseable timestamp falls back to pulledAt", () => {
+  const one = (timestamp: unknown) =>
+    mapLiveStats(
+      {
+        profile,
+        media: { data: [{ ...media.data[0], timestamp }] },
+        reelInsights,
+        account90d: accountChunks,
+      },
+      new Date("2026-11-11T00:30:00Z"),
+    );
+  assert.equal(one("2026-10-21T05:30:00+0000").topReels[0].postedOn, "2026-10-20"); // 22:30 PDT Oct 20
+  assert.equal(one("2026-10-21T07:00:00+0000").topReels[0].postedOn, "2026-10-21"); // 00:00 PDT Oct 21
+  assert.equal(one("2026-11-11T07:59:00+0000").topReels[0].postedOn, "2026-11-10"); // PST
+  const bad = one("garbage");
+  assert.equal(bad.topReels[0].postedOn, bad.pulledAt);
+  assert.equal(bad.pulledAt, "2026-11-10");
+});

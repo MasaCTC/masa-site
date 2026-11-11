@@ -221,13 +221,16 @@ test("validateAuthorize: missing client_id is a 400 with no redirect", () => {
   assert.equal(r.redirectTo, undefined);
 });
 
+/** Same-length signature that always differs in its first char (a fixed "x"/"AA" replacement equals the original ~1/64 of the time). */
+const flipFirst = (sig: string) => (sig[0] === "A" ? "B" : "A") + sig.slice(1);
+
 test("validateAuthorize: tampered client_id is a 400 with no redirect", () => {
   const id = clientId();
   const [body, sig] = id.split(".");
   const evil = Buffer.from(
     JSON.stringify({ name: "x", redirect_uris: ["https://evil.test/cb"], typ: "client" }),
   ).toString("base64url");
-  for (const bad of [`${evil}.${sig}`, `${body}.${sig.slice(0, -2)}AA`, "garbage"]) {
+  for (const bad of [`${evil}.${sig}`, `${body}.${flipFirst(sig)}`, "garbage"]) {
     const r = validateAuthorize(params({ client_id: bad, redirect_uri: "https://evil.test/cb" }));
     assert.equal(r.ok, false);
     if (r.ok) return;
@@ -401,7 +404,7 @@ test("approveAuthorize rejects a tampered consent token", () => {
   const claims = JSON.parse(Buffer.from(body, "base64url").toString());
   claims.redirect_uri = "https://evil.test/cb";
   const evil = Buffer.from(JSON.stringify(claims)).toString("base64url");
-  for (const bad of [`${evil}.${sig}`, `${body}.x${sig.slice(1)}`, "", "a.b"]) {
+  for (const bad of [`${evil}.${sig}`, `${body}.${flipFirst(sig)}`, "", "a.b"]) {
     const r = approveAuthorize(bad, ORIGIN, csrf);
     assert.ok("error" in r, `accepted ${bad.slice(0, 20)}`);
     assert.equal(r.status, 400);

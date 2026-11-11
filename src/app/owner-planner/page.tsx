@@ -9,8 +9,10 @@ import { Planner } from "./_components/Planner";
 import { parseView } from "./_lib/views";
 import styles from "./planner.module.css";
 
-// The real 404 for signed-out visitors comes from src/proxy.ts, which runs
-// before this page renders; do not remove it. requireOwner() below is only
+// The public URL is /planner, but nothing is routed there: src/proxy.ts
+// rewrites only the signed-in owner to this route (/owner-planner), so
+// everyone else gets the ordinary unmatched-URL 404. Direct requests to
+// /owner-planner are 404'd by the proxy too. requireOwner() below is only
 // defence in depth (it calls notFound() if the proxy were ever bypassed). The
 // session is read at request time and the planner data is owner-only and
 // uncached, so it is read here too, after the gate. `instant = false` is not
@@ -22,7 +24,7 @@ async function signOutAction() {
   await signOut({ redirectTo: "/" });
 }
 
-export default async function PlannerPage({ searchParams }: PageProps<"/planner">) {
+export default async function PlannerPage({ searchParams }: PageProps<"/owner-planner">) {
   await requireOwner();
   const [tasks, classes, status, dueSoon, settings, params] = await Promise.all([
     listTasks(),

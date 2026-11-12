@@ -11,9 +11,24 @@ import main from "../main.module.css";
 import { getNowView, type NowView } from "./now-data";
 import styles from "./page.module.css";
 
+const SHARE_DESCRIPTION = "What I'm working on right now. Set by hand from my planner.";
+
+// openGraph/twitter set here replace the root's objects (Next doesn't deep-merge them),
+// so type and siteName are repeated. Title is kept as "Now · Masa Chien".
 export const metadata: Metadata = {
   title: "Now",
   description: "What Masa is working on right now, set by hand, with today's progress.",
+  openGraph: {
+    type: "website",
+    siteName: "Masa Chien",
+    title: "Now · Masa Chien",
+    description: SHARE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Now · Masa Chien",
+    description: SHARE_DESCRIPTION,
+  },
 };
 
 function Skeletons() {

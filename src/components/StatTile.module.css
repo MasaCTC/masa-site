@@ -1,0 +1,21 @@
+/* StatTile loading skeletons, values from Stats.dc.html:
+   <span class="mn-skel" style="height: 52px; width: 75%;">, (height: 14px; width: 50%;), (height: 30px;).
+   md size from States.dc.html "Stat tile / Loading": (height: 30px; width: 80%;). */
+.skelValue {
+  height: 52px;
+  width: 75%;
+}
+
+.skelMeta {
+  height: 14px;
+  width: 50%;
+}
+
+.skelSpark {
+  height: 30px;
+}
+
+.skelValueMd {
+  height: 30px;
+  width: 80%;
+}

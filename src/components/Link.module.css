@@ -1,0 +1,10 @@
+/* Resume.dc.html "Back to the timeline": <button class="mn-link" style="background: none;
+   border: 0; padding: 0; font: inherit; font-weight: 600;">. Two classes so it wins over
+   .mn-link regardless of stylesheet order (the inline style always won in the design). */
+:global(.mn-link).asButton {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+}

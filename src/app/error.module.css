@@ -1,0 +1,38 @@
+/* Launch.dc.html section 4: a centered lg card, 640px wide, 48px padding, 20px gap. */
+.main {
+  display: flex;
+  justify-content: center;
+}
+
+.card {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.label {
+  color: var(--danger);
+}
+
+.title {
+  font-size: 48px;
+  line-height: 52px;
+}
+
+.actions {
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 28px;
+  }
+
+  .title {
+    font-size: 34px;
+    line-height: 38px;
+  }
+}

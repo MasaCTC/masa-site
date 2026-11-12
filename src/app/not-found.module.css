@@ -1,0 +1,30 @@
+/* Launch.dc.html section 3: a centered lg card, 640px wide, 48px padding, 20px gap. */
+.card {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.title {
+  font-size: 48px;
+  line-height: 52px;
+}
+
+.actions {
+  gap: 16px;
+}
+
+/* Phone width: same steps the design system uses for mn-display-lg and mn-page. */
+@media (max-width: 640px) {
+  .card {
+    padding: 28px;
+  }
+
+  .title {
+    font-size: 34px;
+    line-height: 38px;
+  }
+}

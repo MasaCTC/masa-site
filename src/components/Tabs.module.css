@@ -1,0 +1,5 @@
+/* Resume.dc.html: <button class="mn-tab" style="font-family: var(--font-mono);">$ terminal</button>.
+   Two classes so it wins over the .mn-tab font shorthand regardless of stylesheet order. */
+:global(.mn-tab).mono {
+  font-family: var(--font-mono);
+}

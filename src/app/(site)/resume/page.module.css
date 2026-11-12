@@ -1,0 +1,139 @@
+/* Resume.dc.html inline styles, values unchanged. Overrides of mn- rules use two classes so
+   they win regardless of stylesheet order. */
+
+/* Item 3: the Resume page's mn-page gap is 40px (/resume only). Two classes, so this also
+   beats bundle.css's `@media (max-width: 640px) { .mn-page { gap: 36px } }`. */
+:global(.mn-page):has(> .resumeMain) {
+  gap: 40px;
+}
+
+/* <header style="display: flex; flex-direction: column; gap: 20px;"> */
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* <div style="display: flex; flex-direction: column; gap: 10px; max-width: 680px;"> */
+.headCol {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 680px;
+}
+
+/* <div class="mn-row" style="gap: 16px;"> */
+:global(.mn-row).buttons {
+  gap: 16px;
+}
+
+/* <div class="mn-tabs" ... style="align-self: flex-start;"> */
+:global(.mn-tabs).tabs {
+  align-self: flex-start;
+}
+
+/* <div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start;"> (timeline panel) */
+.layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+/* Both tab panels stay mounted (open entries and the terminal log survive a tab switch);
+   the hidden one is not displayed. */
+.layout[hidden] {
+  display: none;
+}
+
+/* Terminal panel: no box of its own, so the terminal and its caption stay mn-page flex items. */
+.panel {
+  display: contents;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+/* <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 36px;"> */
+.col {
+  flex: 999 1 560px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+/* <section class="mn-card" style="gap: 16px;" aria-label="At a glance"> */
+:global(.mn-card).glance {
+  gap: 16px;
+}
+
+/* <div class="mn-card mn-card--inset" style="flex-direction: row; align-items: center;
+   justify-content: space-between; flex-wrap: wrap; padding: 14px 20px;"> (filter banner) */
+:global(.mn-card).filter {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+}
+
+/* <section style="display: flex; flex-direction: column; gap: 16px;"> (timeline group) */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* <h2 class="mn-heading-md" style="font-size: 22px; line-height: 28px;"> */
+:global(.mn-heading-md).groupTitle {
+  font-size: 22px;
+  line-height: 28px;
+}
+
+/* <aside style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 28px;
+   position: sticky; top: 104px;"> */
+.aside {
+  flex: 1 1 320px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: sticky;
+  top: 104px;
+}
+
+/* <p style="margin: 0;"> (education degree line) */
+.flush {
+  margin: 0;
+}
+
+/* <section class="mn-card" aria-label="Skills" style="gap: 18px;"> */
+:global(.mn-card).skills {
+  gap: 18px;
+}
+
+/* <div style="display: flex; flex-direction: column; gap: 4px;"> (skills header) */
+.skillsHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* <div style="display: flex; flex-direction: column; gap: 8px;"> (skill group) */
+.skillGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* <span class="mn-label" style="font-size: 11px;"> */
+:global(.mn-label).skillLabel {
+  font-size: 11px;
+}
+
+/* <p class="mn-body-sm" style="margin: 0;"> ("Back to the timeline") */
+:global(.mn-body-sm).back {
+  margin: 0;
+}

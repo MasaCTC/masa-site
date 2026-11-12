@@ -1,0 +1,18 @@
+/* Stats.dc.html reel-card bars:
+   <ol class="mn-bars" style="gap: 8px;"> and
+   <li class="mn-bar" style="grid-template-columns: 4rem minmax(0,1fr) 3.75rem; gap: 10px;">.
+   Inline styles beat every bundle rule (incl. the 640px .mn-bar media query), so these use
+   two-class selectors to win regardless of stylesheet order. */
+:global(.mn-bars).compact {
+  gap: 8px;
+}
+
+.compact :global(.mn-bar) {
+  grid-template-columns: 4rem minmax(0, 1fr) 3.75rem;
+  gap: 10px;
+}
+
+/* States.dc.html "Bar list / Loading": <span class="mn-skel" style="height: 16px;"> */
+.skelTrack {
+  height: 16px;
+}

@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Launch · favicon, share card, 404, project status</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/masa-neu/tokens.css">
+<link rel="stylesheet" href="ds/masa-neu/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.lb-sec{display:flex;flex-direction:column;gap:20px}
+.lb-note{max-width:760px}
+.lb-row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-end}
+.lb-frame{border-radius:var(--radius-lg);outline:1px dashed var(--line);outline-offset:8px}
+/* favicon */
+.lb-fav{display:grid;place-items:center;background:var(--surface);color:var(--ink);font-family:var(--font-display);font-weight:700;letter-spacing:.01em}
+.lb-fav--180{width:180px;height:180px;border-radius:40px;font-size:72px;box-shadow:var(--neu-raised-md)}
+.lb-fav--32{width:32px;height:32px;border-radius:8px;font-size:14px;box-shadow:var(--neu-raised-xs)}
+.lb-fav--16{width:16px;height:16px;border-radius:4px;font-size:8px;letter-spacing:0}
+.lb-cap{font:500 12px/16px var(--font-mono);color:var(--ink-subtle);margin-top:8px;text-align:center}
+.lb-tab{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:12px 12px 0 0;background:var(--surface-sunken);box-shadow:var(--neu-inset-sm);font:500 14px/18px var(--font-body);color:var(--ink);width:260px}
+/* share card */
+.lb-og{width:1200px;height:630px;box-sizing:border-box;background:var(--surface);border-radius:28px;padding:72px 80px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--neu-raised-lg);position:relative;overflow:hidden}
+.lb-og__top{display:flex;justify-content:space-between;align-items:center}
+.lb-og__mark{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;background:var(--surface);box-shadow:var(--neu-raised-md);font:700 30px/1 var(--font-display);color:var(--ink)}
+.lb-og h1{font:700 104px/1 var(--font-display);letter-spacing:-.02em;margin:0;color:var(--ink)}
+.lb-og p{font:400 34px/46px var(--font-body);color:var(--ink-muted);margin:22px 0 0;max-width:900px}
+.lb-og__stats{display:flex;gap:24px}
+.lb-og__stat{flex:1;border-radius:22px;background:var(--surface-sunken);box-shadow:var(--neu-inset-md);padding:22px 28px;display:flex;flex-direction:column;gap:6px}
+.lb-og__stat b{font:600 52px/1 var(--font-mono);color:var(--ink)}
+.lb-og__stat span{font:600 18px/22px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted)}
+.lb-scale{transform:scale(.5);transform-origin:top left;width:600px;height:315px}
+/* testflight */
+.lb-beta{display:flex;flex-direction:column;gap:16px;align-items:flex-start;padding:10px}
+.lb-beta__icon{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;background:var(--surface);box-shadow:var(--neu-raised-sm);color:var(--ink)}
+</style>
+</helmet>
+<div class="mn-root" data-theme="{{theme}}" data-type="a" style="min-height:5100px">
+<div class="mn-page" style="gap:72px">
+
+  <header class="lb-sec">
+    <span class="mn-label">Launch board · before merging build-site → main</span>
+    <h1 class="mn-display-lg">Launch pieces</h1>
+    <p class="mn-body-lg lb-note">Favicon, share card, 404 and error pages, plus the project status changes: One Basket is paused, Cofura gets a public TestFlight link, and project cards hide the screenshot area until real screenshots exist. No bracket text anywhere a visitor can see.</p>
+  </header>
+
+  <!-- 1 FAVICON -->
+  <section class="lb-sec">
+    <div class="mn-card__row" style="max-width:760px"><h2 class="mn-heading-md">1 · Favicon</h2><span class="mn-mono">app/icon + apple-icon</span></div>
+    <p class="mn-body-sm lb-note">The nav's MC mark, squared off so it reads as an app icon. Space Grotesk 700, ink on surface. The browser tab icon follows the visitor's light or dark mode; the 180px home-screen icon is always light (iOS ignores dark mode for these). At 16px the shadow is dropped: it would just look blurry.</p>
+    <div class="lb-row">
+      <div><div class="lb-fav lb-fav--180">MC</div><div class="lb-cap">180 · apple-icon</div></div>
+      <div><div class="lb-fav lb-fav--32">MC</div><div class="lb-cap">32</div></div>
+      <div><div class="lb-fav lb-fav--16">MC</div><div class="lb-cap">16</div></div>
+      <div style="margin-left:24px"><div class="lb-tab"><div class="lb-fav lb-fav--16">MC</div>Masa Chien</div><div class="lb-cap">browser tab</div></div>
+    </div>
+  </section>
+
+  <!-- 2 SHARE CARD -->
+  <section class="lb-sec">
+    <div class="mn-card__row" style="max-width:1200px"><h2 class="mn-heading-md">2 · Share preview (1200 × 630)</h2><span class="mn-mono">app/opengraph-image · refreshes hourly</span></div>
+    <p class="mn-body-sm lb-note">What shows when someone pastes the link in a DM, iMessage, LinkedIn or Discord. The two numbers are live (same data and 1-hour cache as /stats). If the API is down, the stat row is replaced by "@masamcodes · build in public", never by brackets or stale numbers. Always light theme: share cards don't know the viewer's mode.</p>
+    <div data-theme="light" class="lb-og">
+      <div class="lb-og__top"><span class="mn-label" style="font-size:20px;line-height:24px">@masamcodes · UC Irvine CS</span><div class="lb-og__mark">MC</div></div>
+      <div><h1>Masa Chien</h1><p>CS at UC Irvine. I build apps in public and post the real numbers.</p></div>
+      <div class="lb-og__stats">
+        <div class="lb-og__stat"><span>Followers</span><b>16.6K</b></div>
+        <div class="lb-og__stat"><span>Views · 90 days</span><b>9.5M</b></div>
+        <div class="lb-og__stat" style="flex:0 0 auto;background:none;box-shadow:none;justify-content:flex-end;align-items:flex-end"><span style="letter-spacing:.02em;text-transform:none;font-family:var(--font-mono);font-weight:500;white-space:nowrap;font-size:20px">masa-site-nine.vercel.app</span></div>
+      </div>
+    </div>
+    <div class="mn-card" style="max-width:760px;gap:8px">
+      <span class="mn-label">Meta description (search results + link previews)</span>
+      <p style="margin:0">CS at UC Irvine. I build apps in public as @masamcodes and post the real numbers: live Instagram stats, project build maps, and my resume.</p>
+      <span class="mn-mono">Page titles keep the existing pattern: "Stats · Masa Chien", "Projects · Masa Chien".</span>
+    </div>
+  </section>
+
+  <!-- 3 404 -->
+  <section class="lb-sec">
+    <div class="mn-card__row" style="max-width:1200px"><h2 class="mn-heading-md">3 · Not found (404)</h2><span class="mn-mono">app/not-found</span></div>
+    <p class="mn-body-sm lb-note">Also what a signed-out visitor gets at /planner, so it must be identical to any other missing page: same copy, same status code, no hint that anything private exists.</p>
+    <div class="lb-frame" style="width:1200px">
+      <div class="mn-page" style="gap:48px;padding-top:24px">
+        <nav class="mn-nav mn-nav--dock" aria-label="Main"><a class="mn-nav__brand" href="#" style="padding-right:4px" aria-label="Masa Chien, home"><span class="mn-nav__mark" aria-hidden="true">MC</span></a><div class="mn-nav__links"><a href="#">Stats</a><a href="#">Projects</a><a href="#">Resume</a></div><a class="mn-nav__stat" href="#">16.6K <span>followers</span></a></nav>
+        <section class="mn-card mn-card--lg" style="max-width:640px;margin:0 auto;gap:20px;padding:48px;align-items:flex-start">
+          <span class="mn-label">404 · page not found</span>
+          <h1 class="mn-display-lg" style="font-size:48px;line-height:52px">Nothing here.</h1>
+          <p class="mn-body-lg">This page doesn't exist, or it moved. The real stuff is one click away.</p>
+          <div class="mn-row" style="gap:16px"><a class="mn-btn mn-btn--primary" href="#">Go home</a><a class="mn-btn" href="#">Stats</a><a class="mn-btn mn-btn--ghost" href="#">Projects</a></div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 ERROR -->
+  <section class="lb-sec">
+    <div class="mn-card__row" style="max-width:1200px"><h2 class="mn-heading-md">4 · Something broke (error)</h2><span class="mn-mono">app/error + global-error</span></div>
+    <p class="mn-body-sm lb-note">For crashes. Never shows the error text or a stack trace to visitors (that can leak internals); the details go to the server log. "Try again" re-renders the page.</p>
+    <div class="lb-frame" style="width:1200px">
+      <div class="mn-page" style="gap:48px;padding-top:24px">
+        <nav class="mn-nav mn-nav--dock" aria-label="Main"><a class="mn-nav__brand" href="#" style="padding-right:4px" aria-label="Masa Chien, home"><span class="mn-nav__mark" aria-hidden="true">MC</span></a><div class="mn-nav__links"><a href="#">Stats</a><a href="#">Projects</a><a href="#">Resume</a></div><a class="mn-nav__stat" href="#">16.6K <span>followers</span></a></nav>
+        <section class="mn-card mn-card--lg" style="max-width:640px;margin:0 auto;gap:20px;padding:48px;align-items:flex-start">
+          <span class="mn-label" style="color:var(--danger)">Error</span>
+          <h1 class="mn-display-lg" style="font-size:48px;line-height:52px">Something broke on my end.</h1>
+          <p class="mn-body-lg">Not your fault. Try again, and if it keeps happening, the home page still works.</p>
+          <div class="mn-row" style="gap:16px"><button class="mn-btn mn-btn--primary">Try again</button><a class="mn-btn" href="#">Go home</a></div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 PROJECTS -->
+  <section class="lb-sec">
+    <div class="mn-card__row" style="max-width:1200px"><h2 class="mn-heading-md">5 · Projects page changes</h2><span class="mn-mono">/projects</span></div>
+    <p class="mn-body-sm lb-note">New status: <b>Paused</b> (amber text, new token <code>status-paused</code>). Stopped for now, could come back: quieter shadow and a faded build map, but no dashed outline or strikethrough (that's Dead). Header count becomes "1 building · 1 paused · 1 dead". A project with no screenshots collapses to one column: no empty screenshot slots.</p>
+    <div style="width:1200px;display:flex;flex-direction:column;gap:32px">
+      <div class="mn-card__row"><span class="mn-label">1 building · 1 paused · 1 dead</span></div>
+
+      <article class="mn-card mn-card--lg mn-card--paused" style="gap:22px">
+        <div class="mn-card__row"><h2 class="mn-heading-md">One Basket</h2><span class="mn-state mn-state--paused">Paused</span></div>
+        <p class="mn-body-lg">Recipes in, buyable grocery quantities out.</p>
+        <div style="display:flex;flex-direction:column;gap:14px;max-width:640px">
+          <span class="mn-label">Build map · stopped at phase 2</span>
+          <ol class="mn-track mn-track--stack-sm" aria-label="Build map: paused at phase 2 of 6, Vertical slice">
+            <li class="mn-track__fill" aria-hidden="true" style="width:calc(100% / 6)"></li>
+            <li class="mn-phase is-done"><span class="mn-phase__dot"></span><span class="mn-phase__name">Skeleton</span></li>
+            <li class="mn-phase is-current" aria-current="step"><span class="mn-phase__dot"></span><span class="mn-phase__name">Vertical slice</span></li>
+            <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Input paths</span></li>
+            <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Multiplayer</span></li>
+            <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Money</span></li>
+            <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Premium</span></li>
+          </ol>
+        </div>
+        <div class="mn-epitaph" style="max-width:640px"><span class="mn-label">Why it's paused</span><p>{{pausedReason}}</p></div>
+      </article>
+
+      <article class="mn-card mn-card--lg" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(440px,100%),1fr));gap:40px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:22px;min-width:0">
+          <div class="mn-card__row"><h2 class="mn-heading-md">Cofura</h2><span class="mn-state mn-state--building">Building <small>· beta on TestFlight</small></span></div>
+          <p class="mn-body-lg">A phone app where UCI students find cofounders and teammates. Swipe, match, chat. Not a dating app.</p>
+          <div class="mn-meter" style="max-width:460px"><div class="mn-meter__head"><span class="mn-label">My part</span><span class="mn-meter__value">chat + safety</span></div><span class="mn-body-sm">One of three engineers. I own conversation and safety (unmatch, block, report, message filtering), plus CI and the build setup.</span></div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <span class="mn-label">Build map</span>
+            <ol class="mn-track mn-track--stack-sm" aria-label="Build map: phase 3 of 6, Launch at UCI">
+              <li class="mn-track__fill" aria-hidden="true" style="width:calc(100% / 6 * 2)"></li>
+              <li class="mn-phase is-done"><span class="mn-phase__dot"></span><span class="mn-phase__name">Foundations</span></li>
+              <li class="mn-phase is-done"><span class="mn-phase__dot"></span><span class="mn-phase__name">Core loop (MVP)</span></li>
+              <li class="mn-phase is-current" aria-current="step"><span class="mn-phase__dot"></span><span class="mn-phase__name">Launch at UCI</span></li>
+              <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Trust + polish</span></li>
+              <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Growth</span></li>
+              <li class="mn-phase"><span class="mn-phase__dot"></span><span class="mn-phase__name">Business</span></li>
+            </ol>
+            <span class="mn-mono">Expo · Supabase · GitHub Actions</span>
+          </div>
+        </div>
+        <div class="mn-demo">
+          <div class="lb-beta">
+            <div class="lb-beta__icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg></div>
+            <span class="mn-label">Public beta · iPhone</span>
+            <h3 class="mn-heading-sm">Try Cofura before it launches</h3>
+            <p class="mn-body-sm" style="margin:0">It's an early build, so things will break. Install Apple's TestFlight app, then join from your iPhone.</p>
+            <a class="mn-btn" href="https://testflight.apple.com/join/wmHz6cN1">Join the TestFlight beta<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+            <span class="mn-mono">testflight.apple.com · opens in a new tab</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="mn-card mn-card--lg mn-card--dead" style="gap:22px">
+        <div class="mn-card__row"><h2 class="mn-heading-sm" style="font-size:28px;line-height:34px">PullPilot</h2><span class="mn-state mn-state--dead">Dead</span></div>
+        <p class="mn-body-lg">A crowdsourced auto-parts platform. My earlier app.</p>
+        <ol class="mn-track" aria-label="Build map: stopped after features" style="max-width:640px">
+          <li class="mn-track__fill" aria-hidden="true" style="width:calc(100% / 3 * 2)"></li>
+          <li class="mn-phase is-done"><span class="mn-phase__dot"></span><span class="mn-phase__name">Idea</span></li>
+          <li class="mn-phase is-done"><span class="mn-phase__dot"></span><span class="mn-phase__name">Features</span></li>
+          <li class="mn-phase is-done"><span class="mn-phase__dot"></span><span class="mn-phase__name">Stopped: needed a rewrite</span></li>
+        </ol>
+        <div class="mn-epitaph" style="max-width:640px"><span class="mn-label">Why it died</span><p>I built features with no design planned, so every screen looked different, and fixing it meant a rewrite.</p><p class="mn-body-sm">That's why this site started with a design system.</p></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- 6 HOME -->
+  <section class="lb-sec">
+    <div class="mn-card__row" style="max-width:1200px"><h2 class="mn-heading-md">6 · Home page changes</h2><span class="mn-mono">/</span></div>
+    <p class="mn-body-sm lb-note">"Right now" only lists what's actually active, so One Basket leaves it. The Cofura line points at the beta. Project cards: Cofura first (active), One Basket paused, PullPilot dead.</p>
+    <div style="width:1200px;display:flex;flex-direction:column;gap:32px">
+      <div class="mn-card mn-card--inset" style="gap:14px;max-width:560px">
+        <span class="mn-label">Right now</span>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="mn-card__row"><span>Building Cofura on a team of three</span><span class="mn-state mn-state--building">Building</span></div>
+          <div class="mn-card__row"><span>Cofura beta is on TestFlight</span><a class="mn-link" href="https://testflight.apple.com/join/wmHz6cN1">Join</a></div>
+          <div class="mn-card__row"><span>CS at UCI, graduating early</span><span class="mn-mono">Mar 2028</span></div>
+        </div>
+      </div>
+      <div class="mn-grid">
+        <a class="mn-card mn-card--link" href="#">
+          <div class="mn-card__row"><h3 class="mn-heading-sm">Cofura</h3><span class="mn-state mn-state--building">Building</span></div>
+          <p class="mn-body-sm">Cofounder matching for UCI students. I own chat + safety.</p>
+          <ol class="mn-track" aria-label="Build map: phase 3 of 6"><li class="mn-track__fill" aria-hidden="true" style="width:calc(100% / 6 * 2)"></li><li class="mn-phase is-done"><span class="mn-phase__dot"></span></li><li class="mn-phase is-done"><span class="mn-phase__dot"></span></li><li class="mn-phase is-current" aria-current="step"><span class="mn-phase__dot"></span></li><li class="mn-phase"><span class="mn-phase__dot"></span></li><li class="mn-phase"><span class="mn-phase__dot"></span></li><li class="mn-phase"><span class="mn-phase__dot"></span></li></ol>
+          <span class="mn-mono">phase 3 of 6 · Launch at UCI · beta on TestFlight</span>
+        </a>
+        <a class="mn-card mn-card--link mn-card--paused" href="#">
+          <div class="mn-card__row"><h3 class="mn-heading-sm">One Basket</h3><span class="mn-state mn-state--paused">Paused</span></div>
+          <p class="mn-body-sm">Recipes in, buyable grocery quantities out.</p>
+          <ol class="mn-track" aria-label="Build map: paused at phase 2 of 6"><li class="mn-track__fill" aria-hidden="true" style="width:calc(100% / 6)"></li><li class="mn-phase is-done"><span class="mn-phase__dot"></span></li><li class="mn-phase is-current" aria-current="step"><span class="mn-phase__dot"></span></li><li class="mn-phase"><span class="mn-phase__dot"></span></li><li class="mn-phase"><span class="mn-phase__dot"></span></li><li class="mn-phase"><span class="mn-phase__dot"></span></li><li class="mn-phase"><span class="mn-phase__dot"></span></li></ol>
+          <span class="mn-mono">paused at phase 2 · Vertical slice</span>
+        </a>
+        <article class="mn-card mn-card--dead">
+          <div class="mn-card__row"><h3 class="mn-heading-sm">PullPilot</h3><span class="mn-state mn-state--dead">Dead</span></div>
+          <p class="mn-body-sm">A crowdsourced auto-parts platform. My earlier app.</p>
+          <p style="margin:0;font-size:14px;line-height:20px">No design planned, so every screen looked different. Fixing it meant a rewrite.</p>
+          <a class="mn-link" href="#">What I learned</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"pausedReason":{"editor":"text","default":"Cofura has all my build time right now. The vertical slice works; I'll pick it back up after Cofura launches at UCI."},"$preview":{"width":1440,"height":5100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.theme ?? 'light', pausedReason: this.props.pausedReason ?? '' };
+  }
+}
+</script>
+</body>
+</html>

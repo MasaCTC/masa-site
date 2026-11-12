@@ -18,7 +18,7 @@
   <nav class="mn-nav mn-nav--dock" aria-label="Main">
     <a class="mn-nav__brand" href="HomeA.dc.html" style="padding-right: 4px;" aria-label="Masa Chien, home"><span class="mn-nav__mark" aria-hidden="true">MC</span></a>
     <div class="mn-nav__links"><a href="Stats.dc.html" aria-current="page">Stats</a><a href="Projects.dc.html">Projects</a><a href="Resume.dc.html">Resume</a></div>
-    <a class="mn-nav__stat" href="Stats.dc.html" aria-label="10,214 followers, live">10.2K</a>
+    <a class="mn-nav__stat" href="Stats.dc.html" aria-label="10,214 followers, live">10.2K <span>followers</span></a>
   </nav>
 
   <header class="mn-section__head" style="align-items: flex-end;">
@@ -27,10 +27,10 @@
       <h1 class="mn-display-lg">Instagram, in numbers</h1>
       <p class="mn-body-lg">Pulled straight from the Instagram API. Not rounded up, not cherry-picked.</p>
       <div class="mn-row">
-        <sc-if value="{{isLive}}" hint-placeholder-val="{{true}}"><span class="mn-pill mn-pill--live">Live</span><span class="mn-mono">updated 4 min ago · Oct 11, 2:14 PM</span></sc-if>
+        <sc-if value="{{isLive}}" hint-placeholder-val="{{true}}"><span class="mn-state mn-state--live">Live</span><span class="mn-mono">updated 4 min ago · Oct 11, 2:14 PM</span></sc-if>
         <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}"><span class="mn-msg"><span class="mn-spinner"></span>Pulling from Instagram…</span></sc-if>
-        <sc-if value="{{isError}}" hint-placeholder-val="{{false}}"><span class="mn-pill">Stale</span><span class="mn-mono">last good pull · Oct 10, 9:02 PM</span></sc-if>
-        <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}"><span class="mn-pill">New</span><span class="mn-mono">first pull · Oct 11, 2:14 PM</span></sc-if>
+        <sc-if value="{{isError}}" hint-placeholder-val="{{false}}"><span class="mn-state">Stale</span><span class="mn-mono">last good pull · Oct 10, 9:02 PM</span></sc-if>
+        <sc-if value="{{isEmpty}}" hint-placeholder-val="{{false}}"><span class="mn-state">New</span><span class="mn-mono">first pull · Oct 11, 2:14 PM</span></sc-if>
       </div>
     </div>
     <a class="mn-btn mn-btn--primary" href="https://instagram.com/masamcodes">Follow @masamcodes</a>

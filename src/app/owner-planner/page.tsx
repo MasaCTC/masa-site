@@ -1,0 +1,71 @@
+import { signOut } from "@/auth";
+import linkStyles from "@/components/Link.module.css";
+import { cx } from "@/components/types";
+import { requireOwner } from "@/lib/owner";
+import { getDueSoon, getSettingsMasked, getStatus, listClasses, listTasks } from "@/lib/planner/queries";
+import { plannerToday } from "@/lib/planner/time";
+import { CanvasSyncLine, CanvasSyncProvider } from "./_components/CanvasSyncLine";
+import { Planner } from "./_components/Planner";
+import { parseView } from "./_lib/views";
+import styles from "./planner.module.css";
+
+// The public URL is /planner, but nothing is routed there: src/proxy.ts
+// rewrites only the signed-in owner to this route (/owner-planner), so
+// everyone else gets the ordinary unmatched-URL 404. Non-owner requests that
+// reach /owner-planner directly (any spelling, e.g. /owner%2Dplanner) are
+// rewritten by the proxy to the 404 page; that response matches an unknown URL
+// except for the x-middleware-rewrite header (scripts/404-parity.test.mjs).
+// requireOwner() below is only defence in depth (it calls notFound() if the
+// proxy were ever bypassed). The session is read at request time and the
+// planner data is owner-only and uncached, so it is read here too, after the
+// gate. `instant = false` is not what produces the 404.
+export const instant = false;
+
+async function signOutAction() {
+  "use server";
+  await signOut({ redirectTo: "/" });
+}
+
+export default async function PlannerPage({ searchParams }: PageProps<"/owner-planner">) {
+  await requireOwner();
+  const [tasks, classes, status, dueSoon, settings, params] = await Promise.all([
+    listTasks(),
+    listClasses(),
+    getStatus(),
+    getDueSoon(3),
+    getSettingsMasked(),
+    searchParams,
+  ]);
+
+  return (
+    <main className={cx("mn-section", styles.me)}>
+      {/* Canvas sync runs after the page is shown (see CanvasSyncLine). */}
+      <CanvasSyncProvider hasFeed={settings.hasFeed}>
+        <header className="mn-section__head">
+          <div className={styles.headCol}>
+            {/* Only the owner (GitHub MasaCTC, checked by id) gets past requireOwner. */}
+            <span className="mn-label">Private · only you · signed in as MasaCTC</span>
+            <h1 className="mn-display-lg">Planner</h1>
+          </div>
+          <div className="mn-row">
+            <CanvasSyncLine />
+            <form action={signOutAction} className={styles.signOut}>
+              <button type="submit" className={cx("mn-link", linkStyles.asButton)}>
+                Sign out
+              </button>
+            </form>
+          </div>
+        </header>
+        <Planner
+          today={plannerToday()}
+          tasks={tasks}
+          classes={classes}
+          status={status}
+          dueSoon={dueSoon}
+          settings={settings}
+          initialView={parseView(params.view)}
+        />
+      </CanvasSyncProvider>
+    </main>
+  );
+}

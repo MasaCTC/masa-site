@@ -1,0 +1,11 @@
+/* Resume.dc.html skills card: <div class="mn-tags" style="gap: 8px;"> and
+   <button class="mn-tag" style="min-height: 40px; padding: 0 14px;">.
+   Two classes so these win over .mn-tag / .mn-tags regardless of stylesheet order. */
+:global(.mn-tag).sm {
+  min-height: 40px;
+  padding: 0 14px;
+}
+
+:global(.mn-tags).groupSm {
+  gap: 8px;
+}
